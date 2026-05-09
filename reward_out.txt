@@ -1,0 +1,17 @@
+/usr/lib64/python3.14/functools.py:1126: UserWarning: debug_traceTransaction not available! titanoboa will try hard to interact with the network, but this means that titanoboa is not able to do certain safety checks at runtime. it is recommended to switch to a node or provider with debug_traceTransaction.
+  val = self.func(instance)
+Подключение к сети 0G Galileo Testnet...
+
+Отправитель (Chairperson): 0xbdCAb5CF57680818B833CFCAaE751416cA7809d7
+
+Загрузка смарт-контракта SGC...
+
+Отправка 500 SGC на адрес избирателя Алисы: 0xAb2615a0D3703c3Afad234E1Ab74846e73f09230
+tx broadcasted: 0xef2865082ff9764eb0f723f7ef88388844178837ba4305a1577efa81ca5ec2a7
+0xef2865082ff9764eb0f723f7ef88388844178837ba4305a1577efa81ca5ec2a7 mined in block 0x355a30aec1acb4ffafa5ccd3ac3c080bc971b6c27cf3d4a009cb897d887fdc20!
+  ⏳ Ожидание подтверждения (целевой nonce > 27)...
+  ✅ Вознаграждение успешно отправлено!
+
+=============================================
+Финальный баланс 0xAb2615a0D3703c3Afad234E1Ab74846e73f09230: 2,500.00 SGC
+=============================================

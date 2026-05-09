@@ -1,0 +1,24 @@
+total 60
+drwxr-xr-x. 1 eric eric  356 Feb 20 23:20 .
+drwxr-xr-x. 1 eric eric   10 Feb 11 21:51 ..
+-rw-r--r--. 1 eric eric  344 Feb 18 22:46 =2.9.2
+drwxr-xr-x. 1 eric eric   28 Feb 12 20:09 .agent
+-rw-r--r--. 1 eric eric  340 Feb 18 12:23 compile_res.txt
+-rw-r--r--. 1 eric eric 5371 Feb 18 12:26 compile_verify.txt
+-rw-r--r--. 1 eric eric    0 Feb 20 23:20 env_list.txt
+-rw-r--r--. 1 eric eric  375 Feb 12 20:26 error.txt
+-rw-r--r--. 1 eric eric    0 Feb 18 22:24 err.txt
+-rw-r--r--. 1 eric eric  213 Feb 12 15:56 hello.vy
+-rw-r--r--. 1 eric eric  386 Feb 18 12:26 ls_output.txt
+-rw-r--r--. 1 eric eric 5371 Feb 18 22:24 out.txt
+drwxr-xr-x. 1 eric eric   64 Feb 19 20:41 .pytest_cache
+-rw-r--r--. 1 eric eric  226 Feb 12 20:15 Store.vy
+-rw-r--r--. 1 eric eric   36 Feb 18 12:25 test_output.txt
+-rw-r--r--. 1 eric eric 1100 Feb 20 22:50 test_run.log
+drwxr-xr-x. 1 eric eric   50 Feb 19 20:41 tests
+drwxr-xr-x. 1 eric eric  124 Feb 19 20:01 .venv
+-rw-r--r--. 1 eric eric   21 Feb 18 22:26 version.txt
+-rw-r--r--. 1 eric eric 4229 Feb 20 22:50 Voter.vy
+/usr/bin/python
+Python 3.14.2
+pip 25.1.1 from /usr/lib/python3.14/site-packages/pip (python 3.14)

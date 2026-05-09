@@ -1,0 +1,2 @@
+All logs: [Transfer(address=Address('0x0880cf17Bd263d3d3a5c09D2D86cCecA3CcbD97c'), sender=Address('0x00dE89C733555886f785b0C32b498300297e481F'), receiver=Address('0xd13f0Bd22AFF8176761AEFBfC052a7490bDe268E'), value=100)]
+Log type: <class 'boa.contracts.event_decoder.Transfer'>

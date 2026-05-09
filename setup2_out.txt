@@ -1,0 +1,25 @@
+Подключение к сети 0G Galileo Testnet...
+Отправитель (Chairperson): 0xbdCAb5CF57680818B833CFCAaE751416cA7809d7
+
+Развертывание нового контракта Voter...
+tx broadcasted: 0x16b02c180bef7a61670020d6897a8c9ea39561f5df14f24817cd4c58e53e071f
+/usr/lib64/python3.14/functools.py:1126: UserWarning: debug_traceTransaction not available! titanoboa will try hard to interact with the network, but this means that titanoboa is not able to do certain safety checks at runtime. it is recommended to switch to a node or provider with debug_traceTransaction.
+  val = self.func(instance)
+0x16b02c180bef7a61670020d6897a8c9ea39561f5df14f24817cd4c58e53e071f mined in block 0x280dd2b37a6f6ded55228394451398ebaac8429539dd6f22008bc1b5402f827d!
+contract deployed at 0x46015813f1EB05923285c9Abd8f3BD6dABF1fA8d
+  ⏳ Ожидание подтверждения (целевой nonce > 33)...
+  ✅ Voter V2 развернут по адресу: 0x46015813f1EB05923285c9Abd8f3BD6dABF1fA8d
+
+Загрузка смарт-контракта SGC...
+
+Выдача разрешения (Approve) контракту Voter (0x46015813f1EB05923285c9Abd8f3BD6dABF1fA8d) на сумму 1,000,000 SGC...
+tx broadcasted: 0x2eb448a4c9a6aafab7f1ed818ecbe1a5baffffaf5c54d286ccf29f9b1d5bec9b
+0x2eb448a4c9a6aafab7f1ed818ecbe1a5baffffaf5c54d286ccf29f9b1d5bec9b mined in block 0x6ef1a55080399ba957d41cd6e4f466796a21a033fddfd2be4d96d35e3819326c!
+  ⏳ Ожидание подтверждения (целевой nonce > 34)...
+  ✅ Approve успешно выдан!
+
+=============================================
+Установка V2 завершена!
+Новый адрес Voter: 0x46015813f1EB05923285c9Abd8f3BD6dABF1fA8d
+Не забудьте обновить VOTER_ADDRESS в frontend/index.html
+=============================================

@@ -1,0 +1,9 @@
+Error compiling: /home/eric/Works/Viper/Voter.vy
+vyper.exceptions.CallViolation: Cannot call external functions via 'self' or via library
+
+  contract "Voter.vy:125", function "winner_name", line 125:26 
+       124     """
+  ---> 125     return self.proposals[self.winning_proposal()].name
+  -----------------------------------^
+       126
+

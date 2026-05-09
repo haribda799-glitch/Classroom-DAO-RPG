@@ -1,0 +1,60 @@
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.0.2, pluggy-1.6.0 -- /home/eric/Works/Viper/.venv/bin/python3
+cachedir: .pytest_cache
+hypothesis profile 'default'
+rootdir: /home/eric/Works/Viper
+plugins: hypothesis-6.151.9, cov-7.0.0, titanoboa-0.2.8
+collecting ... collected 6 items
+
+tests/test_voting.py::test_initial_state PASSED
+tests/test_voting.py::test_give_right_to_vote PASSED
+tests/test_voting.py::test_voting_logic PASSED
+tests/test_voting.py::test_delegation PASSED
+tests/test_voting.py::test_self_delegation PASSED
+tests/test_voting.py::test_delegation_loop PASSED
+
+=============================== warnings summary ===============================
+tests/test_voting.py::test_initial_state
+tests/test_voting.py::test_give_right_to_vote
+tests/test_voting.py::test_voting_logic
+tests/test_voting.py::test_delegation
+tests/test_voting.py::test_self_delegation
+tests/test_voting.py::test_delegation_loop
+  /home/eric/Works/Viper/.venv/lib64/python3.14/site-packages/vyper/semantics/types/user.py:313: Deprecation: Instantiating events with positional arguments is deprecated as of v0.4.1 and will be disallowed in a future release. Use kwargs instead e.g.:
+  ```
+  log Delegated(voter=msg.sender, delegate=curr)
+  ```
+  
+    contract "Voter.vy:81", function "delegate", line 81:8 
+         80
+    ---> 81     log Delegated(msg.sender, curr)
+    ----------------^
+         82
+  
+    vyper_warn(Deprecation(msg, node))
+
+tests/test_voting.py::test_initial_state
+tests/test_voting.py::test_give_right_to_vote
+tests/test_voting.py::test_voting_logic
+tests/test_voting.py::test_delegation
+tests/test_voting.py::test_self_delegation
+tests/test_voting.py::test_delegation_loop
+  /home/eric/Works/Viper/.venv/lib64/python3.14/site-packages/vyper/semantics/types/user.py:313: Deprecation: Instantiating events with positional arguments is deprecated as of v0.4.1 and will be disallowed in a future release. Use kwargs instead e.g.:
+  ```
+  log Voted(voter=msg.sender, proposal=proposalIndex, weight=voter.weight)
+  ```
+  
+    contract "Voter.vy:110", function "vote", line 110:8 
+         109
+    ---> 110     log Voted(msg.sender, proposalIndex, voter.weight)
+    -----------------^
+         111
+  
+    vyper_warn(Deprecation(msg, node))
+
+tests/test_voting.py: 142 warnings
+  /home/eric/Works/Viper/.venv/lib64/python3.14/site-packages/cached_property.py:27: DeprecationWarning: 'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16; use inspect.iscoroutinefunction() instead
+    if asyncio.iscoroutinefunction(self.func):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================= 6 passed, 154 warnings in 0.49s ========================
