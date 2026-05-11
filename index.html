@@ -198,26 +198,26 @@
     </div>
 
     <!-- Navigation Tabs -->
-    <div id="tabs-container" class="w-full max-w-5xl flex space-x-1 border-b border-sky-900/50 hidden">
+    <div id="tabs-container" class="w-full max-w-5xl flex justify-between gap-[2px] border-b border-sky-900/50 hidden">
         <button onclick="switchTab('voting')" id="tab-voting"
-            class="tab-btn active px-8 py-3 text-lg font-semibold text-slate-400 hover:text-sky-300 transition-colors uppercase tracking-wider rounded-t-lg">
-            Quests
+            class="tab-btn active flex-1 px-1 sm:px-4 py-3 text-xs sm:text-lg font-semibold text-slate-400 hover:text-sky-300 transition-colors uppercase tracking-wider rounded-t-lg truncate text-center">
+            <span class="sm:hidden">📜 Quests</span>
+            <span class="hidden sm:inline">📜 Quests</span>
         </button>
         <button onclick="switchTab('leaderboard')" id="tab-leaderboard"
-            class="tab-btn px-8 py-3 text-lg font-semibold text-slate-400 hover:text-sky-300 transition-colors uppercase tracking-wider rounded-t-lg">
-            Hall of Fame
-        </button>
-        <button onclick="switchTab('admin')" id="tab-admin"
-            class="tab-btn hidden px-8 py-3 text-lg font-semibold text-amber-500 hover:text-amber-400 transition-colors uppercase tracking-wider rounded-t-lg">
-            Game Master
+            class="tab-btn flex-1 px-1 sm:px-4 py-3 text-xs sm:text-lg font-semibold text-slate-400 hover:text-sky-300 transition-colors uppercase tracking-wider rounded-t-lg truncate text-center">
+            <span class="sm:hidden">🏆 Ranks</span>
+            <span class="hidden sm:inline">🏆 Leaderboard</span>
         </button>
         <button onclick="switchTab('market')" id="tab-market"
-            class="tab-btn px-8 py-3 text-lg font-semibold text-pink-500 hover:text-pink-400 transition-colors uppercase tracking-wider rounded-t-lg">
-            Store
+            class="tab-btn flex-1 px-1 sm:px-4 py-3 text-xs sm:text-lg font-semibold text-pink-500 hover:text-pink-400 transition-colors uppercase tracking-wider rounded-t-lg truncate text-center">
+            <span class="sm:hidden">💰 Store</span>
+            <span class="hidden sm:inline">💰 Store</span>
         </button>
-        <button onclick="switchTab('marketmanager')" id="tab-marketmanager"
-            class="tab-btn hidden px-8 py-3 text-lg font-semibold text-fuchsia-500 hover:text-fuchsia-400 transition-colors uppercase tracking-wider rounded-t-lg">
-            Market Manager
+        <button onclick="switchTab('admin')" id="tab-admin"
+            class="tab-btn hidden flex-1 px-1 sm:px-4 py-3 text-xs sm:text-lg font-semibold text-amber-500 hover:text-amber-400 transition-colors uppercase tracking-wider rounded-t-lg truncate text-center">
+            <span class="sm:hidden">⚙️ Admin</span>
+            <span class="hidden sm:inline">⚙️ GM Tools</span>
         </button>
     </div>
 
@@ -229,7 +229,7 @@
             class="tab-content active glass-panel rounded-b-2xl rounded-tr-2xl p-8 relative overflow-hidden">
             <h2 class="text-3xl font-bold mb-2 text-sky-400 rpg-title">Active Quests (Voting)</h2>
             <p class="text-slate-400 mb-8 text-lg">Cast your vote to shape the realm's future.</p>
-            <div
+            <div id="claim-attendance-block"
                 class="bg-slate-900/50 p-6 rounded-2xl border border-sky-500/20 mb-8 flex flex-col md:flex-row items-center gap-4">
                 <div class="flex-1">
                     <h3 class="text-xl font-bold text-sky-400">Claim Attendance</h3>
@@ -460,6 +460,28 @@
                 <button onclick="savePollTopics()" class="w-full py-4 mt-4 bg-slate-800 hover:bg-sky-600 hover:text-white transition-all rounded-xl font-bold border border-slate-600 hover:border-sky-400 shadow-lg text-sky-300 uppercase tracking-wider text-sm">Save Topics</button>
             </div>
 
+            <div class="bg-slate-900/70 p-6 rounded-2xl border border-fuchsia-500/20 shadow-[inset_0_0_15px_rgba(0,0,0,0.5)] mt-8">
+                <h3 class="text-xl font-bold mb-5 text-fuchsia-400 uppercase tracking-widest">Market Manager</h3>
+                <p class="text-sm text-slate-400 mb-4">Manage assortment and prices for the Mystic Store.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs uppercase tracking-widest text-slate-500 mb-1 font-bold">Item
+                            Name</label>
+                        <input type="text" id="market-item-name" placeholder="e.g. Health Potion"
+                            class="w-full bg-black/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-fuchsia-500 transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-xs uppercase tracking-widest text-slate-500 mb-1 font-bold">Price in
+                            SGC</label>
+                        <input type="number" id="market-item-price" placeholder="e.g. 100"
+                            class="w-full bg-black/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-fuchsia-500 transition-all font-semibold">
+                    </div>
+                </div>
+                <button onclick="addMarketItem()"
+                    class="w-full py-4 mt-4 bg-gradient-to-r from-fuchsia-600 to-pink-600 hover:from-fuchsia-500 hover:to-pink-500 transition-all rounded-xl font-bold text-white shadow-[0_0_15px_rgba(217,70,239,0.4)] hover:scale-[1.02] uppercase tracking-wider">Add
+                    Item</button>
+                <div id="marketmanager-items-container" class="mt-8 space-y-4"></div>
+            </div>
 
         </div>
 
@@ -471,34 +493,6 @@
         <div id="market-items-container" class="grid grid-cols-1 md:grid-cols-3 gap-5">
             <div class="text-center text-slate-500 py-8 col-span-full">Store is empty.</div>
         </div>
-    </div>
-
-    <!-- Tab 5: Market Manager -->
-    <div id="content-marketmanager"
-        class="tab-content glass-panel rounded-b-2xl rounded-tr-2xl p-8 border border-fuchsia-500/30 shadow-[0_0_30px_rgba(217,70,239,0.1)]">
-        <h2 class="text-3xl font-bold mb-2 text-fuchsia-500 rpg-title">Market Manager</h2>
-        <p class="text-slate-400 mb-8 text-lg">Manage assortment and prices for the Mystic Store.</p>
-        <div
-            class="bg-slate-900/70 p-6 rounded-2xl border border-fuchsia-500/20 shadow-[inset_0_0_15px_rgba(0,0,0,0.5)]">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-xs uppercase tracking-widest text-slate-500 mb-1 font-bold">Item
-                        Name</label>
-                    <input type="text" id="market-item-name" placeholder="e.g. Health Potion"
-                        class="w-full bg-black/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-fuchsia-500 transition-all">
-                </div>
-                <div>
-                    <label class="block text-xs uppercase tracking-widest text-slate-500 mb-1 font-bold">Price in
-                        SGC</label>
-                    <input type="number" id="market-item-price" placeholder="e.g. 100"
-                        class="w-full bg-black/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-fuchsia-500 transition-all font-semibold">
-                </div>
-            </div>
-            <button onclick="addMarketItem()"
-                class="w-full py-4 mt-4 bg-gradient-to-r from-fuchsia-600 to-pink-600 hover:from-fuchsia-500 hover:to-pink-500 transition-all rounded-xl font-bold text-white shadow-[0_0_15px_rgba(217,70,239,0.4)] hover:scale-[1.02] uppercase tracking-wider">Add
-                Item</button>
-        </div>
-        <div id="marketmanager-items-container" class="mt-8 space-y-4"></div>
     </div>
 
     </div> <!-- End of content-container -->
@@ -554,14 +548,14 @@
         let isStudent = false;
 
         function switchTab(tabId) {
-            ['voting', 'leaderboard', 'admin', 'market', 'marketmanager'].forEach(id => {
+            ['voting', 'leaderboard', 'admin', 'market'].forEach(id => {
                 document.getElementById('tab-' + id).classList.remove('active');
                 document.getElementById('content-' + id).classList.remove('active');
             });
             document.getElementById('tab-' + tabId).classList.add('active');
             document.getElementById('content-' + tabId).classList.add('active');
 
-            if (tabId === 'market' || tabId === 'marketmanager') { renderMarketItems(); }
+            if (tabId === 'market' || tabId === 'admin') { renderMarketItems(); }
 
             if (tabId === 'leaderboard' && userAddress) {
                 fetchLeaderboard();
@@ -690,7 +684,9 @@
             // Check Admin
             if (address.toLowerCase() === ADMIN_ADDRESS) {
                 document.getElementById("tab-admin").classList.remove("hidden");
-                document.getElementById("tab-marketmanager").classList.remove("hidden");
+
+                const claimBlock = document.getElementById("claim-attendance-block");
+                if (claimBlock) claimBlock.classList.add("hidden");
 
                 voterContract.removeAllListeners("ItemPurchased");
                 voterContract.on("ItemPurchased", async (student, itemName, price, event) => {
@@ -711,7 +707,10 @@
 
             } else {
                 document.getElementById("tab-admin").classList.add("hidden");
-                document.getElementById("tab-marketmanager").classList.add("hidden");
+                
+                const claimBlock = document.getElementById("claim-attendance-block");
+                if (claimBlock) claimBlock.classList.remove("hidden");
+
                 if (document.getElementById('tab-admin').classList.contains('active')) {
                     switchTab('voting');
                 }
