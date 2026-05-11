@@ -54,6 +54,11 @@ struct Student:
     academicXP: uint256
     is_hidden: bool
 
+struct MarketItem:
+    name: String[64]
+    price: uint256
+    isActive: bool
+
 chairperson: public(address)
 voters: public(HashMap[address, Voter])
 proposals: public(DynArray[Proposal, 128])
@@ -70,6 +75,9 @@ has_received_reward: public(HashMap[address, bool])
 active_code_hash: public(bytes32)
 code_expiration_time: public(uint256)
 has_claimed_attendance: public(HashMap[address, bytes32])
+
+marketItems: public(HashMap[uint256, MarketItem])
+marketItemCount: public(uint256)
 
 @deploy
 def __init__(proposalNames: DynArray[String[32], 128], _token_address: address):
@@ -195,17 +203,45 @@ def claimAttendance(code: String[32]):
     log StudentRewarded(student=msg.sender, amount=amount, sgc_amount=sgc_amount, reason="Attendance")
 
 @external
-def buyItem(item_name: String[64], price: uint256):
+def addMarketItem(name: String[64], price: uint256):
+    """
+    @notice Adds an item to the Smart Market.
+    @dev May only be called by `chairperson`.
+    """
+    assert msg.sender == self.chairperson, "Only Game Master can add items"
+    self.marketItems[self.marketItemCount] = MarketItem(
+        name=name,
+        price=price,
+        isActive=True
+    )
+    self.marketItemCount += 1
+
+@external
+def setMarketItemActive(itemId: uint256, active: bool):
+    """
+    @notice Sets the active status of an item.
+    @dev May only be called by `chairperson`.
+    """
+    assert msg.sender == self.chairperson, "Only Game Master can update items"
+    assert itemId < self.marketItemCount, "Invalid item ID"
+    self.marketItems[itemId].isActive = active
+
+@external
+def buyItem(itemId: uint256):
     """
     @notice Buy an item from the Smart Market. Transfers SGC to the Game Master.
     """
     assert self.voters[msg.sender].weight > 0, "Not a registered student"
+    assert itemId < self.marketItemCount, "Invalid item ID"
     
-    price_wei: uint256 = price * 10**18
+    item: MarketItem = self.marketItems[itemId]
+    assert item.isActive, "Item is not active"
+    
+    price_wei: uint256 = item.price * 10**18
     success: bool = extcall ERC20(self.token_address).transferFrom(msg.sender, self.chairperson_wallet, price_wei)
     assert success, "Transfer failed"
     
-    log ItemPurchased(student=msg.sender, item_name=item_name, price=price)
+    log ItemPurchased(student=msg.sender, item_name=item.name, price=item.price)
 
 @external
 def delegate(to: address):

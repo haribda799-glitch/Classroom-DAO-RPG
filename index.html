@@ -526,7 +526,7 @@
         const CHAIN_ID_HEX = "0x" + CHAIN_ID.toString(16);
 
         // Update these if you deploy new contracts
-        const VOTER_ADDRESS = "0x0a763559FFE8cce08AE008bb4015a6f95F8e6e1F";
+        const VOTER_ADDRESS = "0x5d1A62BdfdD790cD3dcA6B458C70eA0aE0AB8B6C";
         const TOKEN_ADDRESS = "0x1731F7F26F6ff2B79A9a5f9C86B6Fec319B7e6E2";
         const ADMIN_ADDRESS = "0xbdCAb5CF57680818B833CFCAaE751416cA7809d7".toLowerCase();
 
@@ -538,7 +538,7 @@
             "function allowance(address owner, address spender) view returns (uint256)"
         ];
 
-        const VOTER_ABI = [{ "name": "Voted", "inputs": [{ "name": "voter", "type": "address", "indexed": true }, { "name": "proposal", "type": "uint256", "indexed": false }, { "name": "weight", "type": "uint256", "indexed": false }], "anonymous": false, "type": "event" }, { "name": "Delegated", "inputs": [{ "name": "voter", "type": "address", "indexed": true }, { "name": "delegate", "type": "address", "indexed": true }], "anonymous": false, "type": "event" }, { "name": "StudentRegistered", "inputs": [{ "name": "student", "type": "address", "indexed": true }, { "name": "nickname", "type": "string", "indexed": false }, { "name": "group", "type": "uint256", "indexed": false }], "anonymous": false, "type": "event" }, { "name": "StudentRewarded", "inputs": [{ "name": "student", "type": "address", "indexed": true }, { "name": "amount", "type": "uint256", "indexed": false }, { "name": "sgc_amount", "type": "uint256", "indexed": false }, { "name": "reason", "type": "string", "indexed": false }], "anonymous": false, "type": "event" }, { "name": "AttendanceClaimed", "inputs": [{ "name": "student", "type": "address", "indexed": true }, { "name": "xp_rewarded", "type": "uint256", "indexed": false }], "anonymous": false, "type": "event" }, { "name": "ItemPurchased", "inputs": [{ "name": "student", "type": "address", "indexed": true }, { "name": "item_name", "type": "string", "indexed": false }, { "name": "price", "type": "uint256", "indexed": false }], "anonymous": false, "type": "event" }, { "stateMutability": "payable", "type": "function", "name": "registerStudent", "inputs": [{ "name": "addr", "type": "address" }, { "name": "nickname", "type": "string" }, { "name": "group", "type": "uint256" }], "outputs": [] }, { "stateMutability": "nonpayable", "type": "function", "name": "setPrivacy", "inputs": [{ "name": "hidden", "type": "bool" }], "outputs": [] }, { "stateMutability": "nonpayable", "type": "function", "name": "rewardStudent", "inputs": [{ "name": "addr", "type": "address" }, { "name": "amount", "type": "uint256" }, { "name": "reason", "type": "string" }], "outputs": [] }, { "stateMutability": "nonpayable", "type": "function", "name": "rewardBatch", "inputs": [{ "name": "addrs", "type": "address[]" }, { "name": "amount", "type": "uint256" }, { "name": "reason", "type": "string" }], "outputs": [] }, { "stateMutability": "nonpayable", "type": "function", "name": "generateDailyCode", "inputs": [{ "name": "code_hash", "type": "bytes32" }], "outputs": [] }, { "stateMutability": "nonpayable", "type": "function", "name": "claimAttendance", "inputs": [{ "name": "code", "type": "string" }], "outputs": [] }, { "stateMutability": "nonpayable", "type": "function", "name": "buyItem", "inputs": [{ "name": "item_name", "type": "string" }, { "name": "price", "type": "uint256" }], "outputs": [] }, { "stateMutability": "nonpayable", "type": "function", "name": "delegate", "inputs": [{ "name": "to", "type": "address" }], "outputs": [] }, { "stateMutability": "nonpayable", "type": "function", "name": "vote", "inputs": [{ "name": "proposalIndex", "type": "uint256" }], "outputs": [] }, { "stateMutability": "view", "type": "function", "name": "winning_proposal", "inputs": [], "outputs": [{ "name": "", "type": "uint256" }] }, { "stateMutability": "view", "type": "function", "name": "winner_name", "inputs": [], "outputs": [{ "name": "", "type": "string" }] }, { "stateMutability": "view", "type": "function", "name": "get_student_count", "inputs": [], "outputs": [{ "name": "", "type": "uint256" }] }, { "stateMutability": "view", "type": "function", "name": "chairperson", "inputs": [], "outputs": [{ "name": "", "type": "address" }] }, { "stateMutability": "view", "type": "function", "name": "voters", "inputs": [{ "name": "arg0", "type": "address" }], "outputs": [{ "name": "", "type": "tuple", "components": [{ "name": "weight", "type": "uint256" }, { "name": "voted", "type": "bool" }, { "name": "delegate", "type": "address" }, { "name": "vote", "type": "uint256" }] }] }, { "stateMutability": "view", "type": "function", "name": "proposals", "inputs": [{ "name": "arg0", "type": "uint256" }], "outputs": [{ "name": "", "type": "tuple", "components": [{ "name": "name", "type": "string" }, { "name": "voteCount", "type": "uint256" }] }] }, { "stateMutability": "view", "type": "function", "name": "students", "inputs": [{ "name": "arg0", "type": "address" }], "outputs": [{ "name": "", "type": "tuple", "components": [{ "name": "nickname", "type": "string" }, { "name": "group", "type": "uint256" }, { "name": "academicXP", "type": "uint256" }, { "name": "is_hidden", "type": "bool" }] }] }, { "stateMutability": "view", "type": "function", "name": "student_addresses", "inputs": [{ "name": "arg0", "type": "uint256" }], "outputs": [{ "name": "", "type": "address" }] }, { "stateMutability": "view", "type": "function", "name": "used_nicknames", "inputs": [{ "name": "arg0", "type": "string" }], "outputs": [{ "name": "", "type": "bool" }] }, { "stateMutability": "view", "type": "function", "name": "token_address", "inputs": [], "outputs": [{ "name": "", "type": "address" }] }, { "stateMutability": "view", "type": "function", "name": "reward_amount", "inputs": [], "outputs": [{ "name": "", "type": "uint256" }] }, { "stateMutability": "view", "type": "function", "name": "chairperson_wallet", "inputs": [], "outputs": [{ "name": "", "type": "address" }] }, { "stateMutability": "view", "type": "function", "name": "has_received_reward", "inputs": [{ "name": "arg0", "type": "address" }], "outputs": [{ "name": "", "type": "bool" }] }, { "stateMutability": "view", "type": "function", "name": "active_code_hash", "inputs": [], "outputs": [{ "name": "", "type": "bytes32" }] }, { "stateMutability": "view", "type": "function", "name": "code_expiration_time", "inputs": [], "outputs": [{ "name": "", "type": "uint256" }] }, { "stateMutability": "view", "type": "function", "name": "has_claimed_attendance", "inputs": [{ "name": "arg0", "type": "address" }], "outputs": [{ "name": "", "type": "bytes32" }] }, { "stateMutability": "nonpayable", "type": "constructor", "inputs": [{ "name": "proposalNames", "type": "string[]" }, { "name": "_token_address", "type": "address" }], "outputs": [] }];
+        const VOTER_ABI = [{"name": "Voted", "inputs": [{"name": "voter", "type": "address", "indexed": true}, {"name": "proposal", "type": "uint256", "indexed": false}, {"name": "weight", "type": "uint256", "indexed": false}], "anonymous": false, "type": "event"}, {"name": "Delegated", "inputs": [{"name": "voter", "type": "address", "indexed": true}, {"name": "delegate", "type": "address", "indexed": true}], "anonymous": false, "type": "event"}, {"name": "StudentRegistered", "inputs": [{"name": "student", "type": "address", "indexed": true}, {"name": "nickname", "type": "string", "indexed": false}, {"name": "group", "type": "uint256", "indexed": false}], "anonymous": false, "type": "event"}, {"name": "StudentRewarded", "inputs": [{"name": "student", "type": "address", "indexed": true}, {"name": "amount", "type": "uint256", "indexed": false}, {"name": "sgc_amount", "type": "uint256", "indexed": false}, {"name": "reason", "type": "string", "indexed": false}], "anonymous": false, "type": "event"}, {"name": "AttendanceClaimed", "inputs": [{"name": "student", "type": "address", "indexed": true}, {"name": "xp_rewarded", "type": "uint256", "indexed": false}], "anonymous": false, "type": "event"}, {"name": "ItemPurchased", "inputs": [{"name": "student", "type": "address", "indexed": true}, {"name": "item_name", "type": "string", "indexed": false}, {"name": "price", "type": "uint256", "indexed": false}], "anonymous": false, "type": "event"}, {"stateMutability": "payable", "type": "function", "name": "registerStudent", "inputs": [{"name": "addr", "type": "address"}, {"name": "nickname", "type": "string"}, {"name": "group", "type": "uint256"}], "outputs": []}, {"stateMutability": "nonpayable", "type": "function", "name": "setPrivacy", "inputs": [{"name": "hidden", "type": "bool"}], "outputs": []}, {"stateMutability": "nonpayable", "type": "function", "name": "rewardStudent", "inputs": [{"name": "addr", "type": "address"}, {"name": "amount", "type": "uint256"}, {"name": "reason", "type": "string"}], "outputs": []}, {"stateMutability": "nonpayable", "type": "function", "name": "rewardBatch", "inputs": [{"name": "addrs", "type": "address[]"}, {"name": "amount", "type": "uint256"}, {"name": "reason", "type": "string"}], "outputs": []}, {"stateMutability": "nonpayable", "type": "function", "name": "generateDailyCode", "inputs": [{"name": "code_hash", "type": "bytes32"}], "outputs": []}, {"stateMutability": "nonpayable", "type": "function", "name": "claimAttendance", "inputs": [{"name": "code", "type": "string"}], "outputs": []}, {"stateMutability": "nonpayable", "type": "function", "name": "addMarketItem", "inputs": [{"name": "name", "type": "string"}, {"name": "price", "type": "uint256"}], "outputs": []}, {"stateMutability": "nonpayable", "type": "function", "name": "setMarketItemActive", "inputs": [{"name": "itemId", "type": "uint256"}, {"name": "active", "type": "bool"}], "outputs": []}, {"stateMutability": "nonpayable", "type": "function", "name": "buyItem", "inputs": [{"name": "itemId", "type": "uint256"}], "outputs": []}, {"stateMutability": "nonpayable", "type": "function", "name": "delegate", "inputs": [{"name": "to", "type": "address"}], "outputs": []}, {"stateMutability": "nonpayable", "type": "function", "name": "vote", "inputs": [{"name": "proposalIndex", "type": "uint256"}], "outputs": []}, {"stateMutability": "view", "type": "function", "name": "winning_proposal", "inputs": [], "outputs": [{"name": "", "type": "uint256"}]}, {"stateMutability": "view", "type": "function", "name": "winner_name", "inputs": [], "outputs": [{"name": "", "type": "string"}]}, {"stateMutability": "view", "type": "function", "name": "get_student_count", "inputs": [], "outputs": [{"name": "", "type": "uint256"}]}, {"stateMutability": "view", "type": "function", "name": "chairperson", "inputs": [], "outputs": [{"name": "", "type": "address"}]}, {"stateMutability": "view", "type": "function", "name": "voters", "inputs": [{"name": "arg0", "type": "address"}], "outputs": [{"name": "", "type": "tuple", "components": [{"name": "weight", "type": "uint256"}, {"name": "voted", "type": "bool"}, {"name": "delegate", "type": "address"}, {"name": "vote", "type": "uint256"}]}]}, {"stateMutability": "view", "type": "function", "name": "proposals", "inputs": [{"name": "arg0", "type": "uint256"}], "outputs": [{"name": "", "type": "tuple", "components": [{"name": "name", "type": "string"}, {"name": "voteCount", "type": "uint256"}]}]}, {"stateMutability": "view", "type": "function", "name": "students", "inputs": [{"name": "arg0", "type": "address"}], "outputs": [{"name": "", "type": "tuple", "components": [{"name": "nickname", "type": "string"}, {"name": "group", "type": "uint256"}, {"name": "academicXP", "type": "uint256"}, {"name": "is_hidden", "type": "bool"}]}]}, {"stateMutability": "view", "type": "function", "name": "student_addresses", "inputs": [{"name": "arg0", "type": "uint256"}], "outputs": [{"name": "", "type": "address"}]}, {"stateMutability": "view", "type": "function", "name": "used_nicknames", "inputs": [{"name": "arg0", "type": "string"}], "outputs": [{"name": "", "type": "bool"}]}, {"stateMutability": "view", "type": "function", "name": "token_address", "inputs": [], "outputs": [{"name": "", "type": "address"}]}, {"stateMutability": "view", "type": "function", "name": "reward_amount", "inputs": [], "outputs": [{"name": "", "type": "uint256"}]}, {"stateMutability": "view", "type": "function", "name": "chairperson_wallet", "inputs": [], "outputs": [{"name": "", "type": "address"}]}, {"stateMutability": "view", "type": "function", "name": "has_received_reward", "inputs": [{"name": "arg0", "type": "address"}], "outputs": [{"name": "", "type": "bool"}]}, {"stateMutability": "view", "type": "function", "name": "active_code_hash", "inputs": [], "outputs": [{"name": "", "type": "bytes32"}]}, {"stateMutability": "view", "type": "function", "name": "code_expiration_time", "inputs": [], "outputs": [{"name": "", "type": "uint256"}]}, {"stateMutability": "view", "type": "function", "name": "has_claimed_attendance", "inputs": [{"name": "arg0", "type": "address"}], "outputs": [{"name": "", "type": "bytes32"}]}, {"stateMutability": "view", "type": "function", "name": "marketItems", "inputs": [{"name": "arg0", "type": "uint256"}], "outputs": [{"name": "", "type": "tuple", "components": [{"name": "name", "type": "string"}, {"name": "price", "type": "uint256"}, {"name": "isActive", "type": "bool"}]}]}, {"stateMutability": "view", "type": "function", "name": "marketItemCount", "inputs": [], "outputs": [{"name": "", "type": "uint256"}]}, {"stateMutability": "nonpayable", "type": "constructor", "inputs": [{"name": "proposalNames", "type": "string[]"}, {"name": "_token_address", "type": "address"}], "outputs": []}];
 
         let provider;
         let signer;
@@ -1157,7 +1157,7 @@
             }
         }
 
-        async function buyItem(itemName, price) {
+        async function buyItem(itemId, itemName, price) {
             try {
                 const priceWei = ethers.utils.parseUnits(price.toString(), 18);
                 const allowance = await tokenContract.allowance(userAddress, VOTER_ADDRESS);
@@ -1169,11 +1169,11 @@
                 }
 
                 alert(`Purchasing ${itemName} for ${price} SGC...`);
-                const tx = await voterContract.buyItem(itemName, price, await getGasOverrides("0"));
+                const tx = await voterContract.buyItem(itemId, await getGasOverrides("0"));
                 await tx.wait();
                 alert(`Successfully purchased ${itemName}! 🎉`);
                 await fetchUserData();
-            loadPollTopics();
+                loadPollTopics();
             } catch (err) {
                 console.error(err);
                 alert("Purchase failed. Make sure you have enough SGC.");
@@ -1200,74 +1200,101 @@
             fetchProposals();
         }
 
-        function getMarketItems() {
-            const items = localStorage.getItem("classroomMarketItems");
-            return items ? JSON.parse(items) : [];
-        }
-
-        function saveMarketItems(items) {
-            localStorage.setItem("classroomMarketItems", JSON.stringify(items));
-        }
-
-        function addMarketItem() {
+        async function addMarketItem() {
             const name = document.getElementById("market-item-name").value.trim();
             const price = document.getElementById("market-item-price").value.trim();
             if (!name || !price) return alert("Enter item name and price.");
-            const items = getMarketItems();
-            items.push({ id: Date.now(), name, price: parseInt(price) });
-            saveMarketItems(items);
-            document.getElementById("market-item-name").value = "";
-            document.getElementById("market-item-price").value = "";
-            renderMarketItems();
-        }
-
-        function removeMarketItem(id) {
-            let items = getMarketItems();
-            items = items.filter(i => i.id !== id);
-            saveMarketItems(items);
-            renderMarketItems();
-        }
-
-        function renderMarketItems() {
-            const items = getMarketItems();
-
-            // Render for Market Manager
-            const managerContainer = document.getElementById("marketmanager-items-container");
-            if (managerContainer) {
-                if (items.length === 0) {
-                    managerContainer.innerHTML = "<p class='text-slate-500'>No items in store.</p>";
-                } else {
-                    managerContainer.innerHTML = items.map(item => `
-                        <div class="flex justify-between items-center bg-slate-800 p-4 rounded-xl border border-fuchsia-500/20">
-                            <div>
-                                <h4 class="font-bold text-white">${item.name}</h4>
-                                <p class="text-fuchsia-400 font-mono text-sm">${item.price} SGC</p>
-                            </div>
-                            <button onclick="removeMarketItem(${item.id})" class="text-rose-500 hover:text-rose-400 font-bold text-sm uppercase">Remove</button>
-                        </div>
-                    `).join('');
-                }
+            const btn = document.querySelector('button[onclick="addMarketItem()"]');
+            btn.innerText = "Adding...";
+            btn.disabled = true;
+            try {
+                const tx = await voterContract.addMarketItem(name, price, await getGasOverrides("0"));
+                await tx.wait();
+                alert("Item added successfully!");
+                document.getElementById("market-item-name").value = "";
+                document.getElementById("market-item-price").value = "";
+                renderMarketItems();
+            } catch (err) {
+                console.error(err);
+                alert("Failed to add item.");
             }
+            btn.innerText = "Add Item";
+            btn.disabled = false;
+        }
 
-            // Render for Store Tab
+        async function removeMarketItem(id) {
+            if (!confirm("Are you sure you want to remove this item?")) return;
+            try {
+                const tx = await voterContract.setMarketItemActive(id, false, await getGasOverrides("0"));
+                await tx.wait();
+                alert("Item removed successfully!");
+                renderMarketItems();
+            } catch (err) {
+                console.error(err);
+                alert("Failed to remove item.");
+            }
+        }
+
+        async function renderMarketItems() {
+            const managerContainer = document.getElementById("marketmanager-items-container");
             const storeContainer = document.getElementById("market-items-container");
-            if (storeContainer) {
-                if (items.length === 0) {
-                    storeContainer.innerHTML = "<div class='text-center text-slate-500 py-8 col-span-full'>Store is empty.</div>";
-                } else {
-                    storeContainer.innerHTML = items.map(item => `
-                        <div class="bg-slate-900/60 p-6 rounded-2xl border border-pink-500/20 hover:border-pink-400 transition-all group shadow-[inset_0_0_20px_rgba(0,0,0,0.4)] flex flex-col items-center text-center">
-                            <div class="w-16 h-16 rounded-full bg-gradient-to-br from-pink-600 to-rose-700 flex items-center justify-center font-bold text-2xl shadow-[0_0_15px_rgba(236,72,153,0.3)] mb-4 text-white">
-                                🎁
-                            </div>
-                            <h3 class="font-bold text-xl text-slate-100 mb-2">${item.name}</h3>
-                            <p class="text-pink-400 font-mono font-bold text-lg mb-4">${item.price} SGC</p>
-                            <button onclick="buyItem('${item.name}', ${item.price})" class="w-full py-2 bg-slate-800 hover:bg-pink-600 hover:text-white transition-all rounded-xl font-bold border border-slate-600 hover:border-pink-400 shadow-lg text-pink-300 uppercase tracking-wider text-sm">
-                                Buy
-                            </button>
-                        </div>
-                    `).join('');
+            
+            if (managerContainer) managerContainer.innerHTML = "<p class='text-slate-500 animate-pulse'>Loading loot from blockchain...</p>";
+            if (storeContainer) storeContainer.innerHTML = "<div class='text-center text-slate-500 py-8 col-span-full animate-pulse'>Loading loot from blockchain...</div>";
+
+            try {
+                let items = [];
+                if (voterContract) {
+                    const countRes = await voterContract.marketItemCount();
+                    const count = countRes.toNumber();
+                    for (let i = 0; i < count; i++) {
+                        const item = await voterContract.marketItems(i);
+                        if (item.isActive) {
+                            items.push({ id: i, name: item.name, price: item.price.toNumber() });
+                        }
+                    }
                 }
+
+                // Render for Market Manager
+                if (managerContainer) {
+                    if (items.length === 0) {
+                        managerContainer.innerHTML = "<p class='text-slate-500'>No items in store.</p>";
+                    } else {
+                        managerContainer.innerHTML = items.map(item => `
+                            <div class="flex justify-between items-center bg-slate-800 p-4 rounded-xl border border-fuchsia-500/20">
+                                <div>
+                                    <h4 class="font-bold text-white">${item.name}</h4>
+                                    <p class="text-fuchsia-400 font-mono text-sm">${item.price} SGC</p>
+                                </div>
+                                <button onclick="removeMarketItem(${item.id})" class="text-rose-500 hover:text-rose-400 font-bold text-sm uppercase">Remove</button>
+                            </div>
+                        `).join('');
+                    }
+                }
+
+                // Render for Store Tab
+                if (storeContainer) {
+                    if (items.length === 0) {
+                        storeContainer.innerHTML = "<div class='text-center text-slate-500 py-8 col-span-full'>Store is empty.</div>";
+                    } else {
+                        storeContainer.innerHTML = items.map(item => `
+                            <div class="bg-slate-900/60 p-6 rounded-2xl border border-pink-500/20 hover:border-pink-400 transition-all group shadow-[inset_0_0_20px_rgba(0,0,0,0.4)] flex flex-col items-center text-center">
+                                <div class="w-16 h-16 rounded-full bg-gradient-to-br from-pink-600 to-rose-700 flex items-center justify-center font-bold text-2xl shadow-[0_0_15px_rgba(236,72,153,0.3)] mb-4 text-white">
+                                    🎁
+                                </div>
+                                <h3 class="font-bold text-xl text-slate-100 mb-2">${item.name}</h3>
+                                <p class="text-pink-400 font-mono font-bold text-lg mb-4">${item.price} SGC</p>
+                                <button onclick="buyItem(${item.id}, '${item.name}', ${item.price})" class="w-full py-2 bg-slate-800 hover:bg-pink-600 hover:text-white transition-all rounded-xl font-bold border border-slate-600 hover:border-pink-400 shadow-lg text-pink-300 uppercase tracking-wider text-sm">
+                                    Buy
+                                </button>
+                            </div>
+                        `).join('');
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+                if (managerContainer) managerContainer.innerHTML = "<p class='text-rose-500'>Failed to load items.</p>";
+                if (storeContainer) storeContainer.innerHTML = "<div class='text-center text-rose-500 py-8 col-span-full'>Failed to load items from blockchain.</div>";
             }
         }
 
