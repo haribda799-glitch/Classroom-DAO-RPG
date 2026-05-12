@@ -954,7 +954,11 @@
         async function getGasOverrides(valueEth = "0") {
             const currentNonce = await provider.getTransactionCount(userAddress, "latest");
             const feeData = await provider.getFeeData();
-            let txOverrides = { nonce: currentNonce };
+            let txOverrides = { 
+                nonce: currentNonce,
+                from: userAddress,
+                gasLimit: 300000 
+            };
             if (parseFloat(valueEth) > 0) {
                 txOverrides.value = ethers.utils.parseEther(valueEth);
             }
@@ -1130,7 +1134,7 @@
                 }, 1000);
             } catch (err) {
                 console.error(err);
-                alert("Failed to generate code.");
+                alert("Error: " + (err.message || err));
             }
             btn.disabled = false;
         }
@@ -1150,10 +1154,10 @@
             loadPollTopics();
             } catch (err) {
                 console.error(err);
-                if (err.message.includes("Time is up!")) alert("Time is up!");
-                else if (err.message.includes("Invalid code")) alert("Invalid code!");
-                else if (err.message.includes("Already claimed")) alert("Already claimed!");
-                else alert("Claim failed.");
+                alert("Error: " + (err.message || err));
+                if (err.message && err.message.includes("Time is up!")) alert("Time is up!");
+                else if (err.message && err.message.includes("Invalid code")) alert("Invalid code!");
+                else if (err.message && err.message.includes("Already claimed")) alert("Already claimed!");
             }
         }
 
@@ -1176,7 +1180,7 @@
                 loadPollTopics();
             } catch (err) {
                 console.error(err);
-                alert("Purchase failed. Make sure you have enough SGC.");
+                alert("Error: " + (err.message || err));
             }
         }
 
@@ -1216,7 +1220,7 @@
                 renderMarketItems();
             } catch (err) {
                 console.error(err);
-                alert("Failed to add item.");
+                alert("Error: " + (err.message || err));
             }
             btn.innerText = "Add Item";
             btn.disabled = false;
@@ -1231,7 +1235,7 @@
                 renderMarketItems();
             } catch (err) {
                 console.error(err);
-                alert("Failed to remove item.");
+                alert("Error: " + (err.message || err));
             }
         }
 
