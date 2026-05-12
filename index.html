@@ -1239,9 +1239,49 @@
             }, 2000);
         }
 
+        // ─── Read-only provider (bypasses MetaMask for chain reads) ────────────────
+        const READ_ONLY_PROVIDER = new ethers.providers.JsonRpcProvider('https://evmrpc-testnet.0g.ai');
+        let readOnlyVoterContract = null; // initialized after VOTER_ABI is known
+
+        function getReadOnlyContract() {
+            if (!readOnlyVoterContract) {
+                readOnlyVoterContract = new ethers.Contract(VOTER_ADDRESS, VOTER_ABI, READ_ONLY_PROVIDER);
+            }
+            return readOnlyVoterContract;
+        }
+
+        // ─── Fetch active items via read-only RPC ────────────────────────────────────
+        async function fetchMarketItemsFromChain() {
+            const contract = getReadOnlyContract();
+            const countRes = await contract.marketItemCount();
+            const count = countRes.toNumber();
+            const items = [];
+            for (let i = 0; i < count; i++) {
+                const item = await contract.marketItems(i);
+                if (item.isActive) {
+                    items.push({ id: i, name: item.name, price: item.price.toNumber() });
+                }
+            }
+            return items;
+        }
+
+        // ─── Force refresh on tab focus / returning from MetaMask ────────────────────
+        document.addEventListener('visibilitychange', async () => {
+            if (document.visibilityState === 'visible' && voterContract) {
+                console.log('[visibilitychange] Tab focused — refreshing market...');
+                await renderMarketItems();
+            }
+        });
+        window.addEventListener('focus', async () => {
+            if (voterContract) {
+                console.log('[focus] Window focused — refreshing market...');
+                await renderMarketItems();
+            }
+        });
+
         async function refreshAll() {
-            console.log("Waiting 1 second for 0G node sync...");
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            console.log('refreshAll: waiting 1.5s for node sync...');
+            await new Promise(r => setTimeout(r, 1500));
             await renderMarketItems();
         }
 
@@ -1293,62 +1333,86 @@
 
         async function removeMarketItem(id) {
             const idStr = String(id);
-            console.log("removeMarketItem called with ID:", idStr);
-            if (!confirm("Are you sure you want to remove this item?")) return;
-            
-            // Find the button fresh from DOM every time
+            console.log('removeMarketItem called with ID:', idStr);
+            if (!confirm('Are you sure you want to remove this item?')) return;
+
             function getBtn() {
                 return document.querySelector(`.remove-item-btn[data-id="${idStr}"]`);
             }
             const btnInitial = getBtn();
-            if (btnInitial) {
-                btnInitial.innerText = "Removing...";
-                btnInitial.disabled = true;
-            }
-            
+            if (btnInitial) { btnInitial.innerText = 'Removing...'; btnInitial.disabled = true; }
+
+            let txHash = null;
+            let pollingInterval = null;
             let txDone = false;
-            let timeoutId = setTimeout(() => {
+
+            // Safety timeout — 60s
+            const safetyTimer = setTimeout(() => {
                 if (!txDone) {
-                    alert("Transaction timeout. Please try again.");
+                    if (pollingInterval) clearInterval(pollingInterval);
+                    alert('Transaction timeout (60s). Check MetaMask or the explorer.');
+                    txDone = true;
                     const b = getBtn();
-                    if (b) { b.innerText = "Remove"; b.disabled = false; }
+                    if (b) { b.innerText = 'Remove'; b.disabled = false; }
+                    renderMarketItems();
                 }
-            }, 30000);
+            }, 60000);
 
             try {
-                console.log("Initiating transaction with account:", userAddress);
-                const params = await getGasOverrides("0");
-                console.log("Final TX Object:", { method: "setMarketItemActive", args: [idStr, false], overrides: params });
-                
-                alert("Check MetaMask now!");
-                
+                console.log('Initiating transaction with account:', userAddress);
+                const params = await getGasOverrides('0');
+                console.log('Final TX Object:', { method: 'setMarketItemActive', args: [idStr, false], overrides: params });
+
+                alert('Check MetaMask now!');
+
                 const tx = await voterContract.setMarketItemActive(idStr, false, params);
-                txDone = true;
-                clearTimeout(timeoutId);
-                console.log("Transaction Hash:", tx.hash);
-                
-                await tx.wait();
-                console.log("TX confirmed. Refreshing in 1s...");
-                
-                // Wait for node sync, THEN re-render (no race with showTemporarySuccess)
-                await refreshAll();
-                
+                txHash = tx.hash;
+                console.log('Got TX hash:', txHash, '— switching to polling mode');
+
+                // ─── POLLING instead of await tx.wait() ─────────────────────────────
+                // Read the contract state every 3s via read-only RPC.
+                // As soon as the item disappears from active list → success.
+                const initialItems = await fetchMarketItemsFromChain();
+                const initialIds = new Set(initialItems.map(i => i.id));
+
+                pollingInterval = setInterval(async () => {
+                    if (txDone) { clearInterval(pollingInterval); return; }
+                    try {
+                        console.log('[polling] Checking chain state...');
+                        const currentItems = await fetchMarketItemsFromChain();
+                        const currentIds = new Set(currentItems.map(i => i.id));
+                        const removed = [...initialIds].some(id => !currentIds.has(id));
+                        if (removed) {
+                            console.log('[polling] Item confirmed removed! Updating UI.');
+                            txDone = true;
+                            clearInterval(pollingInterval);
+                            clearTimeout(safetyTimer);
+                            await renderMarketItems();
+                            const b = getBtn();
+                            if (b) { b.innerText = 'Remove'; b.disabled = false; }
+                        } else {
+                            console.log('[polling] Item still active, waiting...');
+                        }
+                    } catch (pollErr) {
+                        console.error('[polling] Read error:', pollErr);
+                    }
+                }, 3000);
+
             } catch (err) {
-                console.error("FULL ERROR OBJECT:", err);
-                alert("Transaction Failed: " + (err.message || err));
-            } finally {
                 txDone = true;
-                clearTimeout(timeoutId);
-                // Button may be gone after refreshAll re-rendered DOM — that's fine
+                if (pollingInterval) clearInterval(pollingInterval);
+                clearTimeout(safetyTimer);
+                console.error('FULL ERROR OBJECT:', err);
+                alert('Transaction Failed: ' + (err.message || err));
                 const b = getBtn();
-                if (b) { b.innerText = "Remove"; b.disabled = false; }
+                if (b) { b.innerText = 'Remove'; b.disabled = false; }
             }
         }
 
         async function renderMarketItems() {
-            const managerContainer = document.getElementById("marketmanager-items-container");
-            const storeContainer = document.getElementById("market-items-container");
-            
+            const managerContainer = document.getElementById('marketmanager-items-container');
+            const storeContainer = document.getElementById('market-items-container');
+
             if (managerContainer) {
                 managerContainer.innerHTML = '';
                 managerContainer.innerHTML = "<p class='text-slate-500 animate-pulse'>Loading loot from blockchain...</p>";
@@ -1359,25 +1423,21 @@
             }
 
             try {
-                let items = [];
-                if (voterContract) {
-                    const countRes = await voterContract.marketItemCount();
-                    const count = countRes.toNumber();
-                    for (let i = 0; i < count; i++) {
-                        const item = await voterContract.marketItems(i);
-                        if (item.isActive) {
-                            items.push({ id: i, name: item.name, price: item.price.toNumber() });
-                        }
-                    }
-                }
+                // Use read-only RPC for reliable reads
+                const items = await fetchMarketItemsFromChain();
+                console.log('[renderMarketItems] loaded', items.length, 'items');
 
-                // Render for Market Manager
+                // ─── Market Manager panel ────────────────────────────────────────────────
                 if (managerContainer) {
                     if (items.length === 0) {
                         managerContainer.innerHTML = "<p class='text-slate-500'>No items in store.</p>";
                     } else {
-                        managerContainer.innerHTML = items.map(item => `
-                            <div class="flex justify-between items-center bg-slate-800 p-4 rounded-xl border border-fuchsia-500/20">
+                        managerContainer.innerHTML =
+                            `<div class="flex justify-end mb-2">
+                                <button onclick="renderMarketItems()" title="Refresh list" style="cursor:pointer" class="text-slate-400 hover:text-fuchsia-400 text-lg transition-colors">🔄</button>
+                             </div>` +
+                            items.map(item => `
+                            <div class="flex justify-between items-center bg-slate-800 p-4 rounded-xl border border-fuchsia-500/20 mb-2">
                                 <div>
                                     <h4 class="font-bold text-white">${item.name}</h4>
                                     <p class="text-fuchsia-400 font-mono text-sm">${item.price} SGC</p>
