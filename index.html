@@ -1251,15 +1251,22 @@
         }
 
         async function removeMarketItem(id) {
+            console.log("Remove triggered for ID:", id);
             if (!confirm("Are you sure you want to remove this item?")) return;
             const btn = document.querySelector(`button[onclick="removeMarketItem(${id})"]`);
-            if (btn) btn.innerText = "Removing...";
+            if (btn) {
+                btn.innerText = "Removing...";
+                btn.disabled = true;
+            }
             
             let txHashReceived = false;
             let timeoutId = setTimeout(() => {
                 if (!txHashReceived) {
                     alert("Transaction timeout. Please try again.");
-                    if (btn) btn.innerText = "Remove";
+                    if (btn) {
+                        btn.innerText = "Remove";
+                        btn.disabled = false;
+                    }
                 }
             }, 30000);
 
@@ -1282,7 +1289,10 @@
                 console.error("FULL ERROR OBJECT:", err);
                 alert("Transaction Failed: " + (err.message || err));
             } finally {
-                if (btn) btn.innerText = "Remove";
+                if (btn) {
+                    btn.innerText = "Remove";
+                    btn.disabled = false;
+                }
                 clearTimeout(timeoutId);
             }
         }
@@ -1318,7 +1328,7 @@
                                     <h4 class="font-bold text-white">${item.name}</h4>
                                     <p class="text-fuchsia-400 font-mono text-sm">${item.price} SGC</p>
                                 </div>
-                                <button onclick="removeMarketItem(${item.id})" class="text-rose-500 hover:text-rose-400 font-bold text-sm uppercase">Remove</button>
+                                <button onclick="removeMarketItem(${item.id})" ontouchend="event.preventDefault(); removeMarketItem(${item.id});" style="cursor: pointer; z-index: 50; position: relative;" class="text-rose-500 hover:text-rose-400 font-bold text-sm uppercase">Remove</button>
                             </div>
                         `).join('');
                     }
