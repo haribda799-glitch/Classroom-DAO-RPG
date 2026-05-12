@@ -5,8 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Classroom DAO V4 | RPG Edition</title>
-    <script src="//cdn.jsdelivr.net/npm/eruda"></script>
-    <script>eruda.init();</script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/ethereum/blockies/blockies.min.js"></script>
@@ -954,27 +952,21 @@
         }
 
         async function getGasOverrides(valueEth = "0") {
-            const currentNonce = await provider.getTransactionCount(userAddress, "latest");
-            const feeData = await provider.getFeeData();
+            const txCount = await provider.getTransactionCount(userAddress, "pending");
+            console.log("Using Nonce:", txCount);
+            
+            const currentGasPrice = await provider.getGasPrice();
+            const boostedGasPrice = currentGasPrice.mul(2); // 2x gas price to force replacement/inclusion
+            
             let txOverrides = { 
-                nonce: currentNonce,
+                nonce: txCount,
                 from: userAddress,
-                gasLimit: 300000 
+                gasLimit: 300000,
+                gasPrice: boostedGasPrice
             };
+            
             if (parseFloat(valueEth) > 0) {
                 txOverrides.value = ethers.utils.parseEther(valueEth);
-            }
-
-            if (feeData.maxFeePerGas && feeData.maxPriorityFeePerGas) {
-                const MIN_TIP = ethers.utils.parseUnits("3.0", "gwei");
-                let suggestedPriorityFee = feeData.maxPriorityFeePerGas.mul(110).div(100);
-                let priorityFee = suggestedPriorityFee.lt(MIN_TIP) ? MIN_TIP : suggestedPriorityFee;
-                let estimatedBaseFee = feeData.maxFeePerGas.sub(feeData.maxPriorityFeePerGas);
-                let baseMaxFee = estimatedBaseFee.mul(150).div(100).add(priorityFee);
-                txOverrides.maxPriorityFeePerGas = priorityFee;
-                txOverrides.maxFeePerGas = baseMaxFee.gt(priorityFee) ? baseMaxFee : priorityFee.mul(2);
-            } else if (feeData.gasPrice) {
-                txOverrides.gasPrice = feeData.gasPrice.mul(120).div(100);
             }
             return txOverrides;
         }
