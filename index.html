@@ -472,7 +472,16 @@
             </div>
 
             <div class="bg-slate-900/70 p-6 rounded-2xl border border-fuchsia-500/20 shadow-[inset_0_0_15px_rgba(0,0,0,0.5)] mt-8">
-                <h3 class="text-xl font-bold mb-5 text-fuchsia-400 uppercase tracking-widest">Market Manager</h3>
+                <div class="flex items-center justify-between mb-5">
+                    <h3 class="text-xl font-bold text-fuchsia-400 uppercase tracking-widest m-0">Market Manager</h3>
+                    <button
+                        id="market-refresh-btn"
+                        onclick="refreshMarket()"
+                        title="Refresh market items from blockchain"
+                        class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-800/80 border border-sky-500/30 text-sky-400 hover:bg-sky-600 hover:text-white hover:border-sky-400 transition-all shadow text-lg"
+                        style="cursor:pointer;"
+                    >&#x21BB;</button>
+                </div>
                 <p class="text-sm text-slate-400 mb-4">Manage assortment and prices for the Mystic Store.</p>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -1472,16 +1481,29 @@
             }
         }
 
+        async function refreshMarket() {
+            const btn = document.getElementById("market-refresh-btn");
+            if (btn) {
+                btn.style.transform = "rotate(360deg)";
+                btn.style.transition = "transform 0.6s ease";
+                btn.disabled = true;
+                setTimeout(() => {
+                    btn.style.transform = "";
+                    btn.style.transition = "";
+                    btn.disabled = false;
+                }, 700);
+            }
+            await renderMarketItems();
+        }
+
         async function renderMarketItems() {
             const managerContainer = document.getElementById('marketmanager-items-container');
             const storeContainer = document.getElementById('market-items-container');
 
             if (managerContainer) {
-                managerContainer.innerHTML = '';
                 managerContainer.innerHTML = "<p class='text-slate-500 animate-pulse'>Loading loot from blockchain...</p>";
             }
             if (storeContainer) {
-                storeContainer.innerHTML = '';
                 storeContainer.innerHTML = "<div class='text-center text-slate-500 py-8 col-span-full animate-pulse'>Loading loot from blockchain...</div>";
             }
 
@@ -1496,9 +1518,6 @@
                         managerContainer.innerHTML = "<p class='text-slate-500'>No items in store.</p>";
                     } else {
                         managerContainer.innerHTML =
-                            `<div class="flex justify-end mb-2">
-                                <button onclick="renderMarketItems()" title="Refresh list" style="cursor:pointer" class="text-slate-400 hover:text-fuchsia-400 text-lg transition-colors">🔄</button>
-                             </div>` +
                             items.map(item => `
                             <div class="flex justify-between items-center bg-slate-800 p-4 rounded-xl border border-fuchsia-500/20 mb-2">
                                 <div>
