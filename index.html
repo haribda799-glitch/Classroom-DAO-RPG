@@ -1292,7 +1292,7 @@
             const btn = document.querySelector('button[onclick="addMarketItem()"]');
             btn.innerText = "Adding...";
             btn.disabled = true;
-            
+
             let txHashReceived = false;
             let timeoutId = setTimeout(() => {
                 if (!txHashReceived) {
@@ -1301,33 +1301,30 @@
                     btn.disabled = false;
                 }
             }, 30000);
-            
+
             try {
                 console.log("Initiating transaction with account:", userAddress);
                 const params = await getGasOverrides("0");
                 console.log("Final TX Object:", { method: "addMarketItem", args: [name, price], overrides: params });
-                
+
                 alert("Check MetaMask now!");
-                
+
                 const tx = await voterContract.addMarketItem(name, price, params);
                 txHashReceived = true;
                 clearTimeout(timeoutId);
                 console.log("Transaction Hash:", tx.hash);
-                
-                await tx.wait();
-                
-                document.getElementById("market-item-name").value = "";
-                document.getElementById("market-item-price").value = "";
-                
-                showTemporarySuccess(btn, "Success!");
-                await refreshAll();
+
+                // Hard reload — only reliable fix for MetaMask Mobile provider cache
+                btn.innerText = "Confirmed! Reloading...";
+                alert("Transaction successful! Reloading the realm...");
+                setTimeout(() => window.location.reload(), 2000);
+
             } catch (err) {
+                clearTimeout(timeoutId);
                 console.error("FULL ERROR OBJECT:", err);
                 alert("Error: " + (err.message || err));
-            } finally {
                 btn.innerText = "Add Item";
                 btn.disabled = false;
-                clearTimeout(timeoutId);
             }
         }
 
@@ -1342,19 +1339,12 @@
             const btnInitial = getBtn();
             if (btnInitial) { btnInitial.innerText = 'Removing...'; btnInitial.disabled = true; }
 
-            let txHash = null;
-            let pollingInterval = null;
-            let txDone = false;
-
-            // Safety timeout — 60s
+            let txHashReceived = false;
             const safetyTimer = setTimeout(() => {
-                if (!txDone) {
-                    if (pollingInterval) clearInterval(pollingInterval);
+                if (!txHashReceived) {
                     alert('Transaction timeout (60s). Check MetaMask or the explorer.');
-                    txDone = true;
                     const b = getBtn();
                     if (b) { b.innerText = 'Remove'; b.disabled = false; }
-                    renderMarketItems();
                 }
             }, 60000);
 
@@ -1366,41 +1356,17 @@
                 alert('Check MetaMask now!');
 
                 const tx = await voterContract.setMarketItemActive(idStr, false, params);
-                txHash = tx.hash;
-                console.log('Got TX hash:', txHash, '— switching to polling mode');
+                txHashReceived = true;
+                clearTimeout(safetyTimer);
+                console.log('Got TX hash:', tx.hash);
 
-                // ─── POLLING instead of await tx.wait() ─────────────────────────────
-                // Read the contract state every 3s via read-only RPC.
-                // As soon as the item disappears from active list → success.
-                const initialItems = await fetchMarketItemsFromChain();
-                const initialIds = new Set(initialItems.map(i => i.id));
-
-                pollingInterval = setInterval(async () => {
-                    if (txDone) { clearInterval(pollingInterval); return; }
-                    try {
-                        console.log('[polling] Checking chain state...');
-                        const currentItems = await fetchMarketItemsFromChain();
-                        const currentIds = new Set(currentItems.map(i => i.id));
-                        const removed = [...initialIds].some(id => !currentIds.has(id));
-                        if (removed) {
-                            console.log('[polling] Item confirmed removed! Updating UI.');
-                            txDone = true;
-                            clearInterval(pollingInterval);
-                            clearTimeout(safetyTimer);
-                            await renderMarketItems();
-                            const b = getBtn();
-                            if (b) { b.innerText = 'Remove'; b.disabled = false; }
-                        } else {
-                            console.log('[polling] Item still active, waiting...');
-                        }
-                    } catch (pollErr) {
-                        console.error('[polling] Read error:', pollErr);
-                    }
-                }, 3000);
+                // Hard reload — only reliable fix for MetaMask Mobile provider cache
+                const b = getBtn();
+                if (b) b.innerText = 'Confirmed! Reloading...';
+                alert('Transaction successful! Reloading the realm...');
+                setTimeout(() => window.location.reload(), 2000);
 
             } catch (err) {
-                txDone = true;
-                if (pollingInterval) clearInterval(pollingInterval);
                 clearTimeout(safetyTimer);
                 console.error('FULL ERROR OBJECT:', err);
                 alert('Transaction Failed: ' + (err.message || err));
