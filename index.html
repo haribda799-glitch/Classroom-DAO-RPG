@@ -229,7 +229,16 @@
         <!-- Tab 1: Dashboard (Quests) -->
         <div id="content-voting"
             class="tab-content active glass-panel rounded-b-2xl rounded-tr-2xl p-8 relative overflow-hidden">
-            <h2 class="text-3xl font-bold mb-2 text-sky-400 rpg-title">Active Quests (Voting)</h2>
+            <div class="flex items-center justify-between mb-2">
+                <h2 class="text-3xl font-bold text-sky-400 rpg-title">Active Quests (Voting)</h2>
+                <button
+                    id="quest-refresh-btn"
+                    onclick="refreshQuests()"
+                    title="Refresh quest names from blockchain"
+                    class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-800/80 border border-sky-500/30 text-sky-400 hover:bg-sky-600 hover:text-white hover:border-sky-400 transition-all shadow text-lg"
+                    style="cursor:pointer;"
+                >&#x21BB;</button>
+            </div>
             <p class="text-slate-400 mb-8 text-lg">Cast your vote to shape the realm's future.</p>
             <div id="claim-attendance-block"
                 class="bg-slate-900/50 p-6 rounded-2xl border border-sky-500/20 mb-8 flex flex-col md:flex-row items-center gap-4">
@@ -571,6 +580,27 @@
             }
         }
 
+        async function refreshQuests() {
+            const btn = document.getElementById("quest-refresh-btn");
+            if (btn) {
+                btn.style.transform = "rotate(360deg)";
+                btn.style.transition = "transform 0.6s ease";
+                btn.disabled = true;
+                setTimeout(() => {
+                    btn.style.transform = "";
+                    btn.style.transition = "";
+                    btn.disabled = false;
+                }, 700);
+            }
+            await loadQuestNamesFromChain();
+            if (voterContract) {
+                await fetchProposals();
+            } else {
+                // Not connected yet — just update the names cache, show a note
+                console.log("[refreshQuests] Wallet not connected, cache updated. Connect to see live vote counts.");
+            }
+        }
+
         function switchTab(tabId) {
             ['voting', 'leaderboard', 'admin', 'market'].forEach(id => {
                 document.getElementById('tab-' + id).classList.remove('active');
@@ -838,9 +868,9 @@
                 }
 
                 container.innerHTML = proposalsList.map(p => `
-                    <div class="flex items-center justify-between p-6 bg-slate-900/60 rounded-2xl border border-sky-500/20 hover:bg-slate-800/80 hover:border-sky-400/60 transition-all group shadow-[inset_0_0_20px_rgba(0,0,0,0.4)]">
-                        <div class="flex items-center space-x-5">
-                            <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-sky-600 to-indigo-700 flex items-center justify-center font-bold text-2xl shadow-[0_0_15px_rgba(14,165,233,0.3)] group-hover:scale-110 transition-transform text-white border border-sky-400/30">
+                    <div class="flex flex-col h-full p-6 bg-slate-900/60 rounded-2xl border border-sky-500/20 hover:bg-slate-800/80 hover:border-sky-400/60 transition-all group shadow-[inset_0_0_20px_rgba(0,0,0,0.4)]">
+                        <div class="flex items-start space-x-5 flex-grow">
+                            <div class="w-14 h-14 shrink-0 rounded-xl bg-gradient-to-br from-sky-600 to-indigo-700 flex items-center justify-center font-bold text-2xl shadow-[0_0_15px_rgba(14,165,233,0.3)] group-hover:scale-110 transition-transform text-white border border-sky-400/30">
                                 ${p.name.charAt(0)}
                             </div>
                             <div>
@@ -848,9 +878,11 @@
                                 <p class="text-sm text-slate-400 font-semibold mt-1">Votes: <span class="text-emerald-400 font-mono font-bold text-base">${p.votes}</span></p>
                             </div>
                         </div>
-                        <button onclick="voteFor(${p.index})" class="px-6 py-3 bg-slate-800 hover:bg-sky-600 hover:text-white transition-all rounded-xl font-bold border border-slate-600 hover:border-sky-400 shadow-lg hover:shadow-[0_0_15px_rgba(14,165,233,0.5)] text-sky-300 uppercase tracking-wider text-sm">
-                            Vote
-                        </button>
+                        <div class="mt-5 flex justify-end">
+                            <button onclick="voteFor(${p.index})" class="px-6 py-3 bg-slate-800 hover:bg-sky-600 hover:text-white transition-all rounded-xl font-bold border border-slate-600 hover:border-sky-400 shadow-lg hover:shadow-[0_0_15px_rgba(14,165,233,0.5)] text-sky-300 uppercase tracking-wider text-sm">
+                                Vote
+                            </button>
+                        </div>
                     </div>
                 `).join('');
             } catch (err) {
