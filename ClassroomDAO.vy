@@ -79,6 +79,8 @@ has_claimed_attendance: public(HashMap[address, bytes32])
 marketItems: public(HashMap[uint256, MarketItem])
 marketItemCount: public(uint256)
 
+questNames: public(HashMap[uint256, String[100]])
+
 @deploy
 def __init__(proposalNames: DynArray[String[32], 128], _token_address: address):
     """
@@ -242,6 +244,19 @@ def buyItem(itemId: uint256):
     assert success, "Transfer failed"
     
     log ItemPurchased(student=msg.sender, item_name=item.name, price=item.price)
+
+@external
+def setQuestNames(names: DynArray[String[100], 4]):
+    """
+    @notice Sets the names of the Voting Quests.
+    @dev May only be called by `chairperson`.
+    """
+    assert msg.sender == self.chairperson, "Only Game Master can set quest names"
+    for i: uint256 in range(4):
+        if i < len(names):
+            self.questNames[i] = names[i]
+        else:
+            self.questNames[i] = ""
 
 @external
 def delegate(to: address):
