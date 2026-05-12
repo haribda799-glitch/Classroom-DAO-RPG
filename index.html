@@ -549,6 +549,28 @@
         let voterContract;
         let isStudent = false;
 
+        // ── Global quest name cache (loaded at startup via read-only RPC) ──────────
+        let chainQuestNames = ["Quest 1", "Quest 2", "Quest 3", "Quest 4"];
+
+        async function loadQuestNamesFromChain() {
+            try {
+                const ro = getReadOnlyContract();
+                const names = [];
+                for (let i = 0; i < 4; i++) {
+                    try {
+                        const n = await ro.questNames(i);
+                        names.push((n && n.trim() !== "") ? n.trim() : `Quest ${i + 1}`);
+                    } catch (e) {
+                        names.push(`Quest ${i + 1}`);
+                    }
+                }
+                chainQuestNames = names;
+                console.log("Quest names loaded from blockchain:", chainQuestNames);
+            } catch (err) {
+                console.error("Failed to load quest names from chain:", err);
+            }
+        }
+
         function switchTab(tabId) {
             ['voting', 'leaderboard', 'admin', 'market'].forEach(id => {
                 document.getElementById('tab-' + id).classList.remove('active');
@@ -566,6 +588,9 @@
 
         async function init() {
             checkFirstVisit();
+
+            // Load quest names from blockchain immediately — no wallet required
+            await loadQuestNamesFromChain();
 
             if (window.ethereum) {
                 provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -789,26 +814,18 @@
             const container = document.getElementById("proposals-container");
             container.innerHTML = '<div class="col-span-full text-center py-8"><span class="animate-pulse text-sky-400 font-bold tracking-widest uppercase">Deciphering Quests...</span></div>';
             try {
-                // Load quest names strictly from blockchain (no localStorage)
-                const roContract = getReadOnlyContract();
-                const chainNames = [];
-                for (let i = 0; i < 4; i++) {
-                    try {
-                        const n = await roContract.questNames(i);
-                        chainNames.push((n && n.trim() !== "") ? n.trim() : `Quest ${i + 1}`);
-                    } catch (e) {
-                        chainNames.push(`Quest ${i + 1}`);
-                    }
-                }
-                console.log("Quest names loaded from blockchain:", chainNames);
+                // Use the globally cached names (loaded from blockchain at startup)
+                // Refresh the cache in case it changed since init
+                await loadQuestNamesFromChain();
 
                 const proposalsList = [];
                 for (let i = 0; i < 10; i++) {
                     try {
                         const p = await voterContract.proposals(i);
-                        // Blockchain name takes priority; fall back to chain quest name, then generic label
-                        let displayName = (p[0] && p[0].trim() !== "") ? p[0].trim()
-                            : (chainNames[i] || `Quest ${i + 1}`);
+                        // questNames from blockchain take priority over the proposal's on-chain name field
+                        let displayName = (chainQuestNames[i] && chainQuestNames[i].trim() !== "")
+                            ? chainQuestNames[i]
+                            : ((p[0] && p[0].trim() !== "") ? p[0].trim() : `Quest ${i + 1}`);
                         proposalsList.push({ index: i, name: displayName, votes: p[1].toString() });
                     } catch (e) {
                         break;
