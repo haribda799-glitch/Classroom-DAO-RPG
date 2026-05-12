@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Classroom DAO V4 | RPG Edition</title>
+    <script src="//cdn.jsdelivr.net/npm/eruda"></script>
+    <script>eruda.init();</script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/ethereum/blockies/blockies.min.js"></script>
@@ -1173,13 +1175,16 @@
                 }
 
                 alert(`Purchasing ${itemName} for ${price} SGC...`);
-                const tx = await voterContract.buyItem(itemId, await getGasOverrides("0"));
+                console.log("Initiating transaction with account:", userAddress);
+                const params = await getGasOverrides("0");
+                console.log("Transaction parameters:", params);
+                const tx = await voterContract.buyItem(itemId, params);
                 await tx.wait();
                 alert(`Successfully purchased ${itemName}! 🎉`);
                 await fetchUserData();
                 loadPollTopics();
             } catch (err) {
-                console.error(err);
+                console.error("FULL ERROR OBJECT:", err);
                 alert("Error: " + (err.message || err));
             }
         }
@@ -1212,30 +1217,38 @@
             btn.innerText = "Adding...";
             btn.disabled = true;
             try {
-                const tx = await voterContract.addMarketItem(name, price, await getGasOverrides("0"));
+                console.log("Initiating transaction with account:", userAddress);
+                const params = await getGasOverrides("0");
+                console.log("Transaction parameters:", params);
+                const tx = await voterContract.addMarketItem(name, price, params);
                 await tx.wait();
                 alert("Item added successfully!");
                 document.getElementById("market-item-name").value = "";
                 document.getElementById("market-item-price").value = "";
                 renderMarketItems();
+                btn.innerText = "Add Item";
+                btn.disabled = false;
             } catch (err) {
-                console.error(err);
+                console.error("FULL ERROR OBJECT:", err);
+                btn.innerText = "Transaction Failed";
+                btn.disabled = false;
                 alert("Error: " + (err.message || err));
             }
-            btn.innerText = "Add Item";
-            btn.disabled = false;
         }
 
         async function removeMarketItem(id) {
             if (!confirm("Are you sure you want to remove this item?")) return;
             try {
-                const tx = await voterContract.setMarketItemActive(id, false, await getGasOverrides("0"));
+                console.log("Initiating transaction with account:", userAddress);
+                const params = await getGasOverrides("0");
+                console.log("Transaction parameters:", params);
+                const tx = await voterContract.setMarketItemActive(id, false, params);
                 await tx.wait();
                 alert("Item removed successfully!");
                 renderMarketItems();
             } catch (err) {
-                console.error(err);
-                alert("Error: " + (err.message || err));
+                console.error("FULL ERROR OBJECT:", err);
+                alert("Transaction Failed: " + (err.message || err));
             }
         }
 
