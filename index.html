@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Classroom DAO V4 | RPG Edition</title>
+    <script src="//cdn.jsdelivr.net/npm/eruda"></script>
+    <script>eruda.init();</script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/ethereum/blockies/blockies.min.js"></script>
@@ -1208,39 +1210,77 @@
             const btn = document.querySelector('button[onclick="addMarketItem()"]');
             btn.innerText = "Adding...";
             btn.disabled = true;
+            
+            let txHashReceived = false;
+            let timeoutId = setTimeout(() => {
+                if (!txHashReceived) {
+                    alert("Transaction timeout. Please try again.");
+                    btn.innerText = "Add Item";
+                    btn.disabled = false;
+                }
+            }, 30000);
+            
             try {
                 console.log("Initiating transaction with account:", userAddress);
                 const params = await getGasOverrides("0");
-                console.log("Transaction parameters:", params);
+                console.log("Final TX Object:", { method: "addMarketItem", args: [name, price], overrides: params });
+                
+                alert("Check MetaMask now!");
+                
                 const tx = await voterContract.addMarketItem(name, price, params);
+                txHashReceived = true;
+                clearTimeout(timeoutId);
+                console.log("Transaction Hash:", tx.hash);
+                
                 await tx.wait();
                 alert("Item added successfully!");
                 document.getElementById("market-item-name").value = "";
                 document.getElementById("market-item-price").value = "";
                 renderMarketItems();
-                btn.innerText = "Add Item";
-                btn.disabled = false;
             } catch (err) {
                 console.error("FULL ERROR OBJECT:", err);
-                btn.innerText = "Transaction Failed";
-                btn.disabled = false;
                 alert("Error: " + (err.message || err));
+            } finally {
+                btn.innerText = "Add Item";
+                btn.disabled = false;
+                clearTimeout(timeoutId);
             }
         }
 
         async function removeMarketItem(id) {
             if (!confirm("Are you sure you want to remove this item?")) return;
+            const btn = document.querySelector(`button[onclick="removeMarketItem(${id})"]`);
+            if (btn) btn.innerText = "Removing...";
+            
+            let txHashReceived = false;
+            let timeoutId = setTimeout(() => {
+                if (!txHashReceived) {
+                    alert("Transaction timeout. Please try again.");
+                    if (btn) btn.innerText = "Remove";
+                }
+            }, 30000);
+
             try {
                 console.log("Initiating transaction with account:", userAddress);
                 const params = await getGasOverrides("0");
-                console.log("Transaction parameters:", params);
+                console.log("Final TX Object:", { method: "setMarketItemActive", args: [id, false], overrides: params });
+                
+                alert("Check MetaMask now!");
+                
                 const tx = await voterContract.setMarketItemActive(id, false, params);
+                txHashReceived = true;
+                clearTimeout(timeoutId);
+                console.log("Transaction Hash:", tx.hash);
+                
                 await tx.wait();
                 alert("Item removed successfully!");
                 renderMarketItems();
             } catch (err) {
                 console.error("FULL ERROR OBJECT:", err);
                 alert("Transaction Failed: " + (err.message || err));
+            } finally {
+                if (btn) btn.innerText = "Remove";
+                clearTimeout(timeoutId);
             }
         }
 
