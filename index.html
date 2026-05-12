@@ -1234,6 +1234,8 @@
         }
 
         async function refreshAll() {
+            console.log("Waiting 1 second for 0G node sync...");
+            await new Promise(resolve => setTimeout(resolve, 1000));
             await renderMarketItems();
         }
 
@@ -1322,7 +1324,7 @@
                 console.error("FULL ERROR OBJECT:", err);
                 alert("Transaction Failed: " + (err.message || err));
             } finally {
-                if (btn) {
+                if (btn && document.contains(btn)) {
                     btn.innerText = "Remove";
                     btn.disabled = false;
                 }
@@ -1334,8 +1336,14 @@
             const managerContainer = document.getElementById("marketmanager-items-container");
             const storeContainer = document.getElementById("market-items-container");
             
-            if (managerContainer) managerContainer.innerHTML = "<p class='text-slate-500 animate-pulse'>Loading loot from blockchain...</p>";
-            if (storeContainer) storeContainer.innerHTML = "<div class='text-center text-slate-500 py-8 col-span-full animate-pulse'>Loading loot from blockchain...</div>";
+            if (managerContainer) {
+                managerContainer.innerHTML = '';
+                managerContainer.innerHTML = "<p class='text-slate-500 animate-pulse'>Loading loot from blockchain...</p>";
+            }
+            if (storeContainer) {
+                storeContainer.innerHTML = '';
+                storeContainer.innerHTML = "<div class='text-center text-slate-500 py-8 col-span-full animate-pulse'>Loading loot from blockchain...</div>";
+            }
 
             try {
                 let items = [];
