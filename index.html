@@ -1206,21 +1206,27 @@
             fetchProposals();
         }
 
-        document.addEventListener("DOMContentLoaded", () => {
-            const container = document.getElementById("marketmanager-items-container");
-            if (container) {
-                const handler = function(e) {
-                    const btn = e.target.closest('.remove-item-btn');
-                    if (btn) {
-                        e.preventDefault();
-                        const id = btn.getAttribute('data-id');
-                        if (id) removeMarketItem(id, btn);
-                    }
-                };
-                container.addEventListener("click", handler);
-                container.addEventListener("touchend", handler);
+        // Single permanent delegate — survives any innerHTML re-render
+        document.body.addEventListener("click", function(e) {
+            const btn = e.target.closest('.remove-item-btn');
+            if (btn) {
+                e.preventDefault();
+                e.stopPropagation();
+                const id = btn.getAttribute('data-id');
+                console.log("[delegate click] Remove triggered for ID:", id);
+                if (id) removeMarketItem(id);
             }
         });
+        document.body.addEventListener("touchend", function(e) {
+            const btn = e.target.closest('.remove-item-btn');
+            if (btn) {
+                e.preventDefault();
+                e.stopPropagation();
+                const id = btn.getAttribute('data-id');
+                console.log("[delegate touchend] Remove triggered for ID:", id);
+                if (id) removeMarketItem(id);
+            }
+        }, { passive: false });
 
         function showTemporarySuccess(btn, msg) {
             if (!btn) return;
@@ -1285,50 +1291,57 @@
             }
         }
 
-        async function removeMarketItem(id, passedBtn) {
-            console.log("Remove triggered for ID:", id);
+        async function removeMarketItem(id) {
+            const idStr = String(id);
+            console.log("removeMarketItem called with ID:", idStr);
             if (!confirm("Are you sure you want to remove this item?")) return;
-            const btn = passedBtn || document.querySelector(`.remove-item-btn[data-id="${id}"]`);
-            if (btn) {
-                btn.innerText = "Removing...";
-                btn.disabled = true;
+            
+            // Find the button fresh from DOM every time
+            function getBtn() {
+                return document.querySelector(`.remove-item-btn[data-id="${idStr}"]`);
+            }
+            const btnInitial = getBtn();
+            if (btnInitial) {
+                btnInitial.innerText = "Removing...";
+                btnInitial.disabled = true;
             }
             
-            let txHashReceived = false;
+            let txDone = false;
             let timeoutId = setTimeout(() => {
-                if (!txHashReceived) {
+                if (!txDone) {
                     alert("Transaction timeout. Please try again.");
-                    if (btn) {
-                        btn.innerText = "Remove";
-                        btn.disabled = false;
-                    }
+                    const b = getBtn();
+                    if (b) { b.innerText = "Remove"; b.disabled = false; }
                 }
             }, 30000);
 
             try {
                 console.log("Initiating transaction with account:", userAddress);
                 const params = await getGasOverrides("0");
-                console.log("Final TX Object:", { method: "setMarketItemActive", args: [id, false], overrides: params });
+                console.log("Final TX Object:", { method: "setMarketItemActive", args: [idStr, false], overrides: params });
                 
                 alert("Check MetaMask now!");
                 
-                const tx = await voterContract.setMarketItemActive(id, false, params);
-                txHashReceived = true;
+                const tx = await voterContract.setMarketItemActive(idStr, false, params);
+                txDone = true;
                 clearTimeout(timeoutId);
                 console.log("Transaction Hash:", tx.hash);
                 
                 await tx.wait();
-                showTemporarySuccess(btn, "Success!");
+                console.log("TX confirmed. Refreshing in 1s...");
+                
+                // Wait for node sync, THEN re-render (no race with showTemporarySuccess)
                 await refreshAll();
+                
             } catch (err) {
                 console.error("FULL ERROR OBJECT:", err);
                 alert("Transaction Failed: " + (err.message || err));
             } finally {
-                if (btn && document.contains(btn)) {
-                    btn.innerText = "Remove";
-                    btn.disabled = false;
-                }
+                txDone = true;
                 clearTimeout(timeoutId);
+                // Button may be gone after refreshAll re-rendered DOM — that's fine
+                const b = getBtn();
+                if (b) { b.innerText = "Remove"; b.disabled = false; }
             }
         }
 
