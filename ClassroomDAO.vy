@@ -38,6 +38,9 @@ event ItemPurchased:
     item_name: String[64]
     price: uint256
 
+event NewRoundStarted:
+    pollId: uint256
+
 struct Voter:
     weight: uint256
     voted: bool
@@ -81,6 +84,12 @@ marketItemCount: public(uint256)
 
 questNames: public(HashMap[uint256, String[100]])
 
+currentPollId: public(uint256)
+pollVotes: public(HashMap[uint256, HashMap[uint256, uint256]])
+hasVoted: public(HashMap[uint256, HashMap[address, bool]])
+receivedDelegations: public(HashMap[uint256, HashMap[address, uint256]])
+roundVote: public(HashMap[uint256, HashMap[address, uint256]])
+
 @deploy
 def __init__(proposalNames: DynArray[String[32], 128], _token_address: address):
     """
@@ -93,6 +102,7 @@ def __init__(proposalNames: DynArray[String[32], 128], _token_address: address):
     self.token_address = _token_address
     self.reward_amount = 100 * 10**18
     self.voters[self.chairperson].weight = 1
+    self.currentPollId = 1
 
     for name: String[32] in proposalNames:
         self.proposals.append(Proposal(name=name, voteCount=0))
@@ -259,34 +269,39 @@ def setQuestNames(names: DynArray[String[100], 4]):
             self.questNames[i] = ""
 
 @external
+def startNewRound():
+    """
+    @notice Starts a new voting round.
+    @dev May only be called by `chairperson`.
+    """
+    assert msg.sender == self.chairperson, "Only Game Master can start a round"
+    self.currentPollId += 1
+    log NewRoundStarted(pollId=self.currentPollId)
+
+@external
 def delegate(to: address):
     """
     @notice Delegate your vote to the voter `to`.
     @param to Address to which vote is delegated.
     """
-    assert not self.voters[msg.sender].voted, "You already voted"
+    assert self.voters[msg.sender].weight > 0, "Not a registered student"
+    assert not self.hasVoted[self.currentPollId][msg.sender], "You already voted this round"
     assert to != msg.sender, "Self-delegation is disallowed"
+    assert self.voters[to].weight > 0, "Delegate is not a registered student"
 
-    curr: address = to
-    for i: uint256 in range(10):
-        if self.voters[curr].delegate == empty(address):
-            break
-        curr = self.voters[curr].delegate
-        assert curr != msg.sender, "Found loop in delegation"
+    # For multi-round, we do a single-level delegation to avoid complex loops.
+    # The weight transferred includes the sender's base weight + any delegations they received this round.
+    self.hasVoted[self.currentPollId][msg.sender] = True
+    voter_weight: uint256 = self.voters[msg.sender].weight + self.receivedDelegations[self.currentPollId][msg.sender]
 
-    voter: Voter = self.voters[msg.sender]
-    voter.voted = True
-    voter.delegate = curr
-    self.voters[msg.sender] = voter
-
-    log Delegated(voter=msg.sender, delegate=curr)
-
-    delegate_: Voter = self.voters[curr]
-    if delegate_.voted:
-        self.proposals[delegate_.vote].voteCount += voter.weight
+    if self.hasVoted[self.currentPollId][to]:
+        # Delegate already voted, add directly to their chosen proposal
+        self.pollVotes[self.currentPollId][self.roundVote[self.currentPollId][to]] += voter_weight
     else:
-        delegate_.weight += voter.weight
-        self.voters[curr] = delegate_
+        # Delegate hasn't voted yet, add to their weight for this round
+        self.receivedDelegations[self.currentPollId][to] += voter_weight
+
+    log Delegated(voter=msg.sender, delegate=to)
 
 @external
 def vote(proposalIndex: uint256):
@@ -294,23 +309,22 @@ def vote(proposalIndex: uint256):
     @notice Give your vote to proposal `proposals[proposalIndex].name`.
     @param proposalIndex Index of proposal in the proposals array.
     """
-    voter: Voter = self.voters[msg.sender]
-    assert voter.weight != 0, "Has no right to vote"
-    assert not voter.voted, "Already voted"
+    assert self.voters[msg.sender].weight > 0, "Has no right to vote"
+    assert not self.hasVoted[self.currentPollId][msg.sender], "Already voted this round"
     assert proposalIndex < len(self.proposals), "Invalid proposal index"
-    assert not self.has_received_reward[msg.sender], "Already received reward"
 
-    voter.voted = True
-    voter.vote = proposalIndex
-    self.voters[msg.sender] = voter
+    self.hasVoted[self.currentPollId][msg.sender] = True
+    self.roundVote[self.currentPollId][msg.sender] = proposalIndex
 
-    self.proposals[proposalIndex].voteCount += voter.weight
+    voter_weight: uint256 = self.voters[msg.sender].weight + self.receivedDelegations[self.currentPollId][msg.sender]
+    self.pollVotes[self.currentPollId][proposalIndex] += voter_weight
 
-    log Voted(voter=msg.sender, proposal=proposalIndex, weight=voter.weight)
+    log Voted(voter=msg.sender, proposal=proposalIndex, weight=voter_weight)
     
-    # Let's keep the initial SGC reward on the first vote to encourage voting.
-    self.has_received_reward[msg.sender] = True
-    extcall ERC20(self.token_address).transferFrom(self.chairperson_wallet, msg.sender, self.reward_amount)
+    # Reward for the first vote ever
+    if not self.has_received_reward[msg.sender]:
+        self.has_received_reward[msg.sender] = True
+        extcall ERC20(self.token_address).transferFrom(self.chairperson_wallet, msg.sender, self.reward_amount)
 
 @internal
 @view
@@ -323,7 +337,7 @@ def _winning_proposal() -> uint256:
         if i >= num_proposals:
             break
             
-        c: uint256 = self.proposals[i].voteCount
+        c: uint256 = self.pollVotes[self.currentPollId][i]
         if c > winning_vote_count:
             winning_vote_count = c
             winning_proposal_index = i
@@ -337,6 +351,11 @@ def winning_proposal() -> uint256:
 @external
 @view
 def winner_name() -> String[32]:
+    # Try fetching from questNames first, fallback to proposals array
+    quest_name: String[100] = self.questNames[self._winning_proposal()]
+    if len(quest_name) > 0:
+        # Vyper string casting for return
+        return self.proposals[self._winning_proposal()].name # Or just return proposals name. We use frontend to display questNames anyway.
     return self.proposals[self._winning_proposal()].name
 
 @external
