@@ -20,8 +20,8 @@ event Delegated:
 
 event StudentRegistered:
     student: indexed(address)
-    nickname: String[32]
-    group: uint256
+    nickname: String[64]
+    group: String[32]
 
 event StudentRewarded:
     student: indexed(address)
@@ -52,8 +52,8 @@ struct Proposal:
     voteCount: uint256
 
 struct Student:
-    nickname: String[32]
-    group: uint256
+    nickname: String[64]
+    group: String[32]
     academicXP: uint256
     is_hidden: bool
 
@@ -68,7 +68,7 @@ proposals: public(DynArray[Proposal, 128])
 
 students: public(HashMap[address, Student])
 student_addresses: public(DynArray[address, 1024])
-used_nicknames: public(HashMap[String[32], bool])
+used_nicknames: public(HashMap[String[64], bool])
 
 token_address: public(address)
 reward_amount: public(uint256)
@@ -109,7 +109,7 @@ def __init__(proposalNames: DynArray[String[32], 128], _token_address: address):
 
 @external
 @payable
-def registerStudent(addr: address, nickname: String[32], group: uint256):
+def registerStudent(addr: address, nickname: String[64], group: String[32]):
     """
     @notice Register a student, give them voting rights and exact 0.01 OGI for gas.
     @dev May only be called by `chairperson`.
