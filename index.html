@@ -826,23 +826,20 @@
         function handleWeb3Error(error) {
             console.log("Safe handling error:", error);
 
-            const code = error?.code;
-            const reason = error?.reason || "";
-            const message = error?.message || "";
-            const innerMessage = error?.error?.message || "";
+            let errStr = "";
+            try {
+                errStr = JSON.stringify(error).toLowerCase();
+            } catch(e) {}
 
-            // Check exact ethers fields discovered in logs
             const isGasError = 
-                code === 'INSUFFICIENT_FUNDS' || 
-                code === -32603 || 
-                reason.toLowerCase().includes('insufficient funds') ||
-                message.toLowerCase().includes('insufficient funds') ||
-                innerMessage.toLowerCase().includes('insufficient funds');
+                (error && error.code === 'INSUFFICIENT_FUNDS') || 
+                (error && error.message && typeof error.message === 'string' && error.message.toLowerCase().includes('insufficient funds')) ||
+                errStr.includes('insufficient');
 
             if (isGasError) {
                 alert("Ошибка: Недостаточно газа (A0GI) для отправки транзакции. Пожалуйста, попросите преподавателя пополнить ваш баланс.");
             } else {
-                alert("Произошла ошибка: " + (reason || message || error));
+                alert("Произошла ошибка: " + (error?.message || error));
             }
         }
 
