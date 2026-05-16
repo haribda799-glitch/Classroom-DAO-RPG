@@ -1246,16 +1246,21 @@
             const statusEl = document.getElementById("voting-status");
             const originalText = btn ? btn.innerText : "Vote";
             
-            if (btn) {
-                btn.disabled = true;
-                btn.innerText = "Voting...";
-            }
-
-            setStatus(statusEl, "Channeling magic (Waiting for signature)...", "wait");
             try {
-                const tx = await voterContract.vote(index);
+                if (btn) {
+                    btn.disabled = true;
+                    btn.innerText = "Voting...";
+                }
+
+                setStatus(statusEl, "Channeling magic (Waiting for signature)...", "wait");
+                
+                const overrides = await getGasOverrides("0");
+                const tx = await voterContract.vote(index, overrides);
+                
                 setStatus(statusEl, `Casting spell... Tx: ${tx.hash.substring(0, 10)}...`, "wait");
+                
                 await tx.wait();
+                
                 setStatus(statusEl, `Quest Completed! Vote cast successfully! 🎉`, "success");
                 await fetchProposals();
                 await fetchUserData();
@@ -1269,8 +1274,12 @@
                 } else {
                     setStatus(statusEl, "Spell fizzled. Transaction rejected.", "error");
                 }
-                // Pass to universal handler for gas checks and alerts
-                handleWeb3Error(err);
+                
+                if (typeof handleWeb3Error === 'function') {
+                    handleWeb3Error(err);
+                } else {
+                    alert("Произошла ошибка: " + (err.message || err));
+                }
             } finally {
                 if (btn) {
                     btn.disabled = false;
@@ -1698,14 +1707,20 @@
             
             const btn = document.getElementById("btn-claim-attendance");
             const originalText = btn.innerText;
-            btn.disabled = true;
-            btn.innerText = "Sending... Check MetaMask";
 
             try {
-                const tx = await voterContract.claimAttendance(code, await getGasOverrides("0"));
-                document.getElementById("voting-status").innerText = "Claiming attendance...";
+                btn.disabled = true;
+                btn.innerText = "Sending... Check MetaMask";
+                document.getElementById("voting-status").innerText = "Channeling magic (Waiting for signature)...";
                 document.getElementById("voting-status").className = "mt-6 text-center text-sm font-bold text-amber-400 animate-pulse";
+
+                const overrides = await getGasOverrides("0");
+                const tx = await voterContract.claimAttendance(code, overrides);
+                
+                document.getElementById("voting-status").innerText = `Claiming attendance... Tx: ${tx.hash.substring(0, 10)}...`;
+                
                 await tx.wait();
+                
                 document.getElementById("voting-status").innerText = "Attendance Claimed! +50 XP 🎉";
                 document.getElementById("voting-status").className = "mt-6 text-center text-sm font-bold text-emerald-400";
                 document.getElementById("attendance-code-input").value = "";
@@ -1713,7 +1728,11 @@
                 loadPollTopics();
             } catch (err) {
                 console.error("Attendance claim error:", err);
-                handleWeb3Error(err);
+                if (typeof handleWeb3Error === 'function') {
+                    handleWeb3Error(err);
+                } else {
+                    alert("Произошла ошибка: " + (err.message || err));
+                }
             } finally {
                 btn.disabled = false;
                 btn.innerText = originalText;
