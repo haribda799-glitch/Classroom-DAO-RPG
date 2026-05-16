@@ -1336,7 +1336,9 @@
                 return;
             }
 
+            const originalBtnText = btn.innerText;
             setStatus(statusEl, "Preparing summoning ritual (Sending 0.01 OGI)...", "wait");
+            btn.innerText = "Registering...";
             btn.disabled = true; btn.classList.add("opacity-50");
 
             try {
@@ -1346,6 +1348,8 @@
                 setStatus(statusEl, `Summoning... Tx: ${tx.hash.substring(0, 10)}...`, "wait");
                 await tx.wait();
                 setStatus(statusEl, `Hero ${nickname} successfully summoned! 🎉`, "success");
+                
+                alert("Студент успешно зарегистрирован в блокчейне!");
 
                 document.getElementById("reg-nickname").value = "";
                 document.getElementById("reg-group").value = "";
@@ -1355,11 +1359,14 @@
 
             } catch (err) {
                 console.error(err);
-                if (err.message.includes("Nickname already taken")) setStatus(statusEl, "Failed: Nickname is already taken by another Hero.", "error");
-                else if (err.message.includes("already voted") || err.message.includes("already has rights")) setStatus(statusEl, "Failed: Hero is already registered.", "error");
+                if (err.message && err.message.includes("Nickname already taken")) setStatus(statusEl, "Failed: Nickname is already taken by another Hero.", "error");
+                else if (err.message && (err.message.includes("already voted") || err.message.includes("already has rights"))) setStatus(statusEl, "Failed: Hero is already registered.", "error");
                 else setStatus(statusEl, "Ritual failed. See console.", "error");
+                
+                if (typeof handleWeb3Error === 'function') handleWeb3Error(err);
             } finally {
                 btn.disabled = false; btn.classList.remove("opacity-50");
+                btn.innerText = originalBtnText;
             }
         }
 
@@ -1643,6 +1650,8 @@
         let countdownInterval;
         async function generateDailyCode(event) {
             const btn = event.currentTarget;
+            const originalText = btn.innerText;
+            btn.innerText = "Generating...";
             btn.disabled = true;
             try {
                 const code = Math.random().toString(36).substring(2, 6).toUpperCase();
@@ -1652,6 +1661,7 @@
                 document.getElementById("daily-code-display").innerText = "Mining...";
                 await tx.wait();
 
+                // UI update: display the exact string that maps to the codeHash on-chain
                 document.getElementById("daily-code-display").innerText = code;
 
                 let timeLeft = 300;
@@ -1671,9 +1681,15 @@
                 }, 1000);
             } catch (err) {
                 console.error(err);
-                alert("Error: " + (err.message || err));
+                if (typeof handleWeb3Error === 'function') {
+                    handleWeb3Error(err);
+                } else {
+                    alert("Error: " + (err.message || err));
+                }
+            } finally {
+                btn.disabled = false;
+                btn.innerText = originalText;
             }
-            btn.disabled = false;
         }
 
         async function claimAttendance() {
