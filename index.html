@@ -823,6 +823,23 @@
             }
         }
 
+        function handleWeb3Error(error) {
+            console.error("Web3 Error Details:", error);
+            const errMsg = error.message || "";
+            const errCode = error.code || "";
+            const errString = JSON.stringify(error).toLowerCase();
+
+            // Check for gas/insufficient funds in various formats (raw RPC or ethers-wrapped)
+            if (errCode === 'INSUFFICIENT_FUNDS' || 
+                errCode === -32603 ||
+                errMsg.toLowerCase().includes("insufficient funds") || 
+                errString.includes("insufficient")) {
+                alert("Ошибка: Недостаточно газа (A0GI) для отправки транзакции. Пожалуйста, попросите преподавателя пополнить ваш баланс.");
+            } else {
+                alert("Произошла ошибка: " + (errMsg || error));
+            }
+        }
+
         async function refreshQuests() {
             const btn = document.getElementById("quest-refresh-btn");
             if (btn) {
@@ -1129,7 +1146,7 @@
                             </div>
                         </div>
                         <div class="mt-5 flex justify-end">
-                            <button onclick="voteFor(${p.index})" class="px-6 py-3 bg-slate-800 hover:bg-sky-600 hover:text-white transition-all rounded-xl font-bold border border-slate-600 hover:border-sky-400 shadow-lg hover:shadow-[0_0_15px_rgba(14,165,233,0.5)] text-sky-300 uppercase tracking-wider text-sm">
+                            <button onclick="voteFor(${p.index}, this)" class="px-6 py-3 bg-slate-800 hover:bg-sky-600 hover:text-white transition-all rounded-xl font-bold border border-slate-600 hover:border-sky-400 shadow-lg hover:shadow-[0_0_15px_rgba(14,165,233,0.5)] text-sky-300 uppercase tracking-wider text-sm">
                                 Vote
                             </button>
                         </div>
@@ -1222,8 +1239,15 @@
             else el.className = "mt-6 text-center text-sm font-bold text-amber-400 drop-shadow-[0_0_5px_rgba(245,158,11,0.5)] animate-pulse";
         }
 
-        async function voteFor(index) {
+        async function voteFor(index, btn) {
             const statusEl = document.getElementById("voting-status");
+            const originalText = btn ? btn.innerText : "Vote";
+            
+            if (btn) {
+                btn.disabled = true;
+                btn.innerText = "Voting...";
+            }
+
             setStatus(statusEl, "Channeling magic (Waiting for signature)...", "wait");
             try {
                 const tx = await voterContract.vote(index);
@@ -1232,11 +1256,23 @@
                 setStatus(statusEl, `Quest Completed! Vote cast successfully! 🎉`, "success");
                 await fetchProposals();
                 await fetchUserData();
-            loadPollTopics();
+                loadPollTopics();
             } catch (err) {
-                if (err.message.includes("Already voted")) setStatus(statusEl, "Failed: You have already completed a quest here.", "error");
-                else if (err.message.includes("Has no right to vote")) setStatus(statusEl, "Failed: You are not a registered Hero.", "error");
-                else setStatus(statusEl, "Spell fizzled. Transaction rejected.", "error");
+                console.error("Voting error:", err);
+                if (err.message && err.message.includes("Already voted")) {
+                    setStatus(statusEl, "Failed: You have already completed a quest here.", "error");
+                } else if (err.message && err.message.includes("Has no right to vote")) {
+                    setStatus(statusEl, "Failed: You are not a registered Hero.", "error");
+                } else {
+                    setStatus(statusEl, "Spell fizzled. Transaction rejected.", "error");
+                }
+                // Pass to universal handler for gas checks and alerts
+                handleWeb3Error(err);
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerText = originalText;
+                }
             }
         }
 
@@ -1657,21 +1693,8 @@
                 await fetchUserData();
                 loadPollTopics();
             } catch (err) {
-                console.error(err);
-                const errMsg = err.message || "";
-                const errCode = err.code;
-
-                if (errMsg.toLowerCase().includes("insufficient funds") || errCode === -32603) {
-                    alert("Ошибка: Недостаточно газа (A0GI) для отправки транзакции. Пожалуйста, попросите преподавателя пополнить ваш баланс.");
-                } else if (errMsg.includes("Time is up!")) {
-                    alert("Time is up!");
-                } else if (errMsg.includes("Invalid code")) {
-                    alert("Invalid code!");
-                } else if (errMsg.includes("Already claimed")) {
-                    alert("Already claimed!");
-                } else {
-                    alert("Error: " + (errMsg || err));
-                }
+                console.error("Attendance claim error:", err);
+                handleWeb3Error(err);
             } finally {
                 btn.disabled = false;
                 btn.innerText = originalText;
