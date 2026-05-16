@@ -835,9 +835,13 @@
                 (error && error.code === 'INSUFFICIENT_FUNDS') || 
                 (error && error.message && typeof error.message === 'string' && error.message.toLowerCase().includes('insufficient funds')) ||
                 errStr.includes('insufficient');
+                
+            const isCallException = (error && error.code === 'CALL_EXCEPTION');
 
             if (isGasError) {
                 alert("Ошибка: Недостаточно газа (A0GI) для отправки транзакции. Пожалуйста, попросите преподавателя пополнить ваш баланс.");
+            } else if (isCallException) {
+                alert("Ошибка: Транзакция отклонена смарт-контрактом. Возможно, этот студент уже зарегистрирован или действие уже было выполнено.");
             } else {
                 alert("Произошла ошибка: " + (error?.message || error));
             }
@@ -1339,18 +1343,19 @@
             const address = document.getElementById("reg-address").value.trim();
             const btn = document.getElementById("btn-register");
             const statusEl = document.getElementById("admin-status");
-
-            if (!nickname || !group || !ethers.utils.isAddress(address)) {
-                setStatus(statusEl, "Invalid summoning runes. Check fields.", "error");
-                return;
-            }
-
+            
             const originalBtnText = btn.innerText;
-            setStatus(statusEl, "Preparing summoning ritual (Sending 0.01 OGI)...", "wait");
-            btn.innerText = "Registering...";
-            btn.disabled = true; btn.classList.add("opacity-50");
 
             try {
+                if (!nickname || !group || !ethers.utils.isAddress(address)) {
+                    setStatus(statusEl, "Invalid summoning runes. Check fields.", "error");
+                    return;
+                }
+
+                setStatus(statusEl, "Preparing summoning ritual (Sending 0.01 OGI)...", "wait");
+                btn.innerText = "Registering...";
+                btn.disabled = true; btn.classList.add("opacity-50");
+
                 const overrides = await getGasOverrides("0.01");
                 const tx = await voterContract.registerStudent(address, nickname, group, overrides);
 
@@ -1358,7 +1363,7 @@
                 await tx.wait();
                 setStatus(statusEl, `Hero ${nickname} successfully summoned! 🎉`, "success");
                 
-                alert("Студент успешно зарегистрирован в блокчейне!");
+                alert("Студент успешно зарегистрирован!");
 
                 document.getElementById("reg-nickname").value = "";
                 document.getElementById("reg-group").value = "";
@@ -1367,11 +1372,8 @@
                 fetchStudentRegistry(); // Refresh registry table
 
             } catch (err) {
-                console.error(err);
-                if (err.message && err.message.includes("Nickname already taken")) setStatus(statusEl, "Failed: Nickname is already taken by another Hero.", "error");
-                else if (err.message && (err.message.includes("already voted") || err.message.includes("already has rights"))) setStatus(statusEl, "Failed: Hero is already registered.", "error");
-                else setStatus(statusEl, "Ritual failed. See console.", "error");
-                
+                console.error("registerStudent error:", err);
+                setStatus(statusEl, "Ritual failed.", "error");
                 if (typeof handleWeb3Error === 'function') handleWeb3Error(err);
             } finally {
                 btn.disabled = false; btn.classList.remove("opacity-50");
@@ -1460,29 +1462,32 @@
             const group = document.getElementById("qr-group").value.trim();
             const btn = document.getElementById("btn-qr-register");
             const statusEl = document.getElementById("admin-status");
-
-            if (!nickname || !group) {
-                setStatus(statusEl, "Fill in Nickname and Group first.", "error");
-                return;
-            }
-
-            btn.disabled = true;
-            btn.innerText = "Registering...";
-            setStatus(statusEl, "Summoning hero from QR...", "wait");
+            const originalBtnText = btn.innerText;
 
             try {
+                if (!nickname || !group) {
+                    setStatus(statusEl, "Fill in Nickname and Group first.", "error");
+                    return;
+                }
+
+                btn.disabled = true;
+                btn.innerText = "Registering...";
+                setStatus(statusEl, "Summoning hero from QR...", "wait");
+
                 const overrides = await getGasOverrides("0.01");
                 const tx = await voterContract.registerStudent(address, nickname, group, overrides);
                 await tx.wait();
                 setStatus(statusEl, `Hero ${nickname} summoned successfully! 🎉`, "success");
+                alert("Студент успешно зарегистрирован!");
                 resetQrScanner();
                 fetchStudentRegistry();
             } catch (err) {
-                console.error(err);
+                console.error("registerStudentFromQr error:", err);
                 setStatus(statusEl, "QR Summoning failed.", "error");
+                if (typeof handleWeb3Error === 'function') handleWeb3Error(err);
             } finally {
                 btn.disabled = false;
-                btn.innerText = "📲 Register On-chain (+ 0.01 OGI gas)";
+                btn.innerText = originalBtnText;
             }
         }
 
