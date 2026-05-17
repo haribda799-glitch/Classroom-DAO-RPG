@@ -1299,53 +1299,33 @@
             else el.className = "mt-6 text-center text-sm font-bold text-amber-400 drop-shadow-[0_0_5px_rgba(245,158,11,0.5)] animate-pulse";
         }
 
-        async function voteFor(index, btn) {
+                async function voteFor(index, btn) {
             const statusEl = document.getElementById("voting-status");
             const originalText = btn ? btn.innerText : "Vote";
-            
             try {
-                if (btn) {
-                    btn.disabled = true;
-                    btn.innerText = "Voting...";
-                }
-
+                if (btn) { btn.disabled = true; btn.innerText = "Voting..."; }
+                showLoader();
                 setStatus(statusEl, "Channeling magic (Waiting for signature)...", "wait");
-                
                 const overrides = await getGasOverrides("0");
                 const tx = await voterContract.vote(index, overrides);
-                
                 setStatus(statusEl, `Casting spell... Tx: ${tx.hash.substring(0, 10)}...`, "wait");
-                
                 await tx.wait();
-                
                 setStatus(statusEl, `Quest Completed! Vote cast successfully! 🎉`, "success");
+                showToast("Голос успешно учтен!", false);
                 await fetchProposals();
                 await fetchUserData();
                 loadPollTopics();
             } catch (err) {
                 console.error("Voting error:", err);
-                if (err.message && err.message.includes("Already voted")) {
-                    setStatus(statusEl, "Failed: You have already completed a quest here.", "error");
-                } else if (err.message && err.message.includes("Has no right to vote")) {
-                    setStatus(statusEl, "Failed: You are not a registered Hero.", "error");
-                } else {
-                    setStatus(statusEl, "Spell fizzled. Transaction rejected.", "error");
-                }
-                
-                if (typeof handleWeb3Error === 'function') {
-                    handleWeb3Error(err);
-                } else {
-                    showToast("Произошла ошибка: " + (err.message || err), true);
-                }
+                if (typeof handleWeb3Error === 'function') handleWeb3Error(err);
+                else showToast("Произошла ошибка: " + (err?.message || err), true);
             } finally {
-                if (btn) {
-                    btn.disabled = false;
-                    btn.innerText = originalText;
-                }
+                hideLoader();
+                if (btn) { btn.disabled = false; btn.innerText = originalText; }
             }
         }
 
-        async function togglePrivacy() {
+                async function togglePrivacy() {
             const toggle = document.getElementById("privacy-toggle");
             const statusEl = document.getElementById("privacy-status");
             const newState = toggle.checked;
@@ -1355,18 +1335,24 @@
             statusEl.className = "text-xs font-bold text-amber-400 animate-pulse";
 
             try {
+                showLoader();
                 const tx = await voterContract.setPrivacy(newState);
                 statusEl.innerText = "Mining...";
                 await tx.wait();
                 statusEl.innerText = newState ? "Address Hidden" : "Address Visible";
                 statusEl.className = "text-xs font-bold text-emerald-400";
+                showToast("Настройки приватности обновлены!", false);
                 setTimeout(() => statusEl.classList.add("hidden"), 3000);
-            } catch (e) {
-                console.error(e);
+            } catch (err) {
+                console.error(err);
                 toggle.checked = !newState; // revert
                 statusEl.innerText = "Failed";
                 statusEl.className = "text-xs font-bold text-rose-400";
                 setTimeout(() => statusEl.classList.add("hidden"), 3000);
+                if (typeof handleWeb3Error === 'function') handleWeb3Error(err);
+                else showToast("Error: " + (err.message || err), true);
+            } finally {
+                hideLoader();
             }
         }
 
@@ -1634,7 +1620,7 @@
             document.body.removeChild(link);
         }
 
-        async function rewardStudent(amount) {
+                async function rewardStudent(amount) {
             const address = document.getElementById("reward-address").value.trim();
             const reason = document.getElementById("reward-reason").value.trim();
             const statusEl = document.getElementById("admin-status");
@@ -1645,14 +1631,20 @@
 
             setStatus(statusEl, `Bestowing +${amount} XP to ${address.substring(0, 6)}...`, "wait");
             try {
+                showLoader();
                 const overrides = await getGasOverrides("0");
                 const tx = await voterContract.rewardStudent(address, amount, reason, overrides);
                 setStatus(statusEl, `Sending loot... Tx: ${tx.hash.substring(0, 10)}...`, "wait");
                 await tx.wait();
                 setStatus(statusEl, `Loot successfully bestowed! 🎉`, "success");
+                showToast("Награда успешно начислена!", false);
             } catch (err) {
                 console.error(err);
                 setStatus(statusEl, "Bestowal failed. Did you approve SGC allowance?", "error");
+                if (typeof handleWeb3Error === 'function') handleWeb3Error(err);
+                else showToast("Error: " + (err.message || err), true);
+            } finally {
+                hideLoader();
             }
         }
 
@@ -1676,68 +1668,73 @@
             await rewardStudent(parseInt(amountStr));
         }
 
-        async function rewardGroupCustom() {
+                async function rewardGroupCustom() {
             const groupName = document.getElementById("reward-group").value.trim();
             const amountStr = document.getElementById("reward-custom-amount").value.trim();
             const reason = document.getElementById("reward-reason").value.trim();
             const statusEl = document.getElementById("admin-status");
-
-            if (!groupName || !amountStr) {
-                setStatus(statusEl, "Need Group Name and Custom Amount.", "error");
-                return;
-            }
-
+            
+            if (!groupName) return showToast("Enter Target Group ID", true);
+            if (!amountStr) return showToast("Enter Custom Amount", true);
+            
             const amount = parseInt(amountStr);
 
-            setStatus(statusEl, `Finding Heroes in Group ${groupName}...`, "wait");
-
             try {
+                showLoader();
+                setStatus(statusEl, `Finding members of group ${groupName}...`, "wait");
+                
                 let countRes = await voterContract.get_student_count();
                 let count = countRes.toNumber();
                 let targetAddresses = [];
+                
                 for (let i = 0; i < count; i++) {
                     const sAddr = await voterContract.student_addresses(i);
                     const sData = await voterContract.students(sAddr);
-                    if (sData[1] === groupName) {
-                        targetAddresses.push(sAddr);
-                    }
+                    if (sData[1] === groupName) targetAddresses.push(sAddr);
                 }
-
+                
                 if (targetAddresses.length === 0) {
-                    setStatus(statusEl, `No Heroes found in Group ${groupName}.`, "error");
+                    setStatus(statusEl, `No students found in group ${groupName}`, "error");
                     return;
                 }
-
-                setStatus(statusEl, `Found ${targetAddresses.length} Heroes. Bestowing +${amount} XP...`, "wait");
+                
+                setStatus(statusEl, `Bestowing +${amount} XP to ${targetAddresses.length} students...`, "wait");
+                
                 const overrides = await getGasOverrides("0");
                 const tx = await voterContract.rewardBatch(targetAddresses, amount, reason, overrides);
                 setStatus(statusEl, `Sending group loot... Tx: ${tx.hash.substring(0, 10)}...`, "wait");
+                
                 await tx.wait();
-                setStatus(statusEl, `Group loot bestowed to ${targetAddresses.length} Heroes! 🎉`, "success");
+                setStatus(statusEl, `Group loot bestowed! 🎉`, "success");
+                showToast("Групповая награда успешно начислена!", false);
             } catch (err) {
                 console.error(err);
                 setStatus(statusEl, "Group bestowal failed.", "error");
+                if (typeof handleWeb3Error === 'function') handleWeb3Error(err);
+                else showToast("Error: " + (err.message || err), true);
+            } finally {
+                hideLoader();
             }
         }
 
         // Market logic
 
         let countdownInterval;
-        async function generateDailyCode(event) {
+                async function generateDailyCode(event) {
             const btn = event.currentTarget;
             const originalText = btn.innerText;
-            btn.innerText = "Generating...";
-            btn.disabled = true;
             try {
+                btn.innerText = "Generating...";
+                btn.disabled = true;
+                showLoader();
                 const code = Math.random().toString(36).substring(2, 6).toUpperCase();
-                // ethers.utils.id computes keccak256 of the UTF8 string
                 const codeHash = ethers.utils.id(code);
                 const tx = await voterContract.generateDailyCode(codeHash, await getGasOverrides("0"));
                 document.getElementById("daily-code-display").innerText = "Mining...";
                 await tx.wait();
 
-                // UI update: display the exact string that maps to the codeHash on-chain
                 document.getElementById("daily-code-display").innerText = code;
+                showToast("Код успешно сгенерирован!", false);
 
                 let timeLeft = 300;
                 clearInterval(countdownInterval);
@@ -1756,18 +1753,16 @@
                 }, 1000);
             } catch (err) {
                 console.error(err);
-                if (typeof handleWeb3Error === 'function') {
-                    handleWeb3Error(err);
-                } else {
-                    showToast("Error: " + (err.message || err), true);
-                }
+                if (typeof handleWeb3Error === 'function') handleWeb3Error(err);
+                else showToast("Error: " + (err.message || err), true);
             } finally {
+                hideLoader();
                 btn.disabled = false;
                 btn.innerText = originalText;
             }
         }
 
-        async function claimAttendance() {
+                async function claimAttendance() {
             const code = document.getElementById("attendance-code-input").value.trim().toUpperCase();
             if (!code) return showToast("Enter code", true);
             
@@ -1780,6 +1775,7 @@
                 document.getElementById("voting-status").innerText = "Channeling magic (Waiting for signature)...";
                 document.getElementById("voting-status").className = "mt-6 text-center text-sm font-bold text-amber-400 animate-pulse";
 
+                showLoader();
                 const overrides = await getGasOverrides("0");
                 const tx = await voterContract.claimAttendance(code, overrides);
                 
@@ -1790,23 +1786,23 @@
                 document.getElementById("voting-status").innerText = "Attendance Claimed! +50 XP 🎉";
                 document.getElementById("voting-status").className = "mt-6 text-center text-sm font-bold text-emerald-400";
                 document.getElementById("attendance-code-input").value = "";
+                showToast("Посещаемость подтверждена! Награда начислена.", false);
                 await fetchUserData();
                 loadPollTopics();
             } catch (err) {
                 console.error("Attendance claim error:", err);
-                if (typeof handleWeb3Error === 'function') {
-                    handleWeb3Error(err);
-                } else {
-                    showToast("Произошла ошибка: " + (err.message || err), true);
-                }
+                if (typeof handleWeb3Error === 'function') handleWeb3Error(err);
+                else showToast("Произошла ошибка: " + (err.message || err), true);
             } finally {
+                hideLoader();
                 btn.disabled = false;
                 btn.innerText = originalText;
             }
         }
 
-        async function buyItem(itemId, itemName, price) {
+                async function buyItem(itemId, itemName, price) {
             try {
+                showLoader();
                 const priceWei = ethers.utils.parseUnits(price.toString(), 18);
                 const allowance = await tokenContract.allowance(userAddress, VOTER_ADDRESS);
                 if (allowance.lt(priceWei)) {
@@ -1822,12 +1818,15 @@
                 console.log("Transaction parameters:", params);
                 const tx = await voterContract.buyItem(itemId, params);
                 await tx.wait();
-                showToast(`Successfully purchased ${itemName}! 🎉`, false);
+                showToast("Покупка успешно совершена!", false);
                 await fetchUserData();
                 loadPollTopics();
             } catch (err) {
                 console.error("FULL ERROR OBJECT:", err);
-                showToast("Error: " + (err.message || err), true);
+                if (typeof handleWeb3Error === 'function') handleWeb3Error(err);
+                else showToast("Error: " + (err.message || err), true);
+            } finally {
+                hideLoader();
             }
         }
 
@@ -1848,8 +1847,9 @@
             }
         }
 
-        async function savePollTopics() {
+                async function savePollTopics() {
             const btn = document.querySelector('button[onclick="savePollTopics()"]');
+            const originalText = btn ? btn.innerText : "Save Topics";
             if (btn) {
                 btn.innerText = "Saving...";
                 btn.disabled = true;
@@ -1860,40 +1860,30 @@
                 topics.push(el ? el.value.trim() : "");
             }
             
-            let txHashReceived = false;
-            let timeoutId = setTimeout(() => {
-                if (!txHashReceived) {
-                    showToast("Transaction timeout. Please try again.", true);
-                    if (btn) {
-                        btn.innerText = "Save Quests";
-                        btn.disabled = false;
-                    }
-                }
-            }, 30000);
-
             try {
+                showLoader();
                 const params = await getGasOverrides("0");
-                showToast("Check MetaMask now!", false);
                 const tx = await voterContract.setQuestNames(topics, params);
-                txHashReceived = true;
-                clearTimeout(timeoutId);
                 console.log("Transaction Hash:", tx.hash);
+                await tx.wait();
 
                 if (btn) btn.innerText = "Confirmed! Reloading...";
-                showToast("Transaction successful! Reloading the realm...", false);
+                showToast("Названия квестов обновлены!", false);
                 setTimeout(() => window.location.reload(), 2000);
             } catch (err) {
-                clearTimeout(timeoutId);
                 console.error("FULL ERROR OBJECT:", err);
-                showToast("Error saving quests: " + (err.message || err), true);
+                if (typeof handleWeb3Error === 'function') handleWeb3Error(err);
+                else showToast("Error saving quests: " + (err.message || err), true);
                 if (btn) {
-                    btn.innerText = "Save Quests";
-                    btn.disabled = false;
+                    btn.innerText = originalText;
                 }
+            } finally {
+                hideLoader();
+                if (btn) btn.disabled = false;
             }
         }
 
-        async function startNewRound() {
+                async function startNewRound() {
             const btn = document.getElementById("start-round-btn");
             if (!confirm(`Start a new voting round? This will reset all votes. New Round #${currentPollId + 1} will begin.`)) return;
 
@@ -1903,28 +1893,23 @@
                 btn.disabled = true;
             }
 
-            let txHashReceived = false;
-            const timeoutId = setTimeout(() => {
-                if (!txHashReceived) {
-                    showToast("Transaction timeout. Please check MetaMask.", true);
-                    if (btn) { btn.style.transform = ""; btn.style.transition = ""; btn.disabled = false; }
-                }
-            }, 30000);
-
             try {
+                showLoader();
                 const params = await getGasOverrides("0");
-                showToast("Check MetaMask now!", false);
                 const tx = await voterContract.startNewRound(params);
-                txHashReceived = true;
-                clearTimeout(timeoutId);
                 console.log("startNewRound tx hash:", tx.hash);
-                showToast(`New round started! TX: ${tx.hash}\n\nReloading the realm...`, false);
+                await tx.wait();
+                
+                showToast("Новый раунд успешно начат!", false);
                 setTimeout(() => window.location.reload(), 2000);
             } catch (err) {
-                clearTimeout(timeoutId);
                 console.error("startNewRound error:", err);
-                showToast("Error starting round: " + (err.message || err), true);
-                if (btn) { btn.style.transform = ""; btn.style.transition = ""; btn.disabled = false; }
+                if (typeof handleWeb3Error === 'function') handleWeb3Error(err);
+                else showToast("Error starting round: " + (err.message || err), true);
+                if (btn) { btn.style.transform = ""; btn.style.transition = ""; }
+            } finally {
+                hideLoader();
+                if (btn) btn.disabled = false;
             }
         }
 
@@ -2007,50 +1992,42 @@
             await renderMarketItems();
         }
 
-        async function addMarketItem() {
+                async function addMarketItem() {
             const name = document.getElementById("market-item-name").value.trim();
             const price = document.getElementById("market-item-price").value.trim();
             if (!name || !price) return showToast("Enter item name and price.", true);
             const btn = document.querySelector('button[onclick="addMarketItem()"]');
-            btn.innerText = "Adding...";
-            btn.disabled = true;
-
-            let txHashReceived = false;
-            let timeoutId = setTimeout(() => {
-                if (!txHashReceived) {
-                    showToast("Transaction timeout. Please try again.", true);
-                    btn.innerText = "Add Item";
-                    btn.disabled = false;
-                }
-            }, 30000);
+            const originalText = btn ? btn.innerText : "Add Item";
+            if (btn) {
+                btn.innerText = "Adding...";
+                btn.disabled = true;
+            }
 
             try {
+                showLoader();
                 console.log("Initiating transaction with account:", userAddress);
                 const params = await getGasOverrides("0");
                 console.log("Final TX Object:", { method: "addMarketItem", args: [name, price], overrides: params });
 
-                showToast("Check MetaMask now!", false);
-
                 const tx = await voterContract.addMarketItem(name, price, params);
-                txHashReceived = true;
-                clearTimeout(timeoutId);
                 console.log("Transaction Hash:", tx.hash);
+                await tx.wait();
 
-                // Hard reload — only reliable fix for MetaMask Mobile provider cache
-                btn.innerText = "Confirmed! Reloading...";
-                showToast("Transaction successful! Reloading the realm...", false);
+                if (btn) btn.innerText = "Confirmed! Reloading...";
+                showToast("Товар добавлен в магазин!", false);
                 setTimeout(() => window.location.reload(), 2000);
-
             } catch (err) {
-                clearTimeout(timeoutId);
                 console.error("FULL ERROR OBJECT:", err);
-                showToast("Error: " + (err.message || err), true);
-                btn.innerText = "Add Item";
-                btn.disabled = false;
+                if (typeof handleWeb3Error === 'function') handleWeb3Error(err);
+                else showToast("Error: " + (err.message || err), true);
+                if (btn) btn.innerText = originalText;
+            } finally {
+                hideLoader();
+                if (btn) btn.disabled = false;
             }
         }
 
-        async function removeMarketItem(id) {
+                async function removeMarketItem(id) {
             const idStr = String(id);
             console.log('removeMarketItem called with ID:', idStr);
             if (!confirm('Are you sure you want to remove this item?')) return;
@@ -2059,41 +2036,34 @@
                 return document.querySelector(`.remove-item-btn[data-id="${idStr}"]`);
             }
             const btnInitial = getBtn();
+            const originalText = btnInitial ? btnInitial.innerText : "Remove";
             if (btnInitial) { btnInitial.innerText = 'Removing...'; btnInitial.disabled = true; }
 
-            let txHashReceived = false;
-            const safetyTimer = setTimeout(() => {
-                if (!txHashReceived) {
-                    showToast('Transaction timeout (60s). Check MetaMask or the explorer.', true);
-                    const b = getBtn();
-                    if (b) { b.innerText = 'Remove'; b.disabled = false; }
-                }
-            }, 60000);
-
             try {
+                showLoader();
                 console.log('Initiating transaction with account:', userAddress);
                 const params = await getGasOverrides('0');
                 console.log('Final TX Object:', { method: 'setMarketItemActive', args: [idStr, false], overrides: params });
 
-                showToast('Check MetaMask now!', false);
-
                 const tx = await voterContract.setMarketItemActive(idStr, false, params);
-                txHashReceived = true;
-                clearTimeout(safetyTimer);
                 console.log('Got TX hash:', tx.hash);
+                await tx.wait();
 
-                // Hard reload — only reliable fix for MetaMask Mobile provider cache
                 const b = getBtn();
                 if (b) b.innerText = 'Confirmed! Reloading...';
-                showToast('Transaction successful! Reloading the realm...', false);
+                showToast("Статус товара обновлен!", false);
                 setTimeout(() => window.location.reload(), 2000);
 
             } catch (err) {
-                clearTimeout(safetyTimer);
                 console.error('FULL ERROR OBJECT:', err);
-                showToast('Transaction Failed: ' + (err.message || err), true);
+                if (typeof handleWeb3Error === 'function') handleWeb3Error(err);
+                else showToast('Transaction Failed: ' + (err.message || err), true);
                 const b = getBtn();
-                if (b) { b.innerText = 'Remove'; b.disabled = false; }
+                if (b) b.innerText = originalText;
+            } finally {
+                hideLoader();
+                const b = getBtn();
+                if (b) b.disabled = false;
             }
         }
 
