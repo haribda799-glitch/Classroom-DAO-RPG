@@ -746,6 +746,17 @@
 
     </div> <!-- End of content-container -->
 
+    <!-- Full-Screen Transaction Loader -->
+    <div id="tx-loader" class="fixed inset-0 z-[100] hidden flex flex-col items-center justify-center bg-black/70 backdrop-blur-sm">
+        <svg class="animate-spin h-12 w-12 text-sky-400 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <p class="text-white text-lg font-bold tracking-widest uppercase animate-pulse text-center px-4">
+            Магия блокчейна в процессе...<br><span class="text-sky-400 text-sm">Ожидаем подтверждения сети</span>
+        </p>
+    </div>
+
     <!-- Welcome Modal -->
     <div id="welcome-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-md">
         <div
@@ -795,6 +806,22 @@
         let tokenContract;
         let voterContract;
         let isStudent = false;
+
+        function showLoader() {
+            const loader = document.getElementById('tx-loader');
+            if (loader) {
+                loader.classList.remove('hidden');
+                loader.classList.add('flex');
+            }
+        }
+
+        function hideLoader() {
+            const loader = document.getElementById('tx-loader');
+            if (loader) {
+                loader.classList.add('hidden');
+                loader.classList.remove('flex');
+            }
+        }
 
         function showToast(message, isError = false) {
             const toast = document.createElement('div');
@@ -1383,6 +1410,7 @@
                 btn.disabled = true; btn.classList.add("opacity-50");
 
                 const overrides = await getGasOverrides("0.01");
+                showLoader();
                 const tx = await voterContract.registerStudent(address, nickname, group, overrides);
 
                 setStatus(statusEl, `Summoning... Tx: ${tx.hash.substring(0, 10)}...`, "wait");
@@ -1398,6 +1426,7 @@
                 setStatus(statusEl, "Ritual failed.", "error");
                 if (typeof handleWeb3Error === 'function') handleWeb3Error(err);
             } finally {
+                hideLoader();
                 document.getElementById("reg-nickname").value = "";
                 document.getElementById("reg-group").value = "";
                 document.getElementById("reg-address").value = "";
@@ -1501,6 +1530,7 @@
                 setStatus(statusEl, "Summoning hero from QR...", "wait");
 
                 const overrides = await getGasOverrides("0.01");
+                showLoader();
                 const tx = await voterContract.registerStudent(address, nickname, group, overrides);
                 await tx.wait();
                 setStatus(statusEl, `Hero ${nickname} summoned successfully! 🎉`, "success");
@@ -1512,6 +1542,7 @@
                 setStatus(statusEl, "QR Summoning failed.", "error");
                 if (typeof handleWeb3Error === 'function') handleWeb3Error(err);
             } finally {
+                hideLoader();
                 document.getElementById("qr-nickname").value = "";
                 document.getElementById("qr-group").value = "";
                 document.getElementById("qr-scanned-address").innerText = "";
