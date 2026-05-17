@@ -62,6 +62,12 @@ struct MarketItem:
     price: uint256
     isActive: bool
 
+struct PurchaseLog:
+    student: address
+    item_name: String[64]
+    price: uint256
+    timestamp: uint256
+
 chairperson: public(address)
 voters: public(HashMap[address, Voter])
 proposals: public(DynArray[Proposal, 128])
@@ -78,6 +84,9 @@ has_received_reward: public(HashMap[address, bool])
 active_code_hash: public(bytes32)
 code_expiration_time: public(uint256)
 has_claimed_attendance: public(HashMap[address, bytes32])
+
+student_inventory: public(HashMap[address, DynArray[uint256, 50]])
+market_purchases: public(DynArray[PurchaseLog, 1024])
 
 marketItems: public(HashMap[uint256, MarketItem])
 marketItemCount: public(uint256)
@@ -253,6 +262,14 @@ def buyItem(itemId: uint256):
     success: bool = extcall ERC20(self.token_address).transferFrom(msg.sender, self.chairperson_wallet, price_wei)
     assert success, "Transfer failed"
     
+    self.student_inventory[msg.sender].append(itemId)
+    self.market_purchases.append(PurchaseLog({
+        student: msg.sender,
+        item_name: item.name,
+        price: item.price,
+        timestamp: block.timestamp
+    }))
+    
     log ItemPurchased(student=msg.sender, item_name=item.name, price=item.price)
 
 @external
@@ -362,3 +379,13 @@ def winner_name() -> String[32]:
 @view
 def get_student_count() -> uint256:
     return len(self.student_addresses)
+
+@external
+@view
+def get_student_inventory(student: address) -> DynArray[uint256, 50]:
+    return self.student_inventory[student]
+
+@external
+@view
+def get_market_purchases() -> DynArray[PurchaseLog, 1024]:
+    return self.market_purchases
