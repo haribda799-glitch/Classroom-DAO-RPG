@@ -836,15 +836,23 @@
                 (error && error.message && typeof error.message === 'string' && error.message.toLowerCase().includes('insufficient funds')) ||
                 errStr.includes('insufficient');
                 
-            const isCallException = (error && error.code === 'CALL_EXCEPTION');
+            const code = error?.code;
+            const message = error?.message || "";
+            const reason = error?.reason || "";
+            
+            const isRevert = code === 'CALL_EXCEPTION' || message.includes('CALL_EXCEPTION') || reason.includes('transaction failed');
 
             if (isGasError) {
                 alert("Ошибка: Недостаточно газа (A0GI) для отправки транзакции. Пожалуйста, попросите преподавателя пополнить ваш баланс.");
-            } else if (isCallException) {
-                alert("Ошибка: Транзакция отклонена смарт-контрактом. Возможно, этот студент уже зарегистрирован или действие уже было выполнено.");
-            } else {
-                alert("Произошла ошибка: " + (error?.message || error));
+                return;
             }
+            
+            if (isRevert) {
+                alert("Ошибка: Смарт-контракт отклонил транзакцию. Возможно, этот студент уже зарегистрирован.");
+                return;
+            }
+
+            alert("Произошла ошибка: " + (error?.message || error));
         }
 
         async function refreshQuests() {
@@ -1365,10 +1373,6 @@
                 
                 alert("Студент успешно зарегистрирован!");
 
-                document.getElementById("reg-nickname").value = "";
-                document.getElementById("reg-group").value = "";
-                document.getElementById("reg-address").value = "";
-                
                 fetchStudentRegistry(); // Refresh registry table
 
             } catch (err) {
@@ -1376,8 +1380,12 @@
                 setStatus(statusEl, "Ritual failed.", "error");
                 if (typeof handleWeb3Error === 'function') handleWeb3Error(err);
             } finally {
+                document.getElementById("reg-nickname").value = "";
+                document.getElementById("reg-group").value = "";
+                document.getElementById("reg-address").value = "";
+                
                 btn.disabled = false; btn.classList.remove("opacity-50");
-                btn.innerText = originalBtnText;
+                btn.innerText = "Enroll & Grant 0.01 OGI";
             }
         }
 
@@ -1486,8 +1494,12 @@
                 setStatus(statusEl, "QR Summoning failed.", "error");
                 if (typeof handleWeb3Error === 'function') handleWeb3Error(err);
             } finally {
+                document.getElementById("qr-nickname").value = "";
+                document.getElementById("qr-group").value = "";
+                document.getElementById("qr-scanned-address").innerText = "";
+                
                 btn.disabled = false;
-                btn.innerText = originalBtnText;
+                btn.innerText = "📲 Register On-chain (+ 0.01 OGI gas)";
             }
         }
 
