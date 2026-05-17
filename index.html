@@ -991,10 +991,14 @@
                             method: 'wallet_addEthereumChain',
                             params: [{
                                 chainId: CHAIN_ID_HEX,
-                                chainName: '0G Galileo Testnet',
+                                chainName: '0G-Testnet-Galileo',
                                 rpcUrls: ['https://evmrpc-testnet.0g.ai'],
-                                nativeCurrency: { name: 'A0GI', symbol: 'A0GI', decimals: 18 },
-                                blockExplorerUrls: ['https://scan-testnet.0g.ai']
+                                nativeCurrency: { 
+                                    name: '0G', 
+                                    symbol: '0G', 
+                                    decimals: 18 
+                                },
+                                blockExplorerUrls: ['https://chainscan-galileo.0g.ai']
                             }],
                         });
                     } catch (addError) {
