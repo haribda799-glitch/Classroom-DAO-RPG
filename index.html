@@ -1263,7 +1263,8 @@
 
 
         async function loadStudentInventory() {
-            if (!readOnlyVoterContract || !userAddress) return;
+            if (!userAddress) return;
+            getReadOnlyContract();
 
             const btn = document.getElementById("inventory-refresh-btn");
             if (btn) {
@@ -2169,7 +2170,7 @@
         // ─── Fetch active items via read-only RPC ────────────────────────────────────
 
         async function loadMarketLogs() {
-            if (!readOnlyVoterContract) return;
+            getReadOnlyContract();
 
             const btn = document.getElementById("logs-refresh-btn");
             if (btn) {
