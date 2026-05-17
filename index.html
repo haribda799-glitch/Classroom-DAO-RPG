@@ -815,6 +815,13 @@
             }
         }
 
+        function waitWithTimeout(tx, timeoutMs = 30000) {
+            return Promise.race([
+                tx.wait(),
+                new Promise((_, reject) => setTimeout(() => reject(new Error("TX_TIMEOUT")), timeoutMs))
+            ]);
+        }
+
         function hideLoader() {
             const loader = document.getElementById('tx-loader');
             if (loader) {
@@ -825,7 +832,7 @@
 
         function showToast(message, isError = false) {
             const toast = document.createElement('div');
-            toast.className = `fixed top-4 right-4 z-[60] px-6 py-3 rounded-xl font-bold text-white shadow-lg transition-all duration-300 transform translate-y-0 opacity-100 ${isError ? 'bg-red-500 shadow-[0_0_15px_rgba(239,68,68,0.5)]' : 'bg-green-500 shadow-[0_0_15px_rgba(34,197,94,0.5)]'}`;
+            toast.className = `fixed top-4 right-4 z-[60] px-6 py-3 rounded-xl font-bold text-white shadow-lg transition-all duration-300 transform translate-y-0 opacity-100 ${isError === 'warning' ? 'bg-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.5)]' : (isError ? 'bg-red-500 shadow-[0_0_15px_rgba(239,68,68,0.5)]' : 'bg-green-500 shadow-[0_0_15px_rgba(34,197,94,0.5)]')}`;
             toast.innerText = message;
             document.body.appendChild(toast);
             
@@ -881,6 +888,11 @@
                 (error && error.message && typeof error.message === 'string' && error.message.toLowerCase().includes('insufficient funds')) ||
                 errStr.includes('insufficient');
                 
+            if (error?.message === "TX_TIMEOUT") {
+                showToast("Транзакция отправлена, но сеть отвечает слишком долго. Проверьте статус в кошельке.", "warning");
+                return;
+            }
+
             const code = error?.code;
             const message = error?.message || "";
             const reason = error?.reason || "";
@@ -1309,7 +1321,7 @@
                 const overrides = await getGasOverrides("0");
                 const tx = await voterContract.vote(index, overrides);
                 setStatus(statusEl, `Casting spell... Tx: ${tx.hash.substring(0, 10)}...`, "wait");
-                await tx.wait();
+                await waitWithTimeout(tx);
                 setStatus(statusEl, `Quest Completed! Vote cast successfully! 🎉`, "success");
                 showToast("Голос успешно учтен!", false);
                 await fetchProposals();
@@ -1338,7 +1350,7 @@
                 showLoader();
                 const tx = await voterContract.setPrivacy(newState);
                 statusEl.innerText = "Mining...";
-                await tx.wait();
+                await waitWithTimeout(tx);
                 statusEl.innerText = newState ? "Address Hidden" : "Address Visible";
                 statusEl.className = "text-xs font-bold text-emerald-400";
                 showToast("Настройки приватности обновлены!", false);
@@ -1400,7 +1412,7 @@
                 const tx = await voterContract.registerStudent(address, nickname, group, overrides);
 
                 setStatus(statusEl, `Summoning... Tx: ${tx.hash.substring(0, 10)}...`, "wait");
-                await tx.wait();
+                await waitWithTimeout(tx);
                 setStatus(statusEl, `Hero ${nickname} successfully summoned! 🎉`, "success");
                 
                 showToast("Студент успешно зарегистрирован!", false);
@@ -1518,7 +1530,7 @@
                 const overrides = await getGasOverrides("0.01");
                 showLoader();
                 const tx = await voterContract.registerStudent(address, nickname, group, overrides);
-                await tx.wait();
+                await waitWithTimeout(tx);
                 setStatus(statusEl, `Hero ${nickname} summoned successfully! 🎉`, "success");
                 showToast("Студент успешно зарегистрирован!", false);
                 resetQrScanner();
@@ -1592,7 +1604,7 @@
             try {
                 const txParams = { to: address, value: ethers.utils.parseEther("0.1") };
                 const tx = await signer.sendTransaction(txParams);
-                await tx.wait();
+                await waitWithTimeout(tx);
                 btn.innerText = "✅ Sent";
                 setTimeout(() => { btn.innerText = originalText; btn.disabled = false; }, 3000);
             } catch (err) {
@@ -1635,7 +1647,7 @@
                 const overrides = await getGasOverrides("0");
                 const tx = await voterContract.rewardStudent(address, amount, reason, overrides);
                 setStatus(statusEl, `Sending loot... Tx: ${tx.hash.substring(0, 10)}...`, "wait");
-                await tx.wait();
+                await waitWithTimeout(tx);
                 setStatus(statusEl, `Loot successfully bestowed! 🎉`, "success");
                 showToast("Награда успешно начислена!", false);
             } catch (err) {
@@ -1704,7 +1716,7 @@
                 const tx = await voterContract.rewardBatch(targetAddresses, amount, reason, overrides);
                 setStatus(statusEl, `Sending group loot... Tx: ${tx.hash.substring(0, 10)}...`, "wait");
                 
-                await tx.wait();
+                await waitWithTimeout(tx);
                 setStatus(statusEl, `Group loot bestowed! 🎉`, "success");
                 showToast("Групповая награда успешно начислена!", false);
             } catch (err) {
@@ -1731,7 +1743,7 @@
                 const codeHash = ethers.utils.id(code);
                 const tx = await voterContract.generateDailyCode(codeHash, await getGasOverrides("0"));
                 document.getElementById("daily-code-display").innerText = "Mining...";
-                await tx.wait();
+                await waitWithTimeout(tx);
 
                 document.getElementById("daily-code-display").innerText = code;
                 showToast("Код успешно сгенерирован!", false);
@@ -1781,7 +1793,7 @@
                 
                 document.getElementById("voting-status").innerText = `Claiming attendance... Tx: ${tx.hash.substring(0, 10)}...`;
                 
-                await tx.wait();
+                await waitWithTimeout(tx);
                 
                 document.getElementById("voting-status").innerText = "Attendance Claimed! +50 XP 🎉";
                 document.getElementById("voting-status").className = "mt-6 text-center text-sm font-bold text-emerald-400";
@@ -1809,7 +1821,7 @@
                     showToast("Approving SGC for purchase...", false);
                     const overrides = await getGasOverrides("0");
                     const approveTx = await tokenContract.approve(VOTER_ADDRESS, ethers.constants.MaxUint256, overrides);
-                    await approveTx.wait();
+                    await waitWithTimeout(approveTx);
                 }
 
                 showToast(`Purchasing ${itemName} for ${price} SGC...`, false);
@@ -1817,7 +1829,7 @@
                 const params = await getGasOverrides("0");
                 console.log("Transaction parameters:", params);
                 const tx = await voterContract.buyItem(itemId, params);
-                await tx.wait();
+                await waitWithTimeout(tx);
                 showToast("Покупка успешно совершена!", false);
                 await fetchUserData();
                 loadPollTopics();
@@ -1865,7 +1877,7 @@
                 const params = await getGasOverrides("0");
                 const tx = await voterContract.setQuestNames(topics, params);
                 console.log("Transaction Hash:", tx.hash);
-                await tx.wait();
+                await waitWithTimeout(tx);
 
                 if (btn) btn.innerText = "Confirmed! Reloading...";
                 showToast("Названия квестов обновлены!", false);
@@ -1898,7 +1910,7 @@
                 const params = await getGasOverrides("0");
                 const tx = await voterContract.startNewRound(params);
                 console.log("startNewRound tx hash:", tx.hash);
-                await tx.wait();
+                await waitWithTimeout(tx);
                 
                 showToast("Новый раунд успешно начат!", false);
                 setTimeout(() => window.location.reload(), 2000);
@@ -2011,7 +2023,7 @@
 
                 const tx = await voterContract.addMarketItem(name, price, params);
                 console.log("Transaction Hash:", tx.hash);
-                await tx.wait();
+                await waitWithTimeout(tx);
 
                 if (btn) btn.innerText = "Confirmed! Reloading...";
                 showToast("Товар добавлен в магазин!", false);
@@ -2047,7 +2059,7 @@
 
                 const tx = await voterContract.setMarketItemActive(idStr, false, params);
                 console.log('Got TX hash:', tx.hash);
-                await tx.wait();
+                await waitWithTimeout(tx);
 
                 const b = getBtn();
                 if (b) b.innerText = 'Confirmed! Reloading...';
