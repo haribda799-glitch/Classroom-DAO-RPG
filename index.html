@@ -365,6 +365,21 @@
     </div>
 
     
+    <!-- Claim Attendance Panel -->
+    <div id="claim-attendance-block"
+        class="glass-panel w-full max-w-5xl rounded-2xl p-6 border border-sky-500/20 mt-6 hidden flex-col md:flex-row items-center gap-4">
+        <div class="flex-1">
+            <h3 class="text-xl font-bold text-sky-400">Claim Attendance</h3>
+            <p class="text-sm text-slate-400">Enter the Beacon Code provided by the Game Master.</p>
+        </div>
+        <div class="flex gap-2 w-full md:w-auto">
+            <input type="text" id="attendance-code-input" placeholder="CODE"
+                class="w-full md:w-32 bg-black/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-sky-500 transition-all font-mono uppercase">
+            <button id="btn-claim-attendance" onclick="claimAttendance()"
+                class="px-6 py-3 bg-sky-600 hover:bg-sky-500 transition-all rounded-xl font-bold text-white shadow-[0_0_15px_rgba(14,165,233,0.4)] whitespace-nowrap">Claim</button>
+        </div>
+    </div>
+
     <!-- Inventory Panel -->
     <div id="student-inventory-panel" class="glass-panel w-full max-w-5xl rounded-2xl p-4 md:p-6 mt-6 mb-6 hidden">
         <div class="flex justify-between items-center mb-4 border-b border-pink-500/20 pb-2">
@@ -420,19 +435,6 @@
                     style="cursor:pointer;">&#x21BB;</button>
             </div>
             <p class="text-slate-400 mb-8 text-lg">Cast your vote to shape the realm's future.</p>
-            <div id="claim-attendance-block"
-                class="bg-slate-900/50 p-6 rounded-2xl border border-sky-500/20 mb-8 flex flex-col md:flex-row items-center gap-4">
-                <div class="flex-1">
-                    <h3 class="text-xl font-bold text-sky-400">Claim Attendance</h3>
-                    <p class="text-sm text-slate-400">Enter the Beacon Code provided by the Game Master.</p>
-                </div>
-                <div class="flex gap-2 w-full md:w-auto">
-                    <input type="text" id="attendance-code-input" placeholder="CODE"
-                        class="w-full md:w-32 bg-black/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-sky-500 transition-all font-mono uppercase">
-                    <button id="btn-claim-attendance" onclick="claimAttendance()"
-                        class="px-6 py-3 bg-sky-600 hover:bg-sky-500 transition-all rounded-xl font-bold text-white shadow-[0_0_15px_rgba(14,165,233,0.4)] whitespace-nowrap">Claim</button>
-                </div>
-            </div>
 
 
             <div id="proposals-container" class="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -1234,6 +1236,7 @@
             document.getElementById("content-container").classList.remove("hidden");
 
             await fetchUserData();
+            if (isStudent) loadStudentInventory();
             loadPollTopics();
             if (userAddress === ADMIN_ADDRESS) loadMarketLogs();
             await fetchProposals();
@@ -1246,6 +1249,9 @@
             document.getElementById("profile-card").classList.remove("flex");
             if (document.getElementById("student-inventory-panel")) {
                 document.getElementById("student-inventory-panel").classList.add("hidden");
+            }
+            if (document.getElementById("claim-attendance-block")) {
+                document.getElementById("claim-attendance-block").classList.add("hidden");
             }
             document.getElementById("tabs-container").classList.add("hidden");
             document.getElementById("content-container").classList.add("hidden");
