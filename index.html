@@ -370,6 +370,15 @@
         </div>
     </div>
 
+    
+    <!-- Inventory Panel -->
+    <div id="student-inventory-panel" class="glass-panel w-full max-w-5xl rounded-2xl p-4 md:p-6 mt-6 mb-6 hidden">
+        <h3 class="text-xl font-bold mb-4 text-pink-400 uppercase tracking-widest border-b border-pink-500/20 pb-2">Мой инвентарь</h3>
+        <div id="student-inventory-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            <div class="text-slate-400 py-4 col-span-full">У вас пока нет купленных артефактов.</div>
+        </div>
+    </div>
+
     <!-- Navigation Tabs -->
     <div id="tabs-container" class="w-full max-w-5xl flex justify-between gap-[2px] border-b border-sky-900/50 hidden">
         <button onclick="switchTab('voting')" id="tab-voting"
@@ -895,7 +904,15 @@
         let voterContract;
         let isStudent = false;
 
-        function showLoader() {
+        function showLoader(msg = "Магия блокчейна в процессе...") {
+            const loader = document.getElementById('tx-loader');
+            if (loader) {
+                const p = loader.querySelector('p');
+                if (p) p.innerHTML = msg + '<br><span class="text-sky-400 text-sm">Ожидаем подтверждения сети</span>';
+                loader.classList.remove('hidden');
+                loader.classList.add('flex');
+            }
+        }
             const loader = document.getElementById('tx-loader');
             if (loader) {
                 loader.classList.remove('hidden');
@@ -1197,6 +1214,9 @@
             // Show UI
             document.getElementById("profile-card").classList.remove("hidden");
             document.getElementById("profile-card").classList.add("flex");
+            if (document.getElementById("student-inventory-panel")) {
+                document.getElementById("student-inventory-panel").classList.remove("hidden");
+            }
             document.getElementById("tabs-container").classList.remove("hidden");
             document.getElementById("content-container").classList.remove("hidden");
 
@@ -1211,6 +1231,9 @@
             document.getElementById("connect-btn").style.display = "block";
             document.getElementById("profile-card").classList.add("hidden");
             document.getElementById("profile-card").classList.remove("flex");
+            if (document.getElementById("student-inventory-panel")) {
+                document.getElementById("student-inventory-panel").classList.add("hidden");
+            }
             document.getElementById("tabs-container").classList.add("hidden");
             document.getElementById("content-container").classList.add("hidden");
         }
@@ -1940,22 +1963,22 @@
 
         async function buyItem(itemId, itemName, price) {
             try {
-                showLoader();
                 const priceWei = ethers.utils.parseUnits(price.toString(), 18);
+                
+                // 1. Check allowance
                 const allowance = await tokenContract.allowance(userAddress, VOTER_ADDRESS);
                 if (allowance.lt(priceWei)) {
-                    showToast("Approving SGC for purchase...", false);
-                    const overrides = await getGasOverrides("0");
-                    const approveTx = await tokenContract.approve(VOTER_ADDRESS, ethers.constants.MaxUint256, overrides);
-                    await waitWithTimeout(approveTx);
+                    showLoader("Даем разрешение на трату SGC...");
+                    const approveTx = await tokenContract.approve(VOTER_ADDRESS, ethers.constants.MaxUint256);
+                    await waitWithTimeout(approveTx); // CRITICAL: Wait for approve to be mined!
                 }
 
-                showToast(`Purchasing ${itemName} for ${price} SGC...`, false);
-                console.log("Initiating transaction with account:", userAddress);
+                // 2. Execute Purchase
+                showLoader("Магия блокчейна в процессе...");
                 const params = await getGasOverrides("0");
-                console.log("Transaction parameters:", params);
                 const tx = await voterContract.buyItem(itemId, params);
-                await waitWithTimeout(tx);
+                await waitWithTimeout(tx); // Wait for purchase to be mined
+                hideLoader();
                 hideLoader();
                 showToast("Покупка успешно совершена!", false);
                 await fetchUserData();
