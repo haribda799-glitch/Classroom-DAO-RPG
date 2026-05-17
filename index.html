@@ -913,12 +913,6 @@
                 loader.classList.add('flex');
             }
         }
-            const loader = document.getElementById('tx-loader');
-            if (loader) {
-                loader.classList.remove('hidden');
-                loader.classList.add('flex');
-            }
-        }
 
         function waitWithTimeout(tx, timeoutMs = 30000) {
             return Promise.race([
