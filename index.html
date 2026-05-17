@@ -796,6 +796,24 @@
         let voterContract;
         let isStudent = false;
 
+        function showToast(message, isError = false) {
+            const toast = document.createElement('div');
+            toast.className = `fixed top-4 right-4 z-[60] px-6 py-3 rounded-xl font-bold text-white shadow-lg transition-all duration-300 transform translate-y-0 opacity-100 ${isError ? 'bg-red-500 shadow-[0_0_15px_rgba(239,68,68,0.5)]' : 'bg-green-500 shadow-[0_0_15px_rgba(34,197,94,0.5)]'}`;
+            toast.innerText = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.replace('translate-y-0', '-translate-y-full');
+                toast.classList.replace('opacity-100', 'opacity-0');
+                setTimeout(() => {
+                    if (document.body.contains(toast)) {
+                        document.body.removeChild(toast);
+                    }
+                }, 300);
+            }, 4000);
+        }
+
+
         // ── Global quest name cache + current round (loaded at startup via read-only RPC) ──
         let chainQuestNames = ["Quest 1", "Quest 2", "Quest 3", "Quest 4"];
         let currentPollId = 1;
@@ -843,16 +861,16 @@
             const isRevert = code === 'CALL_EXCEPTION' || message.includes('CALL_EXCEPTION') || reason.includes('transaction failed');
 
             if (isGasError) {
-                alert("Ошибка: Недостаточно газа (A0GI) для отправки транзакции. Пожалуйста, попросите преподавателя пополнить ваш баланс.");
+                showToast("Ошибка: Недостаточно газа (A0GI) для отправки транзакции. Пожалуйста, попросите преподавателя пополнить ваш баланс.", true);
                 return;
             }
             
             if (isRevert) {
-                alert("Ошибка: Смарт-контракт отклонил транзакцию. Возможно, этот студент уже зарегистрирован.");
+                showToast("Ошибка: Смарт-контракт отклонил транзакцию. Возможно, этот студент уже зарегистрирован.", true);
                 return;
             }
 
-            alert("Произошла ошибка: " + (error?.message || error));
+            showToast("Произошла ошибка: " + (error?.message || error), true);
         }
 
         async function refreshQuests() {
@@ -916,7 +934,7 @@
                     await handleConnection(accounts[0]);
                 }
             } else {
-                alert("MetaMask is not installed. Please install it to use this DApp.");
+                showToast("MetaMask is not installed. Please install it to use this DApp.", true);
             }
         }
 
@@ -947,12 +965,12 @@
         }
 
         async function setupNetwork() {
-            if (!window.ethereum) return alert("MetaMask not found!");
+            if (!window.ethereum) return showToast("MetaMask not found!", true);
             await switchNetwork();
         }
 
         async function addToken() {
-            if (!window.ethereum) return alert("MetaMask not found!");
+            if (!window.ethereum) return showToast("MetaMask not found!", true);
             try {
                 await window.ethereum.request({
                     method: 'wallet_watchAsset',
@@ -997,7 +1015,7 @@
             const network = await provider.getNetwork();
             if (network.chainId !== CHAIN_ID) {
                 if (network.chainId === 16600) {
-                    alert("Вы в старой сети! Нажмите 'Setup Network', чтобы переключиться на актуальную версию 0G Galileo.");
+                    showToast("Вы в старой сети! Нажмите 'Setup Network', чтобы переключиться на актуальную версию 0G Galileo.", true);
                 }
                 await switchNetwork();
                 return;
@@ -1290,7 +1308,7 @@
                 if (typeof handleWeb3Error === 'function') {
                     handleWeb3Error(err);
                 } else {
-                    alert("Произошла ошибка: " + (err.message || err));
+                    showToast("Произошла ошибка: " + (err.message || err), true);
                 }
             } finally {
                 if (btn) {
@@ -1371,7 +1389,7 @@
                 await tx.wait();
                 setStatus(statusEl, `Hero ${nickname} successfully summoned! 🎉`, "success");
                 
-                alert("Студент успешно зарегистрирован!");
+                showToast("Студент успешно зарегистрирован!", false);
 
                 fetchStudentRegistry(); // Refresh registry table
 
@@ -1429,9 +1447,9 @@
                     btn.classList.add("bg-rose-600/20", "border-rose-500/40", "text-rose-400");
                 }).catch(err => {
                     console.error("QR start error:", err);
-                    alert("Camera error: " + err);
+                    showToast("Camera error: " + err, true);
                 });
-            }).catch(err => alert("No camera found: " + err));
+            }).catch(err => showToast("No camera found: " + err, true));
         }
 
         function onQrSuccess(rawText) {
@@ -1486,7 +1504,7 @@
                 const tx = await voterContract.registerStudent(address, nickname, group, overrides);
                 await tx.wait();
                 setStatus(statusEl, `Hero ${nickname} summoned successfully! 🎉`, "success");
-                alert("Студент успешно зарегистрирован!");
+                showToast("Студент успешно зарегистрирован!", false);
                 resetQrScanner();
                 fetchStudentRegistry();
             } catch (err) {
@@ -1574,7 +1592,7 @@
         }
 
         function exportRegistryCSV() {
-            if (registryData.length === 0) return alert("Registry empty");
+            if (registryData.length === 0) return showToast("Registry empty", true);
             const csvContent = "data:text/csv;charset=utf-8," + "Nickname,Group,Address\n" + registryData.map(r => `${r.nickname},${r.group},${r.address}`).join("\n");
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
@@ -1616,14 +1634,14 @@
                     console.error("User rejected connection", err);
                 }
             } else {
-                alert("MetaMask not found!");
+                showToast("MetaMask not found!", true);
             }
         });
 
 
         async function rewardStudentCustom() {
             const amountStr = document.getElementById("reward-custom-amount").value.trim();
-            if (!amountStr) return alert("Enter custom amount");
+            if (!amountStr) return showToast("Enter custom amount", true);
             await rewardStudent(parseInt(amountStr));
         }
 
@@ -1710,7 +1728,7 @@
                 if (typeof handleWeb3Error === 'function') {
                     handleWeb3Error(err);
                 } else {
-                    alert("Error: " + (err.message || err));
+                    showToast("Error: " + (err.message || err), true);
                 }
             } finally {
                 btn.disabled = false;
@@ -1720,7 +1738,7 @@
 
         async function claimAttendance() {
             const code = document.getElementById("attendance-code-input").value.trim().toUpperCase();
-            if (!code) return alert("Enter code");
+            if (!code) return showToast("Enter code", true);
             
             const btn = document.getElementById("btn-claim-attendance");
             const originalText = btn.innerText;
@@ -1748,7 +1766,7 @@
                 if (typeof handleWeb3Error === 'function') {
                     handleWeb3Error(err);
                 } else {
-                    alert("Произошла ошибка: " + (err.message || err));
+                    showToast("Произошла ошибка: " + (err.message || err), true);
                 }
             } finally {
                 btn.disabled = false;
@@ -1761,24 +1779,24 @@
                 const priceWei = ethers.utils.parseUnits(price.toString(), 18);
                 const allowance = await tokenContract.allowance(userAddress, VOTER_ADDRESS);
                 if (allowance.lt(priceWei)) {
-                    alert("Approving SGC for purchase...");
+                    showToast("Approving SGC for purchase...", false);
                     const overrides = await getGasOverrides("0");
                     const approveTx = await tokenContract.approve(VOTER_ADDRESS, ethers.constants.MaxUint256, overrides);
                     await approveTx.wait();
                 }
 
-                alert(`Purchasing ${itemName} for ${price} SGC...`);
+                showToast(`Purchasing ${itemName} for ${price} SGC...`, false);
                 console.log("Initiating transaction with account:", userAddress);
                 const params = await getGasOverrides("0");
                 console.log("Transaction parameters:", params);
                 const tx = await voterContract.buyItem(itemId, params);
                 await tx.wait();
-                alert(`Successfully purchased ${itemName}! 🎉`);
+                showToast(`Successfully purchased ${itemName}! 🎉`, false);
                 await fetchUserData();
                 loadPollTopics();
             } catch (err) {
                 console.error("FULL ERROR OBJECT:", err);
-                alert("Error: " + (err.message || err));
+                showToast("Error: " + (err.message || err), true);
             }
         }
 
@@ -1814,7 +1832,7 @@
             let txHashReceived = false;
             let timeoutId = setTimeout(() => {
                 if (!txHashReceived) {
-                    alert("Transaction timeout. Please try again.");
+                    showToast("Transaction timeout. Please try again.", true);
                     if (btn) {
                         btn.innerText = "Save Quests";
                         btn.disabled = false;
@@ -1824,19 +1842,19 @@
 
             try {
                 const params = await getGasOverrides("0");
-                alert("Check MetaMask now!");
+                showToast("Check MetaMask now!", false);
                 const tx = await voterContract.setQuestNames(topics, params);
                 txHashReceived = true;
                 clearTimeout(timeoutId);
                 console.log("Transaction Hash:", tx.hash);
 
                 if (btn) btn.innerText = "Confirmed! Reloading...";
-                alert("Transaction successful! Reloading the realm...");
+                showToast("Transaction successful! Reloading the realm...", false);
                 setTimeout(() => window.location.reload(), 2000);
             } catch (err) {
                 clearTimeout(timeoutId);
                 console.error("FULL ERROR OBJECT:", err);
-                alert("Error saving quests: " + (err.message || err));
+                showToast("Error saving quests: " + (err.message || err), true);
                 if (btn) {
                     btn.innerText = "Save Quests";
                     btn.disabled = false;
@@ -1857,24 +1875,24 @@
             let txHashReceived = false;
             const timeoutId = setTimeout(() => {
                 if (!txHashReceived) {
-                    alert("Transaction timeout. Please check MetaMask.");
+                    showToast("Transaction timeout. Please check MetaMask.", true);
                     if (btn) { btn.style.transform = ""; btn.style.transition = ""; btn.disabled = false; }
                 }
             }, 30000);
 
             try {
                 const params = await getGasOverrides("0");
-                alert("Check MetaMask now!");
+                showToast("Check MetaMask now!", false);
                 const tx = await voterContract.startNewRound(params);
                 txHashReceived = true;
                 clearTimeout(timeoutId);
                 console.log("startNewRound tx hash:", tx.hash);
-                alert(`New round started! TX: ${tx.hash}\n\nReloading the realm...`);
+                showToast(`New round started! TX: ${tx.hash}\n\nReloading the realm...`, false);
                 setTimeout(() => window.location.reload(), 2000);
             } catch (err) {
                 clearTimeout(timeoutId);
                 console.error("startNewRound error:", err);
-                alert("Error starting round: " + (err.message || err));
+                showToast("Error starting round: " + (err.message || err), true);
                 if (btn) { btn.style.transform = ""; btn.style.transition = ""; btn.disabled = false; }
             }
         }
@@ -1961,7 +1979,7 @@
         async function addMarketItem() {
             const name = document.getElementById("market-item-name").value.trim();
             const price = document.getElementById("market-item-price").value.trim();
-            if (!name || !price) return alert("Enter item name and price.");
+            if (!name || !price) return showToast("Enter item name and price.", true);
             const btn = document.querySelector('button[onclick="addMarketItem()"]');
             btn.innerText = "Adding...";
             btn.disabled = true;
@@ -1969,7 +1987,7 @@
             let txHashReceived = false;
             let timeoutId = setTimeout(() => {
                 if (!txHashReceived) {
-                    alert("Transaction timeout. Please try again.");
+                    showToast("Transaction timeout. Please try again.", true);
                     btn.innerText = "Add Item";
                     btn.disabled = false;
                 }
@@ -1980,7 +1998,7 @@
                 const params = await getGasOverrides("0");
                 console.log("Final TX Object:", { method: "addMarketItem", args: [name, price], overrides: params });
 
-                alert("Check MetaMask now!");
+                showToast("Check MetaMask now!", false);
 
                 const tx = await voterContract.addMarketItem(name, price, params);
                 txHashReceived = true;
@@ -1989,13 +2007,13 @@
 
                 // Hard reload — only reliable fix for MetaMask Mobile provider cache
                 btn.innerText = "Confirmed! Reloading...";
-                alert("Transaction successful! Reloading the realm...");
+                showToast("Transaction successful! Reloading the realm...", false);
                 setTimeout(() => window.location.reload(), 2000);
 
             } catch (err) {
                 clearTimeout(timeoutId);
                 console.error("FULL ERROR OBJECT:", err);
-                alert("Error: " + (err.message || err));
+                showToast("Error: " + (err.message || err), true);
                 btn.innerText = "Add Item";
                 btn.disabled = false;
             }
@@ -2015,7 +2033,7 @@
             let txHashReceived = false;
             const safetyTimer = setTimeout(() => {
                 if (!txHashReceived) {
-                    alert('Transaction timeout (60s). Check MetaMask or the explorer.');
+                    showToast('Transaction timeout (60s). Check MetaMask or the explorer.', true);
                     const b = getBtn();
                     if (b) { b.innerText = 'Remove'; b.disabled = false; }
                 }
@@ -2026,7 +2044,7 @@
                 const params = await getGasOverrides('0');
                 console.log('Final TX Object:', { method: 'setMarketItemActive', args: [idStr, false], overrides: params });
 
-                alert('Check MetaMask now!');
+                showToast('Check MetaMask now!', false);
 
                 const tx = await voterContract.setMarketItemActive(idStr, false, params);
                 txHashReceived = true;
@@ -2036,13 +2054,13 @@
                 // Hard reload — only reliable fix for MetaMask Mobile provider cache
                 const b = getBtn();
                 if (b) b.innerText = 'Confirmed! Reloading...';
-                alert('Transaction successful! Reloading the realm...');
+                showToast('Transaction successful! Reloading the realm...', false);
                 setTimeout(() => window.location.reload(), 2000);
 
             } catch (err) {
                 clearTimeout(safetyTimer);
                 console.error('FULL ERROR OBJECT:', err);
-                alert('Transaction Failed: ' + (err.message || err));
+                showToast('Transaction Failed: ' + (err.message || err), true);
                 const b = getBtn();
                 if (b) { b.innerText = 'Remove'; b.disabled = false; }
             }
