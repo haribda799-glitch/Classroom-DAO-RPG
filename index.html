@@ -875,7 +875,7 @@
             }
         }
 
-        function handleWeb3Error(error) {
+        function handleWeb3Error(error, customRevertMsg = null) {
             console.log("Safe handling error:", error);
 
             let errStr = "";
@@ -905,7 +905,8 @@
             }
             
             if (isRevert) {
-                showToast("Ошибка: Смарт-контракт отклонил транзакцию. Возможно, этот студент уже зарегистрирован.", true);
+                const msg = customRevertMsg || "Ошибка: Смарт-контракт отклонил транзакцию. Условие не выполнено.";
+                showToast(msg, true);
                 return;
             }
 
@@ -1329,7 +1330,7 @@
                 loadPollTopics();
             } catch (err) {
                 console.error("Voting error:", err);
-                if (typeof handleWeb3Error === 'function') handleWeb3Error(err);
+                if (typeof handleWeb3Error === 'function') handleWeb3Error(err, "Вы уже проголосовали или голосование недоступно!");
                 else showToast("Произошла ошибка: " + (err?.message || err), true);
             } finally {
                 hideLoader();
@@ -1422,7 +1423,7 @@
             } catch (err) {
                 console.error("registerStudent error:", err);
                 setStatus(statusEl, "Ritual failed.", "error");
-                if (typeof handleWeb3Error === 'function') handleWeb3Error(err);
+                if (typeof handleWeb3Error === 'function') handleWeb3Error(err, "Этот студент уже зарегистрирован!");
             } finally {
                 hideLoader();
                 document.getElementById("reg-nickname").value = "";
@@ -1538,7 +1539,7 @@
             } catch (err) {
                 console.error("registerStudentFromQr error:", err);
                 setStatus(statusEl, "QR Summoning failed.", "error");
-                if (typeof handleWeb3Error === 'function') handleWeb3Error(err);
+                if (typeof handleWeb3Error === 'function') handleWeb3Error(err, "Этот студент уже зарегистрирован!");
             } finally {
                 hideLoader();
                 document.getElementById("qr-nickname").value = "";
@@ -1803,7 +1804,7 @@
                 loadPollTopics();
             } catch (err) {
                 console.error("Attendance claim error:", err);
-                if (typeof handleWeb3Error === 'function') handleWeb3Error(err);
+                if (typeof handleWeb3Error === 'function') handleWeb3Error(err, "Неверный код или награда уже получена!");
                 else showToast("Произошла ошибка: " + (err.message || err), true);
             } finally {
                 hideLoader();
@@ -1835,7 +1836,7 @@
                 loadPollTopics();
             } catch (err) {
                 console.error("FULL ERROR OBJECT:", err);
-                if (typeof handleWeb3Error === 'function') handleWeb3Error(err);
+                if (typeof handleWeb3Error === 'function') handleWeb3Error(err, "Недостаточно SGC или предмет недоступен!");
                 else showToast("Error: " + (err.message || err), true);
             } finally {
                 hideLoader();
