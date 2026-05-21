@@ -1480,7 +1480,7 @@
                                 </div>
                             </div>
                         </td>
-                        <td class="p-3 sm:p-5 text-center hidden sm:table-cell">
+                        <td class="p-3 sm:p-5 text-center">
                             <span class="inline-block px-2 py-0.5 sm:px-3 sm:py-1 bg-sky-900/50 text-sky-300 rounded-lg font-bold border border-sky-500/30 text-[10px] sm:text-xs">Lvl ${level}</span>
                         </td>
                         <td class="p-3 sm:p-5 font-bold text-emerald-400 text-right text-sm sm:text-lg">${s.xp} <span class="text-[10px] text-slate-500 font-normal">XP</span></td>
@@ -1835,19 +1835,25 @@
             }
 
             setStatus(statusEl, `Bestowing +${amount} XP to ${address.substring(0, 6)}...`, "wait");
+            let tx;
             try {
                 showLoader();
                 const overrides = await getGasOverrides("0");
-                const tx = await voterContract.rewardStudent(address, amount, reason, overrides);
+                tx = await voterContract.rewardStudent(address, amount, reason, overrides);
                 setStatus(statusEl, `Sending loot... Tx: ${tx.hash.substring(0, 10)}...`, "wait");
                 await waitWithTimeout(tx);
                 setStatus(statusEl, `Loot successfully bestowed! 🎉`, "success");
                 showToast("Награда успешно начислена!", false);
             } catch (err) {
                 console.error(err);
-                setStatus(statusEl, "Bestowal failed. Did you approve SGC allowance?", "error");
-                if (typeof handleWeb3Error === 'function') handleWeb3Error(err);
-                else showToast("Error: " + (err.message || err), true);
+                if (tx && tx.hash) {
+                    setStatus(statusEl, `Loot might be bestowed (Mobile RPC issue)! Tx: ${tx.hash.substring(0, 10)}...`, "success");
+                    showToast("Транзакция отправлена, но возможно прервана. Проверьте через пару минут.", false);
+                } else {
+                    setStatus(statusEl, "Bestowal failed. Did you approve SGC allowance?", "error");
+                    if (typeof handleWeb3Error === 'function') handleWeb3Error(err);
+                    else showToast("Error: " + (err.message || err), true);
+                }
             } finally {
                 hideLoader();
             }
