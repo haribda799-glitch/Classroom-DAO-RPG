@@ -1844,6 +1844,12 @@
                 await waitWithTimeout(tx);
                 setStatus(statusEl, `Loot successfully bestowed! 🎉`, "success");
                 showToast("Награда успешно начислена!", false);
+
+                // Clear reward inputs only on successful transaction
+                document.getElementById("reward-address").value = '';
+                document.getElementById("reward-group").value = '';
+                document.getElementById("reward-custom-amount").value = '';
+                document.getElementById("reward-reason").value = '';
             } catch (err) {
                 console.error(err);
                 if (tx && tx.hash) {
@@ -1890,6 +1896,7 @@
 
             const amount = parseInt(amountStr);
 
+            let tx;
             try {
                 showLoader();
                 setStatus(statusEl, `Finding members of group ${groupName}...`, "wait");
@@ -1912,18 +1919,29 @@
                 setStatus(statusEl, `Bestowing +${amount} XP to ${targetAddresses.length} students...`, "wait");
 
                 const overrides = await getGasOverrides("0");
-                const tx = await voterContract.rewardBatch(targetAddresses, amount, reason, overrides);
+                tx = await voterContract.rewardBatch(targetAddresses, amount, reason, overrides);
                 setStatus(statusEl, `Sending group loot... Tx: ${tx.hash.substring(0, 10)}...`, "wait");
 
                 await waitWithTimeout(tx);
                 hideLoader();
                 setStatus(statusEl, `Group loot bestowed! 🎉`, "success");
                 showToast("Групповая награда успешно начислена!", false);
+
+                // Clear reward inputs only on successful transaction
+                document.getElementById("reward-address").value = '';
+                document.getElementById("reward-group").value = '';
+                document.getElementById("reward-custom-amount").value = '';
+                document.getElementById("reward-reason").value = '';
             } catch (err) {
                 console.error(err);
-                setStatus(statusEl, "Group bestowal failed.", "error");
-                if (typeof handleWeb3Error === 'function') handleWeb3Error(err);
-                else showToast("Error: " + (err.message || err), true);
+                if (tx && tx.hash) {
+                    setStatus(statusEl, `Group loot might be bestowed (Mobile RPC issue)! Tx: ${tx.hash.substring(0, 10)}...`, "success");
+                    showToast("Транзакция отправлена, но возможно прервана. Проверьте через пару минут.", false);
+                } else {
+                    setStatus(statusEl, "Group bestowal failed.", "error");
+                    if (typeof handleWeb3Error === 'function') handleWeb3Error(err);
+                    else showToast("Error: " + (err.message || err), true);
+                }
             } finally {
                 hideLoader();
             }
