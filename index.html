@@ -372,11 +372,16 @@
             <h3 class="text-xl font-bold text-sky-400">Claim Attendance</h3>
             <p class="text-sm text-slate-400">Enter the Beacon Code provided by the Game Master.</p>
         </div>
-        <div class="flex gap-2 w-full md:w-auto">
-            <input type="text" id="attendance-code-input" placeholder="CODE"
-                class="w-full md:w-32 bg-black/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-sky-500 transition-all font-mono uppercase">
-            <button id="btn-claim-attendance" onclick="claimAttendance()"
-                class="px-6 py-3 bg-sky-600 hover:bg-sky-500 transition-all rounded-xl font-bold text-white shadow-[0_0_15px_rgba(14,165,233,0.4)] whitespace-nowrap">Claim</button>
+        <div class="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
+            <div id="student-attendance-timer" class="hidden text-sm font-semibold font-mono text-amber-500 bg-amber-950/40 border border-amber-500/30 px-3 py-2 rounded-xl animate-pulse whitespace-nowrap">
+                Осталось времени: 25 сек
+            </div>
+            <div class="flex gap-2 w-full md:w-auto">
+                <input type="text" id="attendance-code-input" placeholder="CODE"
+                    class="w-full md:w-32 bg-black/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-sky-500 transition-all font-mono uppercase">
+                <button id="btn-claim-attendance" onclick="claimAttendance()"
+                    class="px-6 py-3 bg-sky-600 hover:bg-sky-500 transition-all rounded-xl font-bold text-white shadow-[0_0_15px_rgba(14,165,233,0.4)] whitespace-nowrap">Claim</button>
+            </div>
         </div>
     </div>
 
@@ -687,8 +692,8 @@
                         Daily Code</button>
                     <div class="text-2xl font-mono text-rose-300 font-bold tracking-widest bg-black/50 px-4 py-2 rounded-xl"
                         id="daily-code-display">----</div>
-                    <div class="text-2xl font-mono text-slate-300 font-bold bg-black/50 px-4 py-2 rounded-xl"
-                        id="daily-code-timer">05:00</div>
+                    <div class="text-lg font-mono text-amber-500 font-bold bg-black/50 px-4 py-2 rounded-xl border border-amber-500/30 animate-pulse hidden"
+                        id="daily-code-timer">Осталось времени: 25 сек</div>
                 </div>
             </div>
 
@@ -1255,6 +1260,7 @@
             }
             document.getElementById("tabs-container").classList.add("hidden");
             document.getElementById("content-container").classList.add("hidden");
+            clearInterval(countdownInterval);
         }
 
         function getLevel(xp) {
@@ -1967,20 +1973,65 @@
                 document.getElementById("daily-code-display").innerText = code;
                 showToast("Код успешно сгенерирован!", false);
 
-                let timeLeft = 300;
+                let timeLeft = 25;
                 clearInterval(countdownInterval);
                 const timerEl = document.getElementById("daily-code-timer");
+                const studentTimerEl = document.getElementById("student-attendance-timer");
+                const attendanceInput = document.getElementById("attendance-code-input");
+                const claimBtn = document.getElementById("btn-claim-attendance");
+
+                // Initialize timer displays and enable controls
+                if (timerEl) {
+                    timerEl.classList.remove("hidden", "text-rose-500");
+                    timerEl.classList.add("animate-pulse", "text-amber-500");
+                    timerEl.innerText = `Осталось времени: 25 сек`;
+                }
+                if (studentTimerEl) {
+                    studentTimerEl.classList.remove("hidden", "text-rose-500");
+                    studentTimerEl.classList.add("animate-pulse", "text-amber-500");
+                    studentTimerEl.innerText = `Осталось времени: 25 сек`;
+                }
+                if (attendanceInput) {
+                    attendanceInput.disabled = false;
+                    attendanceInput.placeholder = "CODE";
+                }
+                if (claimBtn) {
+                    claimBtn.disabled = false;
+                    claimBtn.classList.remove("opacity-50", "cursor-not-allowed");
+                }
+
                 countdownInterval = setInterval(() => {
                     timeLeft--;
                     if (timeLeft < 0) {
                         clearInterval(countdownInterval);
-                        timerEl.innerText = "00:00";
+                        
+                        if (timerEl) {
+                            timerEl.classList.remove("animate-pulse", "text-amber-500");
+                            timerEl.classList.add("text-rose-500");
+                            timerEl.innerText = "Время действия истекло! ❌";
+                        }
+                        if (studentTimerEl) {
+                            studentTimerEl.classList.remove("animate-pulse", "text-amber-500");
+                            studentTimerEl.classList.add("text-rose-500");
+                            studentTimerEl.innerText = "Время действия истекло! ❌";
+                        }
                         document.getElementById("daily-code-display").innerText = "----";
+                        
+                        if (attendanceInput) {
+                            attendanceInput.disabled = true;
+                            attendanceInput.placeholder = "EXPIRED";
+                            attendanceInput.value = "";
+                        }
+                        if (claimBtn) {
+                            claimBtn.disabled = true;
+                            claimBtn.classList.add("opacity-50", "cursor-not-allowed");
+                        }
                         return;
                     }
-                    const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
-                    const s = (timeLeft % 60).toString().padStart(2, '0');
-                    timerEl.innerText = `${m}:${s}`;
+                    
+                    const text = `Осталось времени: ${timeLeft} сек`;
+                    if (timerEl) timerEl.innerText = text;
+                    if (studentTimerEl) studentTimerEl.innerText = text;
                 }, 1000);
             } catch (err) {
                 console.error(err);
@@ -2018,6 +2069,13 @@
                 document.getElementById("voting-status").innerText = "Attendance Claimed! +50 XP 🎉";
                 document.getElementById("voting-status").className = "mt-6 text-center text-sm font-bold text-emerald-400";
                 document.getElementById("attendance-code-input").value = "";
+                
+                // Hide student timer on successful claim
+                const studentTimerEl = document.getElementById("student-attendance-timer");
+                if (studentTimerEl) {
+                    studentTimerEl.classList.add("hidden");
+                }
+                
                 showToast("Посещаемость подтверждена! Награда начислена.", false);
                 await fetchUserData();
                 loadPollTopics();
