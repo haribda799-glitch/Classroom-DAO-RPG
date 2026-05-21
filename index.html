@@ -686,6 +686,14 @@
                 class="bg-slate-900/70 p-6 rounded-2xl border border-rose-500/20 shadow-[inset_0_0_15px_rgba(0,0,0,0.5)] mt-8">
                 <h3 class="text-xl font-bold mb-5 text-rose-400 uppercase tracking-widest flex items-center gap-2">
                     Beacon Timer</h3>
+
+                <!-- Custom Reward Input Field -->
+                <div class="mb-5 max-w-xs">
+                    <label class="block text-slate-400 text-sm font-semibold mb-2">Вознаграждение за посещаемость (SGC)</label>
+                    <input type="number" id="attendanceRewardInput" min="1" max="50" value="10"
+                        class="w-full bg-black/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-rose-500 transition-all font-mono">
+                </div>
+
                 <div class="flex flex-col md:flex-row items-center gap-4">
                     <button onclick="generateDailyCode(event)"
                         class="py-3 px-6 bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 transition-all rounded-xl font-bold text-white shadow-[0_0_15px_rgba(225,29,72,0.4)] whitespace-nowrap">Generate
@@ -1261,6 +1269,11 @@
             document.getElementById("tabs-container").classList.add("hidden");
             document.getElementById("content-container").classList.add("hidden");
             clearInterval(countdownInterval);
+            const rewardInputEl = document.getElementById("attendanceRewardInput");
+            if (rewardInputEl) {
+                rewardInputEl.value = "10";
+            }
+            attendanceRewardAmount = 10;
         }
 
         function getLevel(xp) {
@@ -1955,8 +1968,24 @@
 
         // Market logic
 
+        let attendanceRewardAmount = 10;
         let countdownInterval;
         async function generateDailyCode(event) {
+            const rewardInput = document.getElementById("attendanceRewardInput");
+            let rewardVal = rewardInput ? rewardInput.value.trim() : "";
+            let parsedReward = 10;
+            if (rewardVal !== "") {
+                parsedReward = parseInt(rewardVal, 10);
+            }
+            if (isNaN(parsedReward) || parsedReward < 1) {
+                parsedReward = 10;
+            }
+            if (parsedReward > 50) {
+                showToast("Максимальное вознаграждение — 50 SGC!", true);
+                return;
+            }
+            attendanceRewardAmount = parsedReward;
+
             const btn = event.currentTarget;
             const originalText = btn.innerText;
             try {
@@ -2026,6 +2055,14 @@
                             claimBtn.disabled = true;
                             claimBtn.classList.add("opacity-50", "cursor-not-allowed");
                         }
+                        
+                        // Reset the attendance reward input field back to its default value of 10
+                        const rewardInputEl = document.getElementById("attendanceRewardInput");
+                        if (rewardInputEl) {
+                            rewardInputEl.value = "10";
+                        }
+                        attendanceRewardAmount = 10;
+
                         return;
                     }
                     
@@ -2067,7 +2104,7 @@
                 await waitWithTimeout(tx);
                 hideLoader();
 
-                document.getElementById("voting-status").innerText = "Attendance Claimed! +50 XP 🎉";
+                document.getElementById("voting-status").innerText = `Attendance Claimed! +${attendanceRewardAmount} SGC 🎉`;
                 document.getElementById("voting-status").className = "mt-6 text-center text-sm font-bold text-emerald-400";
                 document.getElementById("attendance-code-input").value = "";
                 
