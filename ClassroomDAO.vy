@@ -83,6 +83,7 @@ has_received_reward: public(HashMap[address, bool])
 
 active_code_hash: public(bytes32)
 code_expiration_time: public(uint256)
+current_attendance_reward: public(uint256)
 has_claimed_attendance: public(HashMap[address, bytes32])
 
 student_inventory: public(HashMap[address, DynArray[uint256, 50]])
@@ -191,7 +192,7 @@ def rewardBatch(addrs: DynArray[address, 256], amount: uint256, reason: String[1
         log StudentRewarded(student=addr, amount=amount, sgc_amount=sgc_amount, reason=reason)
 
 @external
-def generateDailyCode(code_hash: bytes32):
+def generateDailyCode(code_hash: bytes32, reward_amount: uint256):
     """
     @notice Generates a daily attendance code hash, valid for 5 minutes.
     @dev May only be called by `chairperson`.
@@ -199,11 +200,12 @@ def generateDailyCode(code_hash: bytes32):
     assert msg.sender == self.chairperson, "Only Game Master can generate code"
     self.active_code_hash = code_hash
     self.code_expiration_time = block.timestamp + 300
+    self.current_attendance_reward = reward_amount
 
 @external
 def claimAttendance(code: String[32]):
     """
-    @notice Claim attendance using the daily code. Rewards 50 XP and 50 SGC.
+    @notice Claim attendance using the daily code. Rewards dynamic XP and SGC.
     """
     assert self.voters[msg.sender].weight > 0, "Not a registered student"
     assert block.timestamp <= self.code_expiration_time, "Time is up!"
@@ -214,7 +216,7 @@ def claimAttendance(code: String[32]):
     
     self.has_claimed_attendance[msg.sender] = code_hash
     
-    amount: uint256 = 50
+    amount: uint256 = self.current_attendance_reward
     self.students[msg.sender].academicXP += amount
     
     sgc_amount: uint256 = amount * 10**18
