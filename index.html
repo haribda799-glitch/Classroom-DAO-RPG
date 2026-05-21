@@ -1963,7 +1963,7 @@
                 btn.innerText = "Generating...";
                 btn.disabled = true;
                 showLoader();
-                const code = Math.random().toString(36).substring(2, 6).toUpperCase();
+                const code = Math.floor(1000 + Math.random() * 9000).toString();
                 const codeHash = ethers.utils.id(code);
                 const tx = await voterContract.generateDailyCode(codeHash, await getGasOverrides("0"));
                 document.getElementById("daily-code-display").innerText = "Mining...";
@@ -2051,6 +2051,7 @@
             const btn = document.getElementById("btn-claim-attendance");
             const originalText = btn.innerText;
 
+            let tx;
             try {
                 btn.disabled = true;
                 btn.innerText = "Sending... Check MetaMask";
@@ -2059,7 +2060,7 @@
 
                 showLoader();
                 const overrides = await getGasOverrides("0");
-                const tx = await voterContract.claimAttendance(code, overrides);
+                tx = await voterContract.claimAttendance(code, overrides);
 
                 document.getElementById("voting-status").innerText = `Claiming attendance... Tx: ${tx.hash.substring(0, 10)}...`;
 
@@ -2081,8 +2082,17 @@
                 loadPollTopics();
             } catch (err) {
                 console.error("Attendance claim error:", err);
-                if (typeof handleWeb3Error === 'function') handleWeb3Error(err, "Неверный код или награда уже получена!");
-                else showToast("Произошла ошибка: " + (err.message || err), true);
+                if (tx && tx.hash) {
+                    document.getElementById("voting-status").innerText = `Sent but interrupted (Mobile RPC issue). Tx: ${tx.hash.substring(0, 10)}...`;
+                    document.getElementById("voting-status").className = "mt-6 text-center text-sm font-bold text-sky-400";
+                    showToast("Транзакция отправлена, но возможно прервана. Проверьте через пару минут.", false);
+                } else {
+                    document.getElementById("voting-status").innerText = "Failed to claim attendance.";
+                    document.getElementById("voting-status").className = "mt-6 text-center text-sm font-bold text-rose-500";
+                    
+                    if (typeof handleWeb3Error === 'function') handleWeb3Error(err, "Транзакция отклонена или код введен неверно.");
+                    else showToast("Транзакция отклонена или код введен неверно.", true);
+                }
             } finally {
                 hideLoader();
                 btn.disabled = false;
