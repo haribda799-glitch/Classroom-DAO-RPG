@@ -381,7 +381,7 @@
 </button>
 <button class="tab-btn hidden flex-1 px-1 sm:px-4 py-3 text-xs sm:text-lg font-semibold text-amber-500 hover:text-amber-400 transition-colors uppercase tracking-wider rounded-t-lg truncate text-center" id="tab-admin" onclick="switchTab('admin')">
 <span class="sm:hidden">⚙️ Admin</span>
-<span class="hidden sm:inline">⚙️ GM Tools</span>
+<span class="hidden sm:inline" data-i18n="menu_gm_tools">⚙️ GM Tools</span>
 </button>
 </div>
 <!-- Main Content Container -->
@@ -641,7 +641,7 @@
 <div class="flex items-center justify-between mb-2">
 <div>
 <p class="font-bold text-amber-400 uppercase tracking-widest text-sm"><span data-i18n="i18n_60">Start New Round</span></p>
-<p class="text-xs text-slate-500 mt-1"><span data-i18n="i18n_61">Resets all votes. Students can vote again from
+<p class="text-xs text-slate-500 mt-1"><span data-i18n="reset_votes_explainer">Resets all votes. Students can vote again from
                                 scratch.</span></p>
 </div>
 <button class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-800/80 border border-amber-500/40 text-amber-400 hover:bg-amber-500 hover:text-white hover:border-amber-400 transition-all shadow text-lg" id="start-round-btn" onclick="startNewRound()" style="cursor:pointer;" title="Start a new voting round">▶</button>
@@ -852,7 +852,11 @@
                 console.log(`Quest names loaded from blockchain (Round #${currentPollId}):`, chainQuestNames);
                 // Update the round badge in UI
                 const badge = document.getElementById("round-badge");
-                if (badge) badge.textContent = `Voting Round #${currentPollId}`;
+                if (badge) {
+                    const lg = localStorage.getItem("lang") || "en";
+                    const prefix = lg === "ru" ? "Раунд голосования" : "Voting Round";
+                    badge.textContent = `${prefix} #${currentPollId}`;
+                }
             } catch (err) {
                 console.error("Failed to load quest names from chain:", err);
             }
@@ -2187,7 +2191,8 @@
                 if (!container) return;
 
                 if (logs.length === 0) {
-                    container.innerHTML = '<tr><td colspan="4" class="px-4 py-4 text-center">No purchases yet.</td></tr>';
+                    const lg = localStorage.getItem("lang") || "en";
+                    container.innerHTML = `<tr><td colspan="4" class="px-4 py-4 text-center" data-i18n="no_purchases">${translations[lg].no_purchases}</td></tr>`;
                     return;
                 }
 
@@ -2354,7 +2359,8 @@
                 // ─── Market Manager panel ────────────────────────────────────────────────
                 if (managerContainer) {
                     if (items.length === 0) {
-                        managerContainer.innerHTML = "<p class='text-slate-500'>No items in store.</p>";
+                        const lg = localStorage.getItem("lang") || "en";
+                        managerContainer.innerHTML = `<p class='text-slate-500' data-i18n="no_items_store">${translations[lg].no_items_store}</p>`;
                     } else {
                         managerContainer.innerHTML =
                             items.map(item => `
@@ -2457,7 +2463,6 @@
         "i18n_58": "Set dynamic topics for active quests (voting). Leave blank to use default names.",
         "i18n_59": "Save Topics",
         "i18n_60": "Start New Round",
-        "i18n_61": "Resets all votes. Students can vote again from scratch.",
         "i18n_62": "Market Manager",
         "i18n_63": "Manage assortment and prices for the Mystic Store.",
         "i18n_64": "Item Name",
@@ -2484,7 +2489,12 @@
         "tab_ranks": "🏆 RANKS",
         "tab_store": "💰 STORE",
         "student_inventory_title": "My Inventory",
-        "votes_count": "Votes"
+        "votes_count": "Votes",
+        "menu_gm_tools": "⚙️ GM TOOLS",
+        "voting_round": "Voting Round",
+        "no_purchases": "No purchases yet.",
+        "reset_votes_explainer": "Resets all votes. Students can vote again from scratch.",
+        "no_items_store": "No items in store."
     },
     "ru": {
         "i18n_1": "html",
@@ -2546,7 +2556,6 @@
         "i18n_58": "Установите темы для квестов. Оставьте пустым для стандартных.",
         "i18n_59": "Сохранить Темы",
         "i18n_60": "Начать Новый Раунд",
-        "i18n_61": "Resets all votes. Students can vote again from scratch.",
         "i18n_62": "Менеджер Магазина",
         "i18n_63": "Магазин артефактов",
         "i18n_64": "Название Предмета",
@@ -2573,7 +2582,12 @@
         "tab_ranks": "🏆 РЕЙТИНГ",
         "tab_store": "💰 МАГАЗИН",
         "student_inventory_title": "Мой инвентарь",
-        "votes_count": "Голосов"
+        "votes_count": "Голосов",
+        "menu_gm_tools": "⚙️ ПАНЕЛЬ ПРЕПОДАВАТЕЛЯ",
+        "voting_round": "Раунд голосования",
+        "no_purchases": "Покупок пока не совершалось.",
+        "reset_votes_explainer": "Сбрасывает все голоса. Студенты смогут голосовать заново, с чистого листа.",
+        "no_items_store": "В магазине пока нет товаров."
     }
 };
 
@@ -2591,6 +2605,14 @@
             const m = totalEl.innerText.match(/\d+/);
             if(m) {
                 totalEl.innerText = lang === 'ru' ? `Всего героев: ${m[0]}` : `Total Heroes: ${m[0]}`;
+            }
+        }
+
+        const badgeEl = document.getElementById('round-badge');
+        if(badgeEl && badgeEl.innerText) {
+            const m = badgeEl.innerText.match(/\d+/);
+            if(m) {
+                badgeEl.innerText = lang === 'ru' ? `Раунд голосования #${m[0]}` : `Voting Round #${m[0]}`;
             }
         }
 
