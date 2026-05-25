@@ -368,16 +368,16 @@
 <!-- Navigation Tabs -->
 <div class="w-full max-w-5xl flex justify-between gap-[2px] border-b border-sky-900/50 hidden" id="tabs-container">
 <button class="tab-btn active flex-1 px-1 sm:px-4 py-3 text-xs sm:text-lg font-semibold text-slate-400 hover:text-sky-300 transition-colors uppercase tracking-wider rounded-t-lg truncate text-center" id="tab-voting" onclick="switchTab('voting')">
-<span class="sm:hidden">📜 Quests</span>
-<span class="hidden sm:inline">📜 Quests</span>
+<span class="sm:hidden" data-i18n="tab_quests">📜 QUESTS</span>
+<span class="hidden sm:inline" data-i18n="tab_quests">📜 QUESTS</span>
 </button>
 <button class="tab-btn flex-1 px-1 sm:px-4 py-3 text-xs sm:text-lg font-semibold text-slate-400 hover:text-sky-300 transition-colors uppercase tracking-wider rounded-t-lg truncate text-center" id="tab-leaderboard" onclick="switchTab('leaderboard')">
-<span class="sm:hidden">🏆 Ranks</span>
-<span class="hidden sm:inline">🏆 Leaderboard</span>
+<span class="sm:hidden" data-i18n="tab_ranks">🏆 RANKS</span>
+<span class="hidden sm:inline" data-i18n="tab_ranks">🏆 RANKS</span>
 </button>
 <button class="tab-btn flex-1 px-1 sm:px-4 py-3 text-xs sm:text-lg font-semibold text-pink-500 hover:text-pink-400 transition-colors uppercase tracking-wider rounded-t-lg truncate text-center" id="tab-market" onclick="switchTab('market')">
-<span class="sm:hidden">💰 Store</span>
-<span class="hidden sm:inline">💰 Store</span>
+<span class="sm:hidden" data-i18n="tab_store">💰 STORE</span>
+<span class="hidden sm:inline" data-i18n="tab_store">💰 STORE</span>
 </button>
 <button class="tab-btn hidden flex-1 px-1 sm:px-4 py-3 text-xs sm:text-lg font-semibold text-amber-500 hover:text-amber-400 transition-colors uppercase tracking-wider rounded-t-lg truncate text-center" id="tab-admin" onclick="switchTab('admin')">
 <span class="sm:hidden">⚙️ Admin</span>
@@ -1228,7 +1228,8 @@
                     const level = getLevel(xp);
                     const currentLevelXP = xp % 100;
                     document.getElementById("user-level-badge").innerText = level;
-                    document.getElementById("user-level-title").innerText = `Уровень ${level}`;
+                    const lg = localStorage.getItem("lang") || "en";
+            document.getElementById("user-level-title").innerText = lg === "ru" ? `Уровень ${level}` : `Level ${level}`;
                     document.getElementById("user-xp-text").innerText = `${currentLevelXP} / 100 XP`;
                     document.getElementById("user-xp-bar").style.width = `${currentLevelXP}%`;
 
@@ -1238,7 +1239,8 @@
                     isStudent = false;
                     document.getElementById("user-nickname").innerText = "Wandering Soul";
                     document.getElementById("user-level-badge").innerText = "0";
-                    document.getElementById("user-level-title").innerText = "Уровень 0";
+                    const lg = localStorage.getItem("lang") || "en";
+            document.getElementById("user-level-title").innerText = lg === "ru" ? "Уровень 0" : "Level 0";
                     document.getElementById("user-xp-text").innerText = "0 / 100 XP";
                     document.getElementById("user-xp-bar").style.width = "0%";
                     document.getElementById("privacy-toggle").checked = false;
@@ -1290,9 +1292,7 @@
                             </div>
                         </div>
                         <div class="mt-5 flex justify-end">
-                            <button onclick="voteFor(${p.index}, this)" class="px-6 py-3 bg-slate-800 hover:bg-sky-600 hover:text-white transition-all rounded-xl font-bold border border-slate-600 hover:border-sky-400 shadow-lg hover:shadow-[0_0_15px_rgba(14,165,233,0.5)] text-sky-300 uppercase tracking-wider text-sm">
-                                Vote
-                            </button>
+                            <button onclick="voteFor(${p.index}, this)" class="px-6 py-3 bg-slate-800 hover:bg-sky-600 hover:text-white transition-all rounded-xl font-bold border border-slate-600 hover:border-sky-400 shadow-lg hover:shadow-[0_0_15px_rgba(14,165,233,0.5)] text-sky-300 uppercase tracking-wider text-sm">${(localStorage.getItem("lang")||"en") === "ru" ? "ГОЛОСОВАТЬ" : "VOTE"}</button>
                         </div>
                     </div>
                 `).join('');
@@ -1307,7 +1307,8 @@
             try {
                 let countRes = await voterContract.get_student_count();
                 let count = countRes ? countRes.toNumber() : 0;
-                document.getElementById("total-students").innerText = `Total Heroes: ${count}`;
+                const lg2 = localStorage.getItem("lang") || "en";
+            document.getElementById("total-students").innerText = lg2 === "ru" ? `Всего героев: ${count}` : `Total Heroes: ${count}`;
 
                 if (count === 0) {
                     tbody.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-slate-500 font-bold">No heroes enrolled yet.</td></tr>';
@@ -2370,7 +2371,7 @@
                 // Render for Store Tab
                 if (storeContainer) {
                     if (items.length === 0) {
-                        storeContainer.innerHTML = "<div class='text-center text-slate-500 py-8 col-span-full'>Store is empty.</div>";
+                        storeContainer.innerHTML = `<div class='text-center text-slate-500 py-8 col-span-full'>${(localStorage.getItem("lang")||"en") === "ru" ? "Магазин пуст." : "Store is empty."}</div>`;
                     } else {
                         storeContainer.innerHTML = items.map(item => `
                             <div class="bg-slate-900/60 p-6 rounded-2xl border border-pink-500/20 hover:border-pink-400 transition-all group shadow-[inset_0_0_20px_rgba(0,0,0,0.4)] flex flex-col items-center text-center">
@@ -2379,9 +2380,7 @@
                                 </div>
                                 <h3 class="font-bold text-xl text-slate-100 mb-2">${item.name}</h3>
                                 <p class="text-pink-400 font-mono font-bold text-lg mb-4">${item.price} SGC</p>
-                                <button onclick="buyItem(${item.id}, '${item.name}', ${item.price})" class="w-full py-2 bg-slate-800 hover:bg-pink-600 hover:text-white transition-all rounded-xl font-bold border border-slate-600 hover:border-pink-400 shadow-lg text-pink-300 uppercase tracking-wider text-sm">
-                                    Buy
-                                </button>
+                                <button onclick="buyItem(${item.id}, '${item.name}', ${item.price})" class="w-full py-2 bg-slate-800 hover:bg-pink-600 hover:text-white transition-all rounded-xl font-bold border border-slate-600 hover:border-pink-400 shadow-lg text-pink-300 uppercase tracking-wider text-sm">${(localStorage.getItem("lang")||"en") === "ru" ? "Купить" : "Buy"}</button>
                             </div>
                         `).join('');
                     }
@@ -2480,13 +2479,16 @@
         "i18n_80": "Prepare your magical artifacts (MetaMask) to join the Classroom DAO.",
         "i18n_81": "1. Connect to 0G Realm",
         "i18n_82": "2. Add Gold (SGC)",
-        "i18n_83": "Enter Dashboard"
+        "i18n_83": "Enter Dashboard",
+        "tab_quests": "📜 QUESTS",
+        "tab_ranks": "🏆 RANKS",
+        "tab_store": "💰 STORE"
     },
     "ru": {
         "i18n_1": "html",
         "i18n_2": "Classroom DAO V4 | RPG Edition",
-        "i18n_3": "КЛАСС DAO",
-        "i18n_4": "RPG Издание",
+        "i18n_3": "CLASSROOM DAO",
+        "i18n_4": "RPG Edition",
         "i18n_5": "Настроить Сеть",
         "i18n_6": "Добавить SGC",
         "i18n_7": "Подключить кошелек",
@@ -2545,7 +2547,7 @@
         "i18n_60": "Начать Новый Раунд",
         "i18n_61": "Resets all votes. Students can vote again from scratch.",
         "i18n_62": "Менеджер Магазина",
-        "i18n_63": "Управление ассортиментом и ценами Мистического Магазина.",
+        "i18n_63": "Магазин артефактов",
         "i18n_64": "Название Предмета",
         "i18n_65": "Цена в SGC",
         "i18n_66": "Добавить Предмет",
@@ -2557,7 +2559,7 @@
         "i18n_72": "Address",
         "i18n_73": "Действия",
         "i18n_74": "Загрузка реестра...",
-        "i18n_75": "Mystic Store",
+        "i18n_75": "Магазин артефактов",
         "i18n_76": "Exchange your SGC for legendary items.",
         "i18n_77": "Магазин пуст.",
         "i18n_78": "Магия блокчейна в процессе...",
@@ -2565,12 +2567,30 @@
         "i18n_80": "Подготовьте свои магические артефакты (MetaMask), чтобы присоединиться к Classroom DAO.",
         "i18n_81": "1. Подключиться к 0G Realm",
         "i18n_82": "2. Добавить Золото (SGC)",
-        "i18n_83": "Войти в Панель"
+        "i18n_83": "Войти в Панель",
+        "tab_quests": "📜 КВЕСТЫ",
+        "tab_ranks": "🏆 РЕЙТИНГ",
+        "tab_store": "💰 МАГАЗИН"
     }
 };
 
     function setLanguage(lang) {
         localStorage.setItem('lang', lang);
+        const levelEl = document.getElementById('user-level-title');
+        if(levelEl && levelEl.innerText) {
+            const m = levelEl.innerText.match(/\d+/);
+            if(m) {
+                levelEl.innerText = lang === 'ru' ? `Уровень ${m[0]}` : `Level ${m[0]}`;
+            }
+        }
+        const totalEl = document.getElementById('total-students');
+        if(totalEl && totalEl.innerText) {
+            const m = totalEl.innerText.match(/\d+/);
+            if(m) {
+                totalEl.innerText = lang === 'ru' ? `Всего героев: ${m[0]}` : `Total Heroes: ${m[0]}`;
+            }
+        }
+
         const toggleBtn = document.getElementById('lang-toggle-btn');
         if(toggleBtn) {
             toggleBtn.innerText = lang === 'ru' ? 'EN' : 'RU'; 
