@@ -1,20 +1,18 @@
-<!DOCTYPE html>
+<span data-i18n="i18n_1"><!DOCTYPE html>
+</span>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Classroom DAO V4 | RPG Edition</title>
-    <script src="//cdn.jsdelivr.net/npm/eruda"></script>
-    <script>eruda.init();</script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/ethereum/blockies/blockies.min.js"></script>
-    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Rajdhani:wght@400;500;600;700&display=swap"
-        rel="stylesheet">
-    <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title data-i18n="i18n_2">Classroom DAO V4 | RPG Edition</title>
+<script src="//cdn.jsdelivr.net/npm/eruda"></script>
+<script>eruda.init();</script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/ethereum/blockies/blockies.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&amp;family=Rajdhani:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<style>
         body {
             background-color: #050b14;
             color: #e2e8f0;
@@ -276,630 +274,486 @@
         }
     </style>
 </head>
-
 <body class="min-h-screen flex flex-col items-center py-8 px-4 space-y-6">
-    <div class="max-w-5xl w-full text-center space-y-2 pt-2">
-        <h1
-            class="text-5xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-emerald-400 neon-text">
+<div class="max-w-5xl w-full text-center space-y-2 pt-2">
+<h1 class="text-5xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-emerald-400 neon-text"><span data-i18n="i18n_3">
             CLASSROOM DAO
-        </h1>
-        <p class="text-sky-300/80 text-xl font-medium tracking-[0.2em] uppercase">RPG Edition</p>
-    </div>
-
-    <!-- Header Actions -->
-    <div class="max-w-5xl w-full flex flex-wrap justify-center md:justify-end gap-3 relative z-10">
-        <button onclick="setupNetwork()"
-            class="px-4 py-2 bg-slate-900/80 hover:bg-slate-800 transition-colors rounded-lg font-medium text-sm text-sky-400 border border-sky-500/30 hover:border-sky-400 shadow-[0_0_10px_rgba(14,165,233,0.1)]">
+        </span></h1>
+<p class="text-sky-300/80 text-xl font-medium tracking-[0.2em] uppercase"><span data-i18n="i18n_4">RPG Edition</span></p>
+</div>
+<!-- Header Actions -->
+<div class="max-w-5xl w-full flex flex-wrap justify-center md:justify-end gap-3 relative z-10">
+<button class="px-4 py-2 bg-slate-900/80 hover:bg-slate-800 transition-colors rounded-lg font-medium text-sm text-sky-400 border border-sky-500/30 hover:border-sky-400 shadow-[0_0_10px_rgba(14,165,233,0.1)]" onclick="setupNetwork()"><span data-i18n="i18n_5">
             Setup Network
-        </button>
-        <button onclick="addToken()"
-            class="px-4 py-2 bg-slate-900/80 hover:bg-slate-800 transition-colors rounded-lg font-medium text-sm text-emerald-400 border border-emerald-500/30 hover:border-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.1)]">
+        </span></button>
+<button class="px-4 py-2 bg-slate-900/80 hover:bg-slate-800 transition-colors rounded-lg font-medium text-sm text-emerald-400 border border-emerald-500/30 hover:border-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.1)]" onclick="addToken()"><span data-i18n="i18n_6">
             Add SGC
-        </button>
-        <button id="connect-btn"
-            class="px-6 py-2 bg-gradient-to-r from-sky-600 to-emerald-600 hover:from-sky-500 hover:to-emerald-500 transition-all rounded-lg font-bold text-white shadow-[0_0_15px_rgba(16,185,129,0.4)] hover:scale-105">
+        </span></button>
+<button class="px-6 py-2 bg-gradient-to-r from-sky-600 to-emerald-600 hover:from-sky-500 hover:to-emerald-500 transition-all rounded-lg font-bold text-white shadow-[0_0_15px_rgba(16,185,129,0.4)] hover:scale-105" id="connect-btn"><span data-i18n="i18n_7">
             Connect Wallet
-        </button>
-    </div>
-
-    <!-- User Profile Card -->
-    <div id="profile-card"
-        class="glass-panel w-full max-w-5xl rounded-2xl p-4 md:p-6 hidden flex-col md:flex-row justify-between items-center gap-6">
-        <div
-            class="flex flex-col sm:flex-row items-center sm:items-start gap-4 md:gap-6 w-full md:w-auto text-center sm:text-left">
-            <div class="relative">
-                <canvas id="user-avatar"
-                    class="w-20 h-20 rounded-xl border-2 border-sky-400 shadow-[0_0_15px_rgba(14,165,233,0.5)]"></canvas>
-                <div id="user-level-badge"
-                    class="absolute -bottom-3 -right-3 bg-slate-900 border-2 border-emerald-500 text-emerald-400 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shadow-[0_0_10px_rgba(16,185,129,0.8)]">
+        </span></button>
+<button class="px-3 py-2 bg-slate-900/80 hover:bg-slate-800 transition-colors rounded-lg font-bold text-sm text-white border border-slate-500/30 hover:border-slate-400 shadow-[0_0_10px_rgba(255,255,255,0.1)] ml-2" id="lang-toggle-btn" onclick="toggleLang()">RU</button></div>
+<!-- User Profile Card -->
+<div class="glass-panel w-full max-w-5xl rounded-2xl p-4 md:p-6 hidden flex-col md:flex-row justify-between items-center gap-6" id="profile-card">
+<div class="flex flex-col sm:flex-row items-center sm:items-start gap-4 md:gap-6 w-full md:w-auto text-center sm:text-left">
+<div class="relative">
+<canvas class="w-20 h-20 rounded-xl border-2 border-sky-400 shadow-[0_0_15px_rgba(14,165,233,0.5)]" id="user-avatar"></canvas>
+<div class="absolute -bottom-3 -right-3 bg-slate-900 border-2 border-emerald-500 text-emerald-400 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shadow-[0_0_10px_rgba(16,185,129,0.8)]" id="user-level-badge">
                     1
                 </div>
-            </div>
-            <div class="flex-1">
-                <div class="flex flex-nowrap justify-between items-baseline gap-2 md:gap-3 w-full">
-                    <h2 id="user-nickname" class="text-xl md:text-2xl font-bold text-white tracking-wide truncate">
-                        Player</h2>
-                    <span id="user-wallet"
-                        class="text-[10px] md:text-xs text-slate-500 font-mono bg-slate-900/50 px-2 py-1 rounded-lg max-w-[100px] md:max-w-[120px] truncate inline-block">0x...</span>
-                </div>
-
-                <div id="student-xp-container" class="mt-2 space-y-1 w-full">
-                    <div class="flex justify-between text-[10px] md:text-xs font-semibold text-sky-300">
-                        <span id="user-level-title">Уровень 1</span>
-                        <span id="user-xp-text">0 / 100 XP</span>
-                    </div>
-                    <div class="xp-bar-container w-full md:w-64 h-3">
-                        <div id="user-xp-bar" class="xp-bar-fill" style="width: 0%;"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="flex flex-col items-center md:items-end w-full md:w-auto gap-4 mt-2 md:mt-0">
-            <div
-                class="text-center md:text-right bg-slate-900/50 p-2 md:p-3 rounded-xl border border-emerald-500/20 w-full md:w-auto">
-                <p class="text-[10px] md:text-xs text-emerald-500/80 uppercase tracking-widest font-bold mb-1">Gold
-                    Stash (SGC)</p>
-                <div class="flex items-center justify-center md:justify-end gap-2 mt-1">
-                    <p id="sgc-balance"
-                        class="text-xl md:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-yellow-300">
+</div>
+<div class="flex-1">
+<div class="flex flex-nowrap justify-between items-baseline gap-2 md:gap-3 w-full">
+<h2 class="text-xl md:text-2xl font-bold text-white tracking-wide truncate" id="user-nickname"><span data-i18n="i18n_8">
+                        Player</span></h2>
+<span class="text-[10px] md:text-xs text-slate-500 font-mono bg-slate-900/50 px-2 py-1 rounded-lg max-w-[100px] md:max-w-[120px] truncate inline-block" id="user-wallet">0x...</span>
+</div>
+<div class="mt-2 space-y-1 w-full" id="student-xp-container">
+<div class="flex justify-between text-[10px] md:text-xs font-semibold text-sky-300">
+<span id="user-level-title">Уровень 1</span>
+<span id="user-xp-text">0 / 100 XP</span>
+</div>
+<div class="xp-bar-container w-full md:w-64 h-3">
+<div class="xp-bar-fill" id="user-xp-bar" style="width: 0%;"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="flex flex-col items-center md:items-end w-full md:w-auto gap-4 mt-2 md:mt-0">
+<div class="text-center md:text-right bg-slate-900/50 p-2 md:p-3 rounded-xl border border-emerald-500/20 w-full md:w-auto">
+<p class="text-[10px] md:text-xs text-emerald-500/80 uppercase tracking-widest font-bold mb-1"><span data-i18n="i18n_9">Gold
+                    Stash (SGC)</span></p>
+<div class="flex items-center justify-center md:justify-end gap-2 mt-1">
+<p class="text-xl md:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-yellow-300" id="sgc-balance">
                         0.00</p>
-                    <button id="balance-refresh-btn" onclick="fetchUserData()" title="Refresh Balance"
-                        class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-800/80 border border-sky-500/30 text-sky-400 hover:bg-sky-600 hover:text-white hover:border-sky-400 transition-all shadow text-lg"
-                        style="cursor:pointer;">&#x21BB;</button>
-                </div>
-            </div>
-
-            <div class="flex items-center gap-3">
-                <span class="text-xs text-slate-400">Hide Wallet from Leaderboard</span>
-                <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
-                    <input type="checkbox" name="toggle" id="privacy-toggle"
-                        class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer z-10 transition-transform duration-200"
-                        onclick="togglePrivacy()" />
-                    <label for="privacy-toggle"
-                        class="toggle-label block overflow-hidden h-5 rounded-full bg-slate-600 cursor-pointer"></label>
-                </div>
-            </div>
-            <p id="privacy-status" class="text-xs text-sky-400 hidden">Updating privacy...</p>
-        </div>
-    </div>
-
-
-    <!-- Claim Attendance Panel -->
-    <div id="claim-attendance-block"
-        class="glass-panel w-full max-w-5xl rounded-2xl p-6 border border-sky-500/20 mt-6 hidden flex-col md:flex-row items-center gap-4">
-        <div class="flex-1">
-            <h3 class="text-xl font-bold text-sky-400">Claim Attendance</h3>
-            <p class="text-sm text-slate-400">Enter the Beacon Code provided by the Game Master.</p>
-        </div>
-        <div class="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
-            <div id="student-attendance-timer"
-                class="hidden text-sm font-semibold font-mono text-amber-500 bg-amber-950/40 border border-amber-500/30 px-3 py-2 rounded-xl animate-pulse whitespace-nowrap">
+<button class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-800/80 border border-sky-500/30 text-sky-400 hover:bg-sky-600 hover:text-white hover:border-sky-400 transition-all shadow text-lg" id="balance-refresh-btn" onclick="fetchUserData()" style="cursor:pointer;" title="Refresh Balance">↻</button>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<span class="text-xs text-slate-400">Hide Wallet from Leaderboard</span>
+<div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+<input class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer z-10 transition-transform duration-200" id="privacy-toggle" name="toggle" onclick="togglePrivacy()" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-5 rounded-full bg-slate-600 cursor-pointer" for="privacy-toggle"></label>
+</div>
+</div>
+<p class="text-xs text-sky-400 hidden" id="privacy-status"><span data-i18n="i18n_10">Updating privacy...</span></p>
+</div>
+</div>
+<!-- Claim Attendance Panel -->
+<div class="glass-panel w-full max-w-5xl rounded-2xl p-6 border border-sky-500/20 mt-6 hidden flex-col md:flex-row items-center gap-4" id="claim-attendance-block">
+<div class="flex-1">
+<h3 class="text-xl font-bold text-sky-400"><span data-i18n="i18n_11">Claim Attendance</span></h3>
+<p class="text-sm text-slate-400"><span data-i18n="i18n_12">Enter the Beacon Code provided by the Game Master.</span></p>
+</div>
+<div class="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
+<div class="hidden text-sm font-semibold font-mono text-amber-500 bg-amber-950/40 border border-amber-500/30 px-3 py-2 rounded-xl animate-pulse whitespace-nowrap" id="student-attendance-timer"><span data-i18n="i18n_13">
                 Осталось времени: 25 сек
-            </div>
-            <div class="flex gap-2 w-full md:w-auto">
-                <input type="text" id="attendance-code-input" placeholder="CODE"
-                    class="w-full md:w-32 bg-black/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-sky-500 transition-all font-mono uppercase">
-                <button id="btn-claim-attendance" onclick="claimAttendance()"
-                    class="px-6 py-3 bg-sky-600 hover:bg-sky-500 transition-all rounded-xl font-bold text-white shadow-[0_0_15px_rgba(14,165,233,0.4)] whitespace-nowrap">Claim</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Inventory Panel -->
-    <div id="student-inventory-panel" class="glass-panel w-full max-w-5xl rounded-2xl p-4 md:p-6 mt-6 mb-6 hidden">
-        <div class="flex justify-between items-center mb-4 border-b border-pink-500/20 pb-2">
-            <h3 class="text-xl font-bold text-pink-400 uppercase tracking-widest">Мой инвентарь</h3>
-            <button id="inventory-refresh-btn" onclick="loadStudentInventory()" title="Refresh Inventory"
-                class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-800/80 border border-sky-500/30 text-sky-400 hover:bg-sky-600 hover:text-white hover:border-sky-400 transition-all shadow text-lg"
-                style="cursor:pointer;">&#x21BB;</button>
-        </div>
-        <div id="student-inventory-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            <div class="text-slate-400 py-4 col-span-full">У вас пока нет купленных артефактов.</div>
-        </div>
-    </div>
-
-    <!-- Navigation Tabs -->
-    <div id="tabs-container" class="w-full max-w-5xl flex justify-between gap-[2px] border-b border-sky-900/50 hidden">
-        <button onclick="switchTab('voting')" id="tab-voting"
-            class="tab-btn active flex-1 px-1 sm:px-4 py-3 text-xs sm:text-lg font-semibold text-slate-400 hover:text-sky-300 transition-colors uppercase tracking-wider rounded-t-lg truncate text-center">
-            <span class="sm:hidden">📜 Quests</span>
-            <span class="hidden sm:inline">📜 Quests</span>
-        </button>
-        <button onclick="switchTab('leaderboard')" id="tab-leaderboard"
-            class="tab-btn flex-1 px-1 sm:px-4 py-3 text-xs sm:text-lg font-semibold text-slate-400 hover:text-sky-300 transition-colors uppercase tracking-wider rounded-t-lg truncate text-center">
-            <span class="sm:hidden">🏆 Ranks</span>
-            <span class="hidden sm:inline">🏆 Leaderboard</span>
-        </button>
-        <button onclick="switchTab('market')" id="tab-market"
-            class="tab-btn flex-1 px-1 sm:px-4 py-3 text-xs sm:text-lg font-semibold text-pink-500 hover:text-pink-400 transition-colors uppercase tracking-wider rounded-t-lg truncate text-center">
-            <span class="sm:hidden">💰 Store</span>
-            <span class="hidden sm:inline">💰 Store</span>
-        </button>
-        <button onclick="switchTab('admin')" id="tab-admin"
-            class="tab-btn hidden flex-1 px-1 sm:px-4 py-3 text-xs sm:text-lg font-semibold text-amber-500 hover:text-amber-400 transition-colors uppercase tracking-wider rounded-t-lg truncate text-center">
-            <span class="sm:hidden">⚙️ Admin</span>
-            <span class="hidden sm:inline">⚙️ GM Tools</span>
-        </button>
-    </div>
-
-    <!-- Main Content Container -->
-    <div id="content-container" class="w-full max-w-5xl relative min-h-[400px] hidden">
-
-        <!-- Tab 1: Dashboard (Quests) -->
-        <div id="content-voting"
-            class="tab-content active glass-panel rounded-b-2xl rounded-tr-2xl p-8 relative overflow-hidden">
-            <div class="flex items-center justify-between mb-2">
-                <div class="flex items-center gap-3 flex-wrap">
-                    <h2 class="text-3xl font-bold text-sky-400 rpg-title">Active Quests (Voting)</h2>
-                    <span id="round-badge"
-                        class="text-xs font-bold px-3 py-1 rounded-full bg-indigo-600/40 border border-indigo-500/40 text-indigo-300 tracking-widest uppercase">Voting
+            </span></div>
+<div class="flex gap-2 w-full md:w-auto">
+<input class="w-full md:w-32 bg-black/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-sky-500 transition-all font-mono uppercase" id="attendance-code-input" placeholder="CODE" type="text"/>
+<button class="px-6 py-3 bg-sky-600 hover:bg-sky-500 transition-all rounded-xl font-bold text-white shadow-[0_0_15px_rgba(14,165,233,0.4)] whitespace-nowrap" id="btn-claim-attendance" onclick="claimAttendance()"><span data-i18n="i18n_14">Claim</span></button>
+</div>
+</div>
+</div>
+<!-- Inventory Panel -->
+<div class="glass-panel w-full max-w-5xl rounded-2xl p-4 md:p-6 mt-6 mb-6 hidden" id="student-inventory-panel">
+<div class="flex justify-between items-center mb-4 border-b border-pink-500/20 pb-2">
+<h3 class="text-xl font-bold text-pink-400 uppercase tracking-widest"><span data-i18n="i18n_15">Мой инвентарь</span></h3>
+<button class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-800/80 border border-sky-500/30 text-sky-400 hover:bg-sky-600 hover:text-white hover:border-sky-400 transition-all shadow text-lg" id="inventory-refresh-btn" onclick="loadStudentInventory()" style="cursor:pointer;" title="Refresh Inventory">↻</button>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4" id="student-inventory-container">
+<div class="text-slate-400 py-4 col-span-full"><span data-i18n="i18n_16">У вас пока нет купленных артефактов.</span></div>
+</div>
+</div>
+<!-- Navigation Tabs -->
+<div class="w-full max-w-5xl flex justify-between gap-[2px] border-b border-sky-900/50 hidden" id="tabs-container">
+<button class="tab-btn active flex-1 px-1 sm:px-4 py-3 text-xs sm:text-lg font-semibold text-slate-400 hover:text-sky-300 transition-colors uppercase tracking-wider rounded-t-lg truncate text-center" id="tab-voting" onclick="switchTab('voting')">
+<span class="sm:hidden">📜 Quests</span>
+<span class="hidden sm:inline">📜 Quests</span>
+</button>
+<button class="tab-btn flex-1 px-1 sm:px-4 py-3 text-xs sm:text-lg font-semibold text-slate-400 hover:text-sky-300 transition-colors uppercase tracking-wider rounded-t-lg truncate text-center" id="tab-leaderboard" onclick="switchTab('leaderboard')">
+<span class="sm:hidden">🏆 Ranks</span>
+<span class="hidden sm:inline">🏆 Leaderboard</span>
+</button>
+<button class="tab-btn flex-1 px-1 sm:px-4 py-3 text-xs sm:text-lg font-semibold text-pink-500 hover:text-pink-400 transition-colors uppercase tracking-wider rounded-t-lg truncate text-center" id="tab-market" onclick="switchTab('market')">
+<span class="sm:hidden">💰 Store</span>
+<span class="hidden sm:inline">💰 Store</span>
+</button>
+<button class="tab-btn hidden flex-1 px-1 sm:px-4 py-3 text-xs sm:text-lg font-semibold text-amber-500 hover:text-amber-400 transition-colors uppercase tracking-wider rounded-t-lg truncate text-center" id="tab-admin" onclick="switchTab('admin')">
+<span class="sm:hidden">⚙️ Admin</span>
+<span class="hidden sm:inline">⚙️ GM Tools</span>
+</button>
+</div>
+<!-- Main Content Container -->
+<div class="w-full max-w-5xl relative min-h-[400px] hidden" id="content-container">
+<!-- Tab 1: Dashboard (Quests) -->
+<div class="tab-content active glass-panel rounded-b-2xl rounded-tr-2xl p-8 relative overflow-hidden" id="content-voting">
+<div class="flex items-center justify-between mb-2">
+<div class="flex items-center gap-3 flex-wrap">
+<h2 class="text-3xl font-bold text-sky-400 rpg-title"><span data-i18n="i18n_17">Active Quests (Voting)</span></h2>
+<span class="text-xs font-bold px-3 py-1 rounded-full bg-indigo-600/40 border border-indigo-500/40 text-indigo-300 tracking-widest uppercase" id="round-badge">Voting
                         Round #1</span>
-                </div>
-                <button id="quest-refresh-btn" onclick="refreshQuests()" title="Refresh quest names from blockchain"
-                    class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-800/80 border border-sky-500/30 text-sky-400 hover:bg-sky-600 hover:text-white hover:border-sky-400 transition-all shadow text-lg"
-                    style="cursor:pointer;">&#x21BB;</button>
-            </div>
-            <p class="text-slate-400 mb-8 text-lg">Cast your vote to shape the realm's future.</p>
-
-
-            <div id="proposals-container" class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div class="text-center text-slate-500 py-8 col-span-full">Loading quests...</div>
-            </div>
-            <p id="voting-status" class="mt-6 text-center text-sm font-bold"></p>
-        </div>
-
-        <!-- Tab 2: Leaderboard (Hall of Fame) -->
-        <div id="content-leaderboard" class="tab-content glass-panel rounded-b-2xl rounded-tr-2xl p-8">
-            <h2 class="text-3xl font-bold mb-2 text-yellow-400 rpg-title flex items-center gap-3">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <polygon
-                        points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
-                    </polygon>
-                </svg>
+</div>
+<button class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-800/80 border border-sky-500/30 text-sky-400 hover:bg-sky-600 hover:text-white hover:border-sky-400 transition-all shadow text-lg" id="quest-refresh-btn" onclick="refreshQuests()" style="cursor:pointer;" title="Refresh quest names from blockchain">↻</button>
+</div>
+<p class="text-slate-400 mb-8 text-lg"><span data-i18n="i18n_18">Cast your vote to shape the realm's future.</span></p>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-5" id="proposals-container">
+<div class="text-center text-slate-500 py-8 col-span-full"><span data-i18n="i18n_19">Loading quests...</span></div>
+</div>
+<p class="mt-6 text-center text-sm font-bold" id="voting-status"></p>
+</div>
+<!-- Tab 2: Leaderboard (Hall of Fame) -->
+<div class="tab-content glass-panel rounded-b-2xl rounded-tr-2xl p-8" id="content-leaderboard">
+<h2 class="text-3xl font-bold mb-2 text-yellow-400 rpg-title flex items-center gap-3">
+<svg fill="none" height="28" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="28">
+<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
+</polygon>
+</svg><span data-i18n="i18n_20">
                 Hall of Fame
-            </h2>
-            <p class="text-slate-400 mb-6 text-lg">The most legendary heroes of Classroom DAO.</p>
-
-            <div
-                class="overflow-x-auto rounded-xl border border-sky-500/20 bg-slate-900/60 shadow-[inset_0_0_20px_rgba(0,0,0,0.5)]">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr
-                            class="bg-slate-900 border-b border-sky-500/30 text-sky-400 text-sm uppercase tracking-widest">
-                            <th class="p-5 font-bold w-20 text-center">Rank</th>
-                            <th class="p-5 font-bold">Hero</th>
-                            <th class="p-5 font-bold text-center">Level</th>
-                            <th class="p-5 font-bold text-right">Total XP</th>
-                        </tr>
-                    </thead>
-                    <tbody id="leaderboard-body" class="divide-y divide-sky-900/30">
-                        <tr>
-                            <td colspan="4" class="p-8 text-center text-slate-500">Loading legends...</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            <div class="mt-4 flex justify-between items-center text-sm font-semibold text-slate-500">
-                <span id="total-students">Total Heroes: 0</span>
-                <button onclick="fetchLeaderboard()"
-                    class="hover:text-emerald-400 transition-colors flex items-center gap-1">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
-                        <path d="M21 3v5h-5" />
-                    </svg>
+            </span></h2>
+<p class="text-slate-400 mb-6 text-lg"><span data-i18n="i18n_21">The most legendary heroes of Classroom DAO.</span></p>
+<div class="overflow-x-auto rounded-xl border border-sky-500/20 bg-slate-900/60 shadow-[inset_0_0_20px_rgba(0,0,0,0.5)]">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-slate-900 border-b border-sky-500/30 text-sky-400 text-sm uppercase tracking-widest">
+<th class="p-5 font-bold w-20 text-center"><span data-i18n="i18n_22">Rank</span></th>
+<th class="p-5 font-bold"><span data-i18n="i18n_23">Hero</span></th>
+<th class="p-5 font-bold text-center"><span data-i18n="i18n_24">Level</span></th>
+<th class="p-5 font-bold text-right"><span data-i18n="i18n_25">Total XP</span></th>
+</tr>
+</thead>
+<tbody class="divide-y divide-sky-900/30" id="leaderboard-body">
+<tr>
+<td class="p-8 text-center text-slate-500" colspan="4"><span data-i18n="i18n_26">Loading legends...</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="mt-4 flex justify-between items-center text-sm font-semibold text-slate-500">
+<span id="total-students">Total Heroes: 0</span>
+<button class="hover:text-emerald-400 transition-colors flex items-center gap-1" onclick="fetchLeaderboard()">
+<svg fill="none" height="14" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="14">
+<path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"></path>
+<path d="M21 3v5h-5"></path>
+</svg><span data-i18n="i18n_27">
                     Refresh
-                </button>
-            </div>
-        </div>
-
-        <!-- Tab 3: Admin Panel (Game Master) -->
-        <div id="content-admin"
-            class="tab-content glass-panel rounded-b-2xl rounded-tr-2xl p-4 sm:p-8 border border-amber-500/30 shadow-[0_0_30px_rgba(245,158,11,0.1)]">
-            <h2 class="text-3xl font-bold mb-2 text-amber-500 rpg-title">Game Master Domain</h2>
-            <p class="text-slate-400 mb-8 text-lg">Summon new heroes and bestow legendary rewards.</p>
-
-            <!-- ── QR Scanner ──────────────────────────────────────────────── -->
-            <div
-                class="bg-slate-900/70 p-6 rounded-2xl border border-amber-500/20 shadow-[inset_0_0_15px_rgba(0,0,0,0.5)] mb-8">
-                <div id="qr-header-container" class="flex items-center justify-between mb-5">
-                    <h3 id="qr-scanner-title"
-                        class="text-xl font-bold text-amber-400 uppercase tracking-widest flex items-center gap-2">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <rect x="3" y="3" width="7" height="7" />
-                            <rect x="14" y="3" width="7" height="7" />
-                            <rect x="3" y="14" width="7" height="7" />
-                            <path
-                                d="M14 14h.01M18 14h.01M14 18h.01M18 18h.01M14 22h.01M22 14h.01M22 18h.01M22 22h.01M18 22h.01" />
-                        </svg>
+                </span></button>
+</div>
+</div>
+<!-- Tab 3: Admin Panel (Game Master) -->
+<div class="tab-content glass-panel rounded-b-2xl rounded-tr-2xl p-4 sm:p-8 border border-amber-500/30 shadow-[0_0_30px_rgba(245,158,11,0.1)]" id="content-admin">
+<h2 class="text-3xl font-bold mb-2 text-amber-500 rpg-title"><span data-i18n="i18n_28">Game Master Domain</span></h2>
+<p class="text-slate-400 mb-8 text-lg"><span data-i18n="i18n_29">Summon new heroes and bestow legendary rewards.</span></p>
+<!-- ── QR Scanner ──────────────────────────────────────────────── -->
+<div class="bg-slate-900/70 p-6 rounded-2xl border border-amber-500/20 shadow-[inset_0_0_15px_rgba(0,0,0,0.5)] mb-8">
+<div class="flex items-center justify-between mb-5" id="qr-header-container">
+<h3 class="text-xl font-bold text-amber-400 uppercase tracking-widest flex items-center gap-2" id="qr-scanner-title">
+<svg fill="none" height="20" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="20">
+<rect height="7" width="7" x="3" y="3"></rect>
+<rect height="7" width="7" x="14" y="3"></rect>
+<rect height="7" width="7" x="3" y="14"></rect>
+<path d="M14 14h.01M18 14h.01M14 18h.01M18 18h.01M14 22h.01M22 14h.01M22 18h.01M22 22h.01M18 22h.01"></path>
+</svg><span data-i18n="i18n_30">
                         QR Scanner — Enroll Student
-                    </h3>
-                    <button id="qr-toggle-btn" onclick="toggleQrScanner()"
-                        class="px-4 py-2 text-xs font-bold uppercase tracking-widest rounded-lg bg-amber-600/20 border border-amber-500/40 text-amber-400 hover:bg-amber-500/30 transition-all">
+                    </span></h3>
+<button class="px-4 py-2 text-xs font-bold uppercase tracking-widest rounded-lg bg-amber-600/20 border border-amber-500/40 text-amber-400 hover:bg-amber-500/30 transition-all" id="qr-toggle-btn" onclick="toggleQrScanner()"><span data-i18n="i18n_31">
                         Start Camera
-                    </button>
-                </div>
-
-                <!-- Scanner viewport -->
-                <div id="qr-reader" class="w-full max-w-sm mx-auto hidden"></div>
-
-                <!-- Scan result + registration fields -->
-                <div id="qr-result-block" class="hidden mt-6 space-y-4">
-                    <div class="flex items-center gap-3 p-3 bg-emerald-900/30 border border-emerald-500/40 rounded-xl">
-                        <span class="text-emerald-400 text-xl">✅</span>
-                        <div>
-                            <p class="text-xs text-slate-500 uppercase tracking-widest font-bold">Scanned Address</p>
-                            <p id="qr-scanned-address" class="font-mono text-emerald-300 text-sm break-all"></p>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label
-                                class="block text-xs uppercase tracking-widest text-slate-500 mb-1 font-bold">Nickname
-                                (Unique)</label>
-                            <input type="text" id="qr-nickname" placeholder="e.g. DragonSlayer99"
-                                class="w-full bg-black/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-amber-500 focus:shadow-[0_0_10px_rgba(245,158,11,0.3)] transition-all font-semibold">
-                        </div>
-                        <div>
-                            <label class="block text-xs uppercase tracking-widest text-slate-500 mb-1 font-bold">Group /
-                                Guild Name</label>
-                            <input type="text" id="qr-group" placeholder="e.g. Web3 Knights"
-                                class="w-full bg-black/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-amber-500 focus:shadow-[0_0_10px_rgba(245,158,11,0.3)] transition-all font-semibold">
-                        </div>
-                    </div>
-                    <button id="btn-qr-register" onclick="registerStudentFromQr()"
-                        class="w-full py-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 transition-all rounded-xl font-bold text-white shadow-[0_0_15px_rgba(16,185,129,0.5)] hover:scale-[1.02] uppercase tracking-widest">
+                    </span></button>
+</div>
+<!-- Scanner viewport -->
+<div class="w-full max-w-sm mx-auto hidden" id="qr-reader"></div>
+<!-- Scan result + registration fields -->
+<div class="hidden mt-6 space-y-4" id="qr-result-block">
+<div class="flex items-center gap-3 p-3 bg-emerald-900/30 border border-emerald-500/40 rounded-xl">
+<span class="text-emerald-400 text-xl">✅</span>
+<div>
+<p class="text-xs text-slate-500 uppercase tracking-widest font-bold"><span data-i18n="i18n_32">Scanned Address</span></p>
+<p class="font-mono text-emerald-300 text-sm break-all" id="qr-scanned-address"></p>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div>
+<label class="block text-xs uppercase tracking-widest text-slate-500 mb-1 font-bold"><span data-i18n="i18n_33">Nickname
+                                (Unique)</span></label>
+<input class="w-full bg-black/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-amber-500 focus:shadow-[0_0_10px_rgba(245,158,11,0.3)] transition-all font-semibold" id="qr-nickname" placeholder="e.g. DragonSlayer99" type="text"/>
+</div>
+<div>
+<label class="block text-xs uppercase tracking-widest text-slate-500 mb-1 font-bold"><span data-i18n="i18n_34">Group /
+                                Guild Name</span></label>
+<input class="w-full bg-black/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-amber-500 focus:shadow-[0_0_10px_rgba(245,158,11,0.3)] transition-all font-semibold" id="qr-group" placeholder="e.g. Web3 Knights" type="text"/>
+</div>
+</div>
+<button class="w-full py-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 transition-all rounded-xl font-bold text-white shadow-[0_0_15px_rgba(16,185,129,0.5)] hover:scale-[1.02] uppercase tracking-widest" id="btn-qr-register" onclick="registerStudentFromQr()"><span data-i18n="i18n_35">
                         📲 Register On-chain (+ 0.01 OGI gas)
-                    </button>
-                    <button onclick="resetQrScanner()"
-                        class="w-full py-2 text-slate-500 hover:text-slate-300 text-sm transition-colors">
+                    </span></button>
+<button class="w-full py-2 text-slate-500 hover:text-slate-300 text-sm transition-colors" onclick="resetQrScanner()"><span data-i18n="i18n_36">
                         ↩ Scan another address
-                    </button>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <!-- Registration Form (manual) -->
-                <div
-                    class="bg-slate-900/70 p-6 rounded-2xl border border-amber-500/20 shadow-[inset_0_0_15px_rgba(0,0,0,0.5)]">
-                    <h3 class="text-xl font-bold mb-5 text-amber-400 uppercase tracking-widest flex items-center gap-2">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                            <circle cx="9" cy="7" r="4" />
-                            <line x1="19" y1="8" x2="19" y2="14" />
-                            <line x1="22" y1="11" x2="16" y2="11" />
-                        </svg>
+                    </span></button>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+<!-- Registration Form (manual) -->
+<div class="bg-slate-900/70 p-6 rounded-2xl border border-amber-500/20 shadow-[inset_0_0_15px_rgba(0,0,0,0.5)]">
+<h3 class="text-xl font-bold mb-5 text-amber-400 uppercase tracking-widest flex items-center gap-2">
+<svg fill="none" height="20" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="20">
+<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+<circle cx="9" cy="7" r="4"></circle>
+<line x1="19" x2="19" y1="8" y2="14"></line>
+<line x1="22" x2="16" y1="11" y2="11"></line>
+</svg><span data-i18n="i18n_37">
                         Manual Enroll
-                    </h3>
-                    <div class="space-y-4">
-                        <div>
-                            <label
-                                class="block text-xs uppercase tracking-widest text-slate-500 mb-1 font-bold">Nickname
-                                (Unique)</label>
-                            <input type="text" id="reg-nickname" placeholder="e.g. DragonSlayer99"
-                                class="w-full bg-black/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-amber-500 focus:shadow-[0_0_10px_rgba(245,158,11,0.3)] transition-all font-semibold">
-                        </div>
-                        <div>
-                            <label class="block text-xs uppercase tracking-widest text-slate-500 mb-1 font-bold">Group /
-                                Guild Name</label>
-                            <input type="text" id="reg-group" placeholder="e.g. Web3 Knights"
-                                class="w-full bg-black/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-amber-500 focus:shadow-[0_0_10px_rgba(245,158,11,0.3)] transition-all font-semibold">
-                        </div>
-                        <div>
-                            <label class="block text-xs uppercase tracking-widest text-slate-500 mb-1 font-bold">Wallet
-                                Address</label>
-                            <input type="text" id="reg-address" placeholder="0x..."
-                                class="w-full bg-black/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-amber-500 focus:shadow-[0_0_10px_rgba(245,158,11,0.3)] transition-all font-mono text-sm">
-                        </div>
-                        <button id="btn-register" onclick="registerStudent()"
-                            class="w-full py-4 mt-4 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 transition-all rounded-xl font-bold text-white shadow-[0_0_15px_rgba(245,158,11,0.4)] hover:scale-[1.02] uppercase tracking-wider">
+                    </span></h3>
+<div class="space-y-4">
+<div>
+<label class="block text-xs uppercase tracking-widest text-slate-500 mb-1 font-bold"><span data-i18n="i18n_38">Nickname
+                                (Unique)</span></label>
+<input class="w-full bg-black/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-amber-500 focus:shadow-[0_0_10px_rgba(245,158,11,0.3)] transition-all font-semibold" id="reg-nickname" placeholder="e.g. DragonSlayer99" type="text"/>
+</div>
+<div>
+<label class="block text-xs uppercase tracking-widest text-slate-500 mb-1 font-bold"><span data-i18n="i18n_39">Group /
+                                Guild Name</span></label>
+<input class="w-full bg-black/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-amber-500 focus:shadow-[0_0_10px_rgba(245,158,11,0.3)] transition-all font-semibold" id="reg-group" placeholder="e.g. Web3 Knights" type="text"/>
+</div>
+<div>
+<label class="block text-xs uppercase tracking-widest text-slate-500 mb-1 font-bold"><span data-i18n="i18n_40">Wallet
+                                Address</span></label>
+<input class="w-full bg-black/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-amber-500 focus:shadow-[0_0_10px_rgba(245,158,11,0.3)] transition-all font-mono text-sm" id="reg-address" placeholder="0x..." type="text"/>
+</div>
+<button class="w-full py-4 mt-4 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 transition-all rounded-xl font-bold text-white shadow-[0_0_15px_rgba(245,158,11,0.4)] hover:scale-[1.02] uppercase tracking-wider" id="btn-register" onclick="registerStudent()"><span data-i18n="i18n_41">
                             Enroll &amp; Grant 0.01 OGI
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Quick Rewards Section -->
-                <div
-                    class="bg-slate-900/70 p-6 rounded-2xl border border-purple-500/20 shadow-[inset_0_0_15px_rgba(0,0,0,0.5)] flex flex-col">
-                    <h3
-                        class="text-xl font-bold mb-5 text-purple-400 uppercase tracking-widest flex items-center gap-2">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <polygon
-                                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
-                            </polygon>
-                        </svg>
+                        </span></button>
+</div>
+</div>
+<!-- Quick Rewards Section -->
+<div class="bg-slate-900/70 p-6 rounded-2xl border border-purple-500/20 shadow-[inset_0_0_15px_rgba(0,0,0,0.5)] flex flex-col">
+<h3 class="text-xl font-bold mb-5 text-purple-400 uppercase tracking-widest flex items-center gap-2">
+<svg fill="none" height="20" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="20">
+<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
+</polygon>
+</svg><span data-i18n="i18n_42">
                         Bestow Loot
-                    </h3>
-                    <div class="space-y-4 flex-1">
-                        <div>
-                            <label class="block text-xs uppercase tracking-widest text-slate-500 mb-1 font-bold">Target
-                                Wallet Address</label>
-                            <input type="text" id="reward-address" placeholder="0x..."
-                                class="w-full bg-black/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-purple-500 focus:shadow-[0_0_10px_rgba(168,85,247,0.3)] transition-all font-mono text-sm">
-                        </div>
-                        <div class="grid grid-cols-2 gap-4 mt-4">
-                            <div>
-                                <label
-                                    class="block text-xs uppercase tracking-widest text-slate-500 mb-1 font-bold">Target
-                                    Group ID (Optional)</label>
-                                <input type="number" id="reward-group" placeholder="e.g. 101"
-                                    class="w-full bg-black/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-purple-500 transition-all font-semibold">
-                            </div>
-                            <div>
-                                <label
-                                    class="block text-xs uppercase tracking-widest text-slate-500 mb-1 font-bold">Custom
-                                    Amount (XP)</label>
-                                <input type="number" id="reward-custom-amount" placeholder="e.g. 150"
-                                    class="w-full bg-black/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-purple-500 transition-all font-semibold">
-                            </div>
-                        </div>
-                        <div class="mt-4">
-                            <label class="block text-xs uppercase tracking-widest text-slate-500 mb-1 font-bold">Reason
-                                for Reward</label>
-                            <input type="text" id="reward-reason" placeholder="e.g. Activity on lecture"
-                                class="w-full bg-black/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-purple-500 transition-all text-sm">
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-4 mt-6">
-                            <button onclick="rewardStudent(50)"
-                                class="py-4 bg-slate-800 hover:bg-purple-900/50 transition-colors rounded-xl font-bold border border-slate-700 hover:border-purple-500 flex flex-col items-center justify-center group shadow-lg">
-                                <span class="text-purple-400 group-hover:text-purple-300 text-lg transition-colors">+50
+                    </span></h3>
+<div class="space-y-4 flex-1">
+<div>
+<label class="block text-xs uppercase tracking-widest text-slate-500 mb-1 font-bold"><span data-i18n="i18n_43">Target
+                                Wallet Address</span></label>
+<input class="w-full bg-black/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-purple-500 focus:shadow-[0_0_10px_rgba(168,85,247,0.3)] transition-all font-mono text-sm" id="reward-address" placeholder="0x..." type="text"/>
+</div>
+<div class="grid grid-cols-2 gap-4 mt-4">
+<div>
+<label class="block text-xs uppercase tracking-widest text-slate-500 mb-1 font-bold"><span data-i18n="i18n_44">Target
+                                    Group ID (Optional)</span></label>
+<input class="w-full bg-black/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-purple-500 transition-all font-semibold" id="reward-group" placeholder="e.g. 101" type="number"/>
+</div>
+<div>
+<label class="block text-xs uppercase tracking-widest text-slate-500 mb-1 font-bold"><span data-i18n="i18n_45">Custom
+                                    Amount (XP)</span></label>
+<input class="w-full bg-black/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-purple-500 transition-all font-semibold" id="reward-custom-amount" placeholder="e.g. 150" type="number"/>
+</div>
+</div>
+<div class="mt-4">
+<label class="block text-xs uppercase tracking-widest text-slate-500 mb-1 font-bold"><span data-i18n="i18n_46">Reason
+                                for Reward</span></label>
+<input class="w-full bg-black/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-purple-500 transition-all text-sm" id="reward-reason" placeholder="e.g. Activity on lecture" type="text"/>
+</div>
+<div class="grid grid-cols-2 gap-4 mt-6">
+<button class="py-4 bg-slate-800 hover:bg-purple-900/50 transition-colors rounded-xl font-bold border border-slate-700 hover:border-purple-500 flex flex-col items-center justify-center group shadow-lg" onclick="rewardStudent(50)">
+<span class="text-purple-400 group-hover:text-purple-300 text-lg transition-colors">+50
                                     XP</span>
-                                <span
-                                    class="text-[10px] text-slate-500 group-hover:text-purple-200 uppercase tracking-widest mt-1">Minor
+<span class="text-[10px] text-slate-500 group-hover:text-purple-200 uppercase tracking-widest mt-1">Minor
                                     Quest</span>
-                            </button>
-                            <button onclick="rewardStudent(100)"
-                                class="py-4 bg-slate-800 hover:bg-purple-900/50 transition-colors rounded-xl font-bold border border-slate-700 hover:border-purple-500 flex flex-col items-center justify-center group shadow-lg">
-                                <span class="text-purple-400 group-hover:text-purple-300 text-lg transition-colors">+100
+</button>
+<button class="py-4 bg-slate-800 hover:bg-purple-900/50 transition-colors rounded-xl font-bold border border-slate-700 hover:border-purple-500 flex flex-col items-center justify-center group shadow-lg" onclick="rewardStudent(100)">
+<span class="text-purple-400 group-hover:text-purple-300 text-lg transition-colors">+100
                                     XP</span>
-                                <span
-                                    class="text-[10px] text-slate-500 group-hover:text-purple-200 uppercase tracking-widest mt-1">Major
+<span class="text-[10px] text-slate-500 group-hover:text-purple-200 uppercase tracking-widest mt-1">Major
                                     Quest</span>
-                            </button>
-                            <button onclick="rewardStudent(200)"
-                                class="col-span-2 py-4 bg-gradient-to-r from-purple-700 to-indigo-700 hover:from-purple-600 hover:to-indigo-600 transition-all rounded-xl font-bold shadow-[0_0_15px_rgba(168,85,247,0.4)] flex flex-col items-center justify-center hover:scale-[1.02]">
-                                <span class="text-white text-xl">+200 XP & SGC</span>
-                                <span
-                                    class="text-[10px] text-purple-200 uppercase tracking-widest mt-1 font-medium">Epic
+</button>
+<button class="col-span-2 py-4 bg-gradient-to-r from-purple-700 to-indigo-700 hover:from-purple-600 hover:to-indigo-600 transition-all rounded-xl font-bold shadow-[0_0_15px_rgba(168,85,247,0.4)] flex flex-col items-center justify-center hover:scale-[1.02]" onclick="rewardStudent(200)">
+<span class="text-white text-xl">+200 XP &amp; SGC</span>
+<span class="text-[10px] text-purple-200 uppercase tracking-widest mt-1 font-medium">Epic
                                     Boss Raid</span>
-                            </button>
-                            <button onclick="rewardStudentCustom()"
-                                class="py-4 bg-slate-800 hover:bg-purple-900/50 transition-colors rounded-xl font-bold border border-slate-700 hover:border-purple-500 flex flex-col items-center justify-center group shadow-lg">
-                                <span
-                                    class="text-purple-400 group-hover:text-purple-300 text-lg transition-colors">Custom
+</button>
+<button class="py-4 bg-slate-800 hover:bg-purple-900/50 transition-colors rounded-xl font-bold border border-slate-700 hover:border-purple-500 flex flex-col items-center justify-center group shadow-lg" onclick="rewardStudentCustom()">
+<span class="text-purple-400 group-hover:text-purple-300 text-lg transition-colors">Custom
                                     Reward</span>
-                            </button>
-                            <button onclick="rewardGroupCustom()"
-                                class="py-4 bg-gradient-to-r from-blue-700 to-cyan-700 hover:from-blue-600 hover:to-cyan-600 transition-all rounded-xl font-bold shadow-[0_0_15px_rgba(6,182,212,0.4)] flex flex-col items-center justify-center hover:scale-[1.02]">
-                                <span class="text-white text-lg">Reward Group</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <p id="admin-status" class="mt-6 text-center text-sm font-bold"></p>
-            <div
-                class="bg-slate-900/70 p-6 rounded-2xl border border-rose-500/20 shadow-[inset_0_0_15px_rgba(0,0,0,0.5)] mt-8">
-                <h3 class="text-xl font-bold mb-5 text-rose-400 uppercase tracking-widest flex items-center gap-2">
-                    Beacon Timer</h3>
-
-                <!-- Custom Reward Input Field -->
-                <div class="mb-5 max-w-xs">
-                    <label class="block text-slate-400 text-sm font-semibold mb-2">Вознаграждение за посещаемость
-                        (SGC)</label>
-                    <input type="number" id="attendanceRewardInput" min="1" max="50" value="10"
-                        class="w-full bg-black/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-rose-500 transition-all font-mono">
-                </div>
-
-                <div class="flex flex-col md:flex-row items-center gap-4">
-                    <button onclick="generateDailyCode(event)"
-                        class="py-3 px-6 bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 transition-all rounded-xl font-bold text-white shadow-[0_0_15px_rgba(225,29,72,0.4)] whitespace-nowrap">Generate
-                        Daily Code</button>
-                    <div class="text-2xl font-mono text-rose-300 font-bold tracking-widest bg-black/50 px-4 py-2 rounded-xl"
-                        id="daily-code-display">----</div>
-                    <div class="text-lg font-mono text-amber-500 font-bold bg-black/50 px-4 py-2 rounded-xl border border-amber-500/30 animate-pulse hidden"
-                        id="daily-code-timer">Осталось времени: 25 сек</div>
-                </div>
-            </div>
-
-            <div
-                class="bg-slate-900/70 p-6 rounded-2xl border border-amber-500/20 shadow-[inset_0_0_15px_rgba(0,0,0,0.5)] mt-8">
-                <div class="flex justify-between items-center mb-5">
-                    <h3 class="text-xl font-bold text-amber-400 uppercase tracking-widest">Market Logs</h3>
-                    <button id="logs-refresh-btn" onclick="loadMarketLogs()" title="Refresh Market Logs"
-                        class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-800/80 border border-sky-500/30 text-sky-400 hover:bg-sky-600 hover:text-white hover:border-sky-400 transition-all shadow text-lg"
-                        style="cursor:pointer;">&#x21BB;</button>
-                </div>
-                <div class="overflow-x-auto max-h-60 overflow-y-auto rounded-xl border border-slate-700">
-                    <table class="w-full text-sm text-left text-slate-400 font-mono">
-                        <thead class="text-xs text-amber-500 uppercase bg-slate-800/80 sticky top-0">
-                            <tr>
-                                <th class="px-4 py-3">Student</th>
-                                <th class="px-4 py-3">Item</th>
-                                <th class="px-4 py-3">Price</th>
-                                <th class="px-4 py-3">Date</th>
-                            </tr>
-                        </thead>
-                        <tbody id="market-logs-container" class="divide-y divide-slate-700/50">
-                            <tr>
-                                <td colspan="4" class="px-4 py-4 text-center">Loading logs...</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div
-                class="bg-slate-900/70 p-6 rounded-2xl border border-sky-500/20 shadow-[inset_0_0_15px_rgba(0,0,0,0.5)] mt-8">
-                <h3 class="text-xl font-bold mb-5 text-sky-400 uppercase tracking-widest">Poll Manager</h3>
-                <p class="text-sm text-slate-400 mb-4">Set dynamic topics for active quests (voting). Leave blank to use
-                    default names.</p>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <input type="text" id="poll-topic-0" placeholder="Topic 1 (e.g. Web3 Basics)"
-                        class="w-full bg-black/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-sky-500 transition-all text-sm">
-                    <input type="text" id="poll-topic-1" placeholder="Topic 2 (e.g. DeFi)"
-                        class="w-full bg-black/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-sky-500 transition-all text-sm">
-                    <input type="text" id="poll-topic-2" placeholder="Topic 3 (e.g. NFTs)"
-                        class="w-full bg-black/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-sky-500 transition-all text-sm">
-                    <input type="text" id="poll-topic-3" placeholder="Topic 4 (e.g. DAOs)"
-                        class="w-full bg-black/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-sky-500 transition-all text-sm">
-                </div>
-                <button onclick="savePollTopics()"
-                    class="w-full py-4 mt-4 bg-slate-800 hover:bg-sky-600 hover:text-white transition-all rounded-xl font-bold border border-slate-600 hover:border-sky-400 shadow-lg text-sky-300 uppercase tracking-wider text-sm">Save
-                    Topics</button>
-                <div class="mt-6 pt-5 border-t border-slate-700/50">
-                    <div class="flex items-center justify-between mb-2">
-                        <div>
-                            <p class="font-bold text-amber-400 uppercase tracking-widest text-sm">Start New Round</p>
-                            <p class="text-xs text-slate-500 mt-1">Resets all votes. Students can vote again from
-                                scratch.</p>
-                        </div>
-                        <button id="start-round-btn" onclick="startNewRound()" title="Start a new voting round"
-                            class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-800/80 border border-amber-500/40 text-amber-400 hover:bg-amber-500 hover:text-white hover:border-amber-400 transition-all shadow text-lg"
-                            style="cursor:pointer;">&#x25B6;</button>
-                    </div>
-                </div>
-            </div>
-
-            <div
-                class="bg-slate-900/70 p-6 rounded-2xl border border-fuchsia-500/20 shadow-[inset_0_0_15px_rgba(0,0,0,0.5)] mt-8">
-                <div class="flex items-center justify-between mb-5">
-                    <h3 class="text-xl font-bold text-fuchsia-400 uppercase tracking-widest m-0">Market Manager</h3>
-                    <button id="market-refresh-btn" onclick="refreshMarket()"
-                        title="Refresh market items from blockchain"
-                        class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-800/80 border border-sky-500/30 text-sky-400 hover:bg-sky-600 hover:text-white hover:border-sky-400 transition-all shadow text-lg"
-                        style="cursor:pointer;">&#x21BB;</button>
-                </div>
-                <p class="text-sm text-slate-400 mb-4">Manage assortment and prices for the Mystic Store.</p>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs uppercase tracking-widest text-slate-500 mb-1 font-bold">Item
-                            Name</label>
-                        <input type="text" id="market-item-name" placeholder="e.g. Health Potion"
-                            class="w-full bg-black/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-fuchsia-500 transition-all">
-                    </div>
-                    <div>
-                        <label class="block text-xs uppercase tracking-widest text-slate-500 mb-1 font-bold">Price in
-                            SGC</label>
-                        <input type="number" id="market-item-price" placeholder="e.g. 100"
-                            class="w-full bg-black/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-fuchsia-500 transition-all font-semibold">
-                    </div>
-                </div>
-                <button onclick="addMarketItem()"
-                    class="w-full py-4 mt-4 bg-gradient-to-r from-fuchsia-600 to-pink-600 hover:from-fuchsia-500 hover:to-pink-500 transition-all rounded-xl font-bold text-white shadow-[0_0_15px_rgba(217,70,239,0.4)] hover:scale-[1.02] uppercase tracking-wider">Add
-                    Item</button>
-                <div id="marketmanager-items-container" class="mt-8 space-y-4"></div>
-            </div>
-
-            <!-- ── Student Registry ───────────────────────────────────────── -->
-            <div
-                class="bg-slate-900/70 p-6 rounded-2xl border border-sky-500/20 shadow-[inset_0_0_15px_rgba(0,0,0,0.5)] mt-8">
-                <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
-                    <h3 class="text-xl font-bold text-sky-400 uppercase tracking-widest flex items-center gap-2">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                            <circle cx="9" cy="7" r="4" />
-                            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                        </svg>
+</button>
+<button class="py-4 bg-gradient-to-r from-blue-700 to-cyan-700 hover:from-blue-600 hover:to-cyan-600 transition-all rounded-xl font-bold shadow-[0_0_15px_rgba(6,182,212,0.4)] flex flex-col items-center justify-center hover:scale-[1.02]" onclick="rewardGroupCustom()">
+<span class="text-white text-lg">Reward Group</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<p class="mt-6 text-center text-sm font-bold" id="admin-status"></p>
+<div class="bg-slate-900/70 p-6 rounded-2xl border border-rose-500/20 shadow-[inset_0_0_15px_rgba(0,0,0,0.5)] mt-8">
+<h3 class="text-xl font-bold mb-5 text-rose-400 uppercase tracking-widest flex items-center gap-2"><span data-i18n="i18n_47">
+                    Beacon Timer</span></h3>
+<!-- Custom Reward Input Field -->
+<div class="mb-5 max-w-xs">
+<label class="block text-slate-400 text-sm font-semibold mb-2"><span data-i18n="i18n_48">Вознаграждение за посещаемость
+                        (SGC)</span></label>
+<input class="w-full bg-black/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-rose-500 transition-all font-mono" id="attendanceRewardInput" max="50" min="1" type="number" value="10"/>
+</div>
+<div class="flex flex-col md:flex-row items-center gap-4">
+<button class="py-3 px-6 bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 transition-all rounded-xl font-bold text-white shadow-[0_0_15px_rgba(225,29,72,0.4)] whitespace-nowrap" onclick="generateDailyCode(event)"><span data-i18n="i18n_49">Generate
+                        Daily Code</span></button>
+<div class="text-2xl font-mono text-rose-300 font-bold tracking-widest bg-black/50 px-4 py-2 rounded-xl" id="daily-code-display">----</div>
+<div class="text-lg font-mono text-amber-500 font-bold bg-black/50 px-4 py-2 rounded-xl border border-amber-500/30 animate-pulse hidden" id="daily-code-timer"><span data-i18n="i18n_50">Осталось времени: 25 сек</span></div>
+</div>
+</div>
+<div class="bg-slate-900/70 p-6 rounded-2xl border border-amber-500/20 shadow-[inset_0_0_15px_rgba(0,0,0,0.5)] mt-8">
+<div class="flex justify-between items-center mb-5">
+<h3 class="text-xl font-bold text-amber-400 uppercase tracking-widest"><span data-i18n="i18n_51">Market Logs</span></h3>
+<button class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-800/80 border border-sky-500/30 text-sky-400 hover:bg-sky-600 hover:text-white hover:border-sky-400 transition-all shadow text-lg" id="logs-refresh-btn" onclick="loadMarketLogs()" style="cursor:pointer;" title="Refresh Market Logs">↻</button>
+</div>
+<div class="overflow-x-auto max-h-60 overflow-y-auto rounded-xl border border-slate-700">
+<table class="w-full text-sm text-left text-slate-400 font-mono">
+<thead class="text-xs text-amber-500 uppercase bg-slate-800/80 sticky top-0">
+<tr>
+<th class="px-4 py-3"><span data-i18n="i18n_52">Student</span></th>
+<th class="px-4 py-3"><span data-i18n="i18n_53">Item</span></th>
+<th class="px-4 py-3"><span data-i18n="i18n_54">Price</span></th>
+<th class="px-4 py-3"><span data-i18n="i18n_55">Date</span></th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-700/50" id="market-logs-container">
+<tr>
+<td class="px-4 py-4 text-center" colspan="4"><span data-i18n="i18n_56">Loading logs...</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="bg-slate-900/70 p-6 rounded-2xl border border-sky-500/20 shadow-[inset_0_0_15px_rgba(0,0,0,0.5)] mt-8">
+<h3 class="text-xl font-bold mb-5 text-sky-400 uppercase tracking-widest"><span data-i18n="i18n_57">Poll Manager</span></h3>
+<p class="text-sm text-slate-400 mb-4"><span data-i18n="i18n_58">Set dynamic topics for active quests (voting). Leave blank to use
+                    default names.</span></p>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<input class="w-full bg-black/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-sky-500 transition-all text-sm" id="poll-topic-0" placeholder="Topic 1 (e.g. Web3 Basics)" type="text"/>
+<input class="w-full bg-black/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-sky-500 transition-all text-sm" id="poll-topic-1" placeholder="Topic 2 (e.g. DeFi)" type="text"/>
+<input class="w-full bg-black/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-sky-500 transition-all text-sm" id="poll-topic-2" placeholder="Topic 3 (e.g. NFTs)" type="text"/>
+<input class="w-full bg-black/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-sky-500 transition-all text-sm" id="poll-topic-3" placeholder="Topic 4 (e.g. DAOs)" type="text"/>
+</div>
+<button class="w-full py-4 mt-4 bg-slate-800 hover:bg-sky-600 hover:text-white transition-all rounded-xl font-bold border border-slate-600 hover:border-sky-400 shadow-lg text-sky-300 uppercase tracking-wider text-sm" onclick="savePollTopics()"><span data-i18n="i18n_59">Save
+                    Topics</span></button>
+<div class="mt-6 pt-5 border-t border-slate-700/50">
+<div class="flex items-center justify-between mb-2">
+<div>
+<p class="font-bold text-amber-400 uppercase tracking-widest text-sm"><span data-i18n="i18n_60">Start New Round</span></p>
+<p class="text-xs text-slate-500 mt-1"><span data-i18n="i18n_61">Resets all votes. Students can vote again from
+                                scratch.</span></p>
+</div>
+<button class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-800/80 border border-amber-500/40 text-amber-400 hover:bg-amber-500 hover:text-white hover:border-amber-400 transition-all shadow text-lg" id="start-round-btn" onclick="startNewRound()" style="cursor:pointer;" title="Start a new voting round">▶</button>
+</div>
+</div>
+</div>
+<div class="bg-slate-900/70 p-6 rounded-2xl border border-fuchsia-500/20 shadow-[inset_0_0_15px_rgba(0,0,0,0.5)] mt-8">
+<div class="flex items-center justify-between mb-5">
+<h3 class="text-xl font-bold text-fuchsia-400 uppercase tracking-widest m-0"><span data-i18n="i18n_62">Market Manager</span></h3>
+<button class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-800/80 border border-sky-500/30 text-sky-400 hover:bg-sky-600 hover:text-white hover:border-sky-400 transition-all shadow text-lg" id="market-refresh-btn" onclick="refreshMarket()" style="cursor:pointer;" title="Refresh market items from blockchain">↻</button>
+</div>
+<p class="text-sm text-slate-400 mb-4"><span data-i18n="i18n_63">Manage assortment and prices for the Mystic Store.</span></p>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div>
+<label class="block text-xs uppercase tracking-widest text-slate-500 mb-1 font-bold"><span data-i18n="i18n_64">Item
+                            Name</span></label>
+<input class="w-full bg-black/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-fuchsia-500 transition-all" id="market-item-name" placeholder="e.g. Health Potion" type="text"/>
+</div>
+<div>
+<label class="block text-xs uppercase tracking-widest text-slate-500 mb-1 font-bold"><span data-i18n="i18n_65">Price in
+                            SGC</span></label>
+<input class="w-full bg-black/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-fuchsia-500 transition-all font-semibold" id="market-item-price" placeholder="e.g. 100" type="number"/>
+</div>
+</div>
+<button class="w-full py-4 mt-4 bg-gradient-to-r from-fuchsia-600 to-pink-600 hover:from-fuchsia-500 hover:to-pink-500 transition-all rounded-xl font-bold text-white shadow-[0_0_15px_rgba(217,70,239,0.4)] hover:scale-[1.02] uppercase tracking-wider" onclick="addMarketItem()"><span data-i18n="i18n_66">Add
+                    Item</span></button>
+<div class="mt-8 space-y-4" id="marketmanager-items-container"></div>
+</div>
+<!-- ── Student Registry ───────────────────────────────────────── -->
+<div class="bg-slate-900/70 p-6 rounded-2xl border border-sky-500/20 shadow-[inset_0_0_15px_rgba(0,0,0,0.5)] mt-8">
+<div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+<h3 class="text-xl font-bold text-sky-400 uppercase tracking-widest flex items-center gap-2">
+<svg fill="none" height="20" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="20">
+<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+<circle cx="9" cy="7" r="4"></circle>
+<path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+<path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+</svg><span data-i18n="i18n_67">
                         Student Registry
-                        <span id="registry-count-badge"
-                            class="text-xs font-bold px-2 py-0.5 rounded-full bg-sky-900/60 border border-sky-500/40 text-sky-300 ml-1">0</span>
-                    </h3>
-                    <div class="flex gap-2">
-                        <button onclick="fetchStudentRegistry()" id="registry-refresh-btn"
-                            class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-800/80 border border-sky-500/30 text-sky-400 hover:bg-sky-600 hover:text-white transition-all shadow text-lg"
-                            title="Refresh">
-                            &#x21BB;
+                        </span><span class="text-xs font-bold px-2 py-0.5 rounded-full bg-sky-900/60 border border-sky-500/40 text-sky-300 ml-1" id="registry-count-badge">0</span>
+</h3>
+<div class="flex gap-2">
+<button class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-800/80 border border-sky-500/30 text-sky-400 hover:bg-sky-600 hover:text-white transition-all shadow text-lg" id="registry-refresh-btn" onclick="fetchStudentRegistry()" title="Refresh">
+                            ↻
                         </button>
-                        <button onclick="exportRegistryCSV()"
-                            class="px-4 py-2 text-xs font-bold uppercase tracking-widest rounded-lg bg-emerald-600/20 border border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/30 transition-all flex items-center gap-1">
+<button class="px-4 py-2 text-xs font-bold uppercase tracking-widest rounded-lg bg-emerald-600/20 border border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/30 transition-all flex items-center gap-1" onclick="exportRegistryCSV()"><span data-i18n="i18n_68">
                             ⬇ Export CSV
-                        </button>
-                    </div>
-                </div>
-                <p class="text-xs text-slate-500 mb-4">Live data from blockchain. Send Gas = 0.1 A0GI native transfer.
-                </p>
-                <div class="overflow-x-auto rounded-xl border border-sky-500/10">
-                    <table class="w-full registry-table text-left">
-                        <thead>
-                            <tr>
-                                <th class="w-10">#</th>
-                                <th>Nickname</th>
-                                <th>Group / Guild</th>
-                                <th>Address</th>
-                                <th class="text-center">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="registry-tbody">
-                            <tr>
-                                <td colspan="5" class="p-6 text-center text-slate-500">Loading registry...</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- Tab 4: Store (Market) -->
-        <div id="content-market"
-            class="tab-content glass-panel rounded-b-2xl rounded-tr-2xl p-8 border border-pink-500/30 shadow-[0_0_30px_rgba(236,72,153,0.1)]">
-            <h2 class="text-3xl font-bold mb-2 text-pink-500 rpg-title">Mystic Store</h2>
-            <p class="text-slate-400 mb-8 text-lg">Exchange your SGC for legendary items.</p>
-            <div id="market-items-container" class="grid grid-cols-1 md:grid-cols-3 gap-5">
-                <div class="text-center text-slate-500 py-8 col-span-full">Store is empty.</div>
-            </div>
-        </div>
-
-    </div> <!-- End of content-container -->
-
-    <!-- Full-Screen Transaction Loader -->
-    <div id="tx-loader"
-        class="fixed inset-0 z-[100] hidden flex flex-col items-center justify-center bg-black/70 backdrop-blur-sm">
-        <svg class="animate-spin h-12 w-12 text-sky-400 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none"
-            viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-            </path>
-        </svg>
-        <p class="text-white text-lg font-bold tracking-widest uppercase animate-pulse text-center px-4">
-            Магия блокчейна в процессе...<br><span class="text-sky-400 text-sm">Ожидаем подтверждения сети</span>
-        </p>
-    </div>
-
-    <!-- Welcome Modal -->
-    <div id="welcome-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-md">
-        <div
-            class="glass-panel rounded-3xl p-8 max-w-md w-full mx-4 text-center transform scale-95 transition-transform duration-300 border border-sky-500/50 shadow-[0_0_40px_rgba(14,165,233,0.3)]">
-            <h3 class="text-3xl font-bold mb-4 text-white rpg-title neon-text">Enter the Realm</h3>
-            <p class="text-slate-300 mb-8 text-lg">Prepare your magical artifacts (MetaMask) to join the Classroom DAO.
-            </p>
-            <div class="flex flex-col space-y-4">
-                <button onclick="setupNetwork()"
-                    class="w-full py-4 bg-slate-800 hover:bg-sky-700 hover:text-white transition-all rounded-xl font-bold border border-sky-500/50 hover:border-sky-400 shadow-[0_0_15px_rgba(14,165,233,0.2)] text-sky-400 text-lg">
+                        </span></button>
+</div>
+</div>
+<p class="text-xs text-slate-500 mb-4"><span data-i18n="i18n_69">Live data from blockchain. Send Gas = 0.1 A0GI native transfer.
+                </span></p>
+<div class="overflow-x-auto rounded-xl border border-sky-500/10">
+<table class="w-full registry-table text-left">
+<thead>
+<tr>
+<th class="w-10">#</th>
+<th><span data-i18n="i18n_70">Nickname</span></th>
+<th><span data-i18n="i18n_71">Group / Guild</span></th>
+<th><span data-i18n="i18n_72">Address</span></th>
+<th class="text-center"><span data-i18n="i18n_73">Actions</span></th>
+</tr>
+</thead>
+<tbody id="registry-tbody">
+<tr>
+<td class="p-6 text-center text-slate-500" colspan="5"><span data-i18n="i18n_74">Loading registry...</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- Tab 4: Store (Market) -->
+<div class="tab-content glass-panel rounded-b-2xl rounded-tr-2xl p-8 border border-pink-500/30 shadow-[0_0_30px_rgba(236,72,153,0.1)]" id="content-market">
+<h2 class="text-3xl font-bold mb-2 text-pink-500 rpg-title"><span data-i18n="i18n_75">Mystic Store</span></h2>
+<p class="text-slate-400 mb-8 text-lg"><span data-i18n="i18n_76">Exchange your SGC for legendary items.</span></p>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-5" id="market-items-container">
+<div class="text-center text-slate-500 py-8 col-span-full"><span data-i18n="i18n_77">Store is empty.</span></div>
+</div>
+</div>
+</div> <!-- End of content-container -->
+<!-- Full-Screen Transaction Loader -->
+<div class="fixed inset-0 z-[100] hidden flex flex-col items-center justify-center bg-black/70 backdrop-blur-sm" id="tx-loader">
+<svg class="animate-spin h-12 w-12 text-sky-400 mb-4" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+<path class="opacity-75" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" fill="currentColor">
+</path>
+</svg>
+<p class="text-white text-lg font-bold tracking-widest uppercase animate-pulse text-center px-4"><span data-i18n="i18n_78">
+            Магия блокчейна в процессе...</span><br/><span class="text-sky-400 text-sm">Ожидаем подтверждения сети</span>
+</p>
+</div>
+<!-- Welcome Modal -->
+<div class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-md" id="welcome-modal">
+<div class="glass-panel rounded-3xl p-8 max-w-md w-full mx-4 text-center transform scale-95 transition-transform duration-300 border border-sky-500/50 shadow-[0_0_40px_rgba(14,165,233,0.3)]">
+<h3 class="text-3xl font-bold mb-4 text-white rpg-title neon-text"><span data-i18n="i18n_79">Enter the Realm</span></h3>
+<p class="text-slate-300 mb-8 text-lg"><span data-i18n="i18n_80">Prepare your magical artifacts (MetaMask) to join the Classroom DAO.
+            </span></p>
+<div class="flex flex-col space-y-4">
+<button class="w-full py-4 bg-slate-800 hover:bg-sky-700 hover:text-white transition-all rounded-xl font-bold border border-sky-500/50 hover:border-sky-400 shadow-[0_0_15px_rgba(14,165,233,0.2)] text-sky-400 text-lg" onclick="setupNetwork()"><span data-i18n="i18n_81">
                     1. Connect to 0G Realm
-                </button>
-                <button onclick="addToken()"
-                    class="w-full py-4 bg-slate-800 hover:bg-emerald-700 hover:text-white transition-all rounded-xl font-bold border border-emerald-500/50 hover:border-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.2)] text-emerald-400 text-lg">
+                </span></button>
+<button class="w-full py-4 bg-slate-800 hover:bg-emerald-700 hover:text-white transition-all rounded-xl font-bold border border-emerald-500/50 hover:border-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.2)] text-emerald-400 text-lg" onclick="addToken()"><span data-i18n="i18n_82">
                     2. Add Gold (SGC)
-                </button>
-                <button onclick="closeWelcomeModal()"
-                    class="w-full py-3 mt-4 bg-transparent text-slate-500 hover:text-slate-300 transition-colors rounded-xl font-semibold uppercase tracking-widest text-sm">
+                </span></button>
+<button class="w-full py-3 mt-4 bg-transparent text-slate-500 hover:text-slate-300 transition-colors rounded-xl font-semibold uppercase tracking-widest text-sm" onclick="closeWelcomeModal()"><span data-i18n="i18n_83">
                     Enter Dashboard
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <script>
+                </span></button>
+</div>
+</div>
+</div>
+<script>
         const CHAIN_ID = 16602;
         const CHAIN_ID_HEX = "0x" + CHAIN_ID.toString(16);
 
@@ -2541,6 +2395,207 @@
 
         window.addEventListener('DOMContentLoaded', init);
     </script>
-</body>
+<script>
+    const translations = {
+    "en": {
+        "i18n_1": "html",
+        "i18n_2": "Classroom DAO V4 | RPG Edition",
+        "i18n_3": "CLASSROOM DAO",
+        "i18n_4": "RPG Edition",
+        "i18n_5": "Setup Network",
+        "i18n_6": "Add SGC",
+        "i18n_7": "Connect Wallet",
+        "i18n_8": "Player",
+        "i18n_9": "Gold Stash (SGC)",
+        "i18n_10": "Updating privacy...",
+        "i18n_11": "Claim Attendance",
+        "i18n_12": "Enter the Beacon Code provided by the Game Master.",
+        "i18n_13": "Осталось времени: 25 сек",
+        "i18n_14": "Claim",
+        "i18n_15": "Мой инвентарь",
+        "i18n_16": "У вас пока нет купленных артефактов.",
+        "i18n_17": "Active Quests (Voting)",
+        "i18n_18": "Cast your vote to shape the realm's future.",
+        "i18n_19": "Loading quests...",
+        "i18n_20": "Hall of Fame",
+        "i18n_21": "The most legendary heroes of Classroom DAO.",
+        "i18n_22": "Rank",
+        "i18n_23": "Hero",
+        "i18n_24": "Level",
+        "i18n_25": "Total XP",
+        "i18n_26": "Loading legends...",
+        "i18n_27": "Refresh",
+        "i18n_28": "Game Master Domain",
+        "i18n_29": "Summon new heroes and bestow legendary rewards.",
+        "i18n_30": "QR Scanner — Enroll Student",
+        "i18n_31": "Start Camera",
+        "i18n_32": "Scanned Address",
+        "i18n_33": "Nickname (Unique)",
+        "i18n_34": "Group / Guild Name",
+        "i18n_35": "📲 Register On-chain (+ 0.01 OGI gas)",
+        "i18n_36": "↩ Scan another address",
+        "i18n_37": "Manual Enroll",
+        "i18n_38": "Nickname (Unique)",
+        "i18n_39": "Group / Guild Name",
+        "i18n_40": "Wallet Address",
+        "i18n_41": "Enroll & Grant 0.01 OGI",
+        "i18n_42": "Bestow Loot",
+        "i18n_43": "Target Wallet Address",
+        "i18n_44": "Target Group ID (Optional)",
+        "i18n_45": "Custom Amount (XP)",
+        "i18n_46": "Reason for Reward",
+        "i18n_47": "Beacon Timer",
+        "i18n_48": "Вознаграждение за посещаемость (SGC)",
+        "i18n_49": "Generate Daily Code",
+        "i18n_50": "Осталось времени: 25 сек",
+        "i18n_51": "Market Logs",
+        "i18n_52": "Student",
+        "i18n_53": "Item",
+        "i18n_54": "Price",
+        "i18n_55": "Date",
+        "i18n_56": "Loading logs...",
+        "i18n_57": "Poll Manager",
+        "i18n_58": "Set dynamic topics for active quests (voting). Leave blank to use default names.",
+        "i18n_59": "Save Topics",
+        "i18n_60": "Start New Round",
+        "i18n_61": "Resets all votes. Students can vote again from scratch.",
+        "i18n_62": "Market Manager",
+        "i18n_63": "Manage assortment and prices for the Mystic Store.",
+        "i18n_64": "Item Name",
+        "i18n_65": "Price in SGC",
+        "i18n_66": "Add Item",
+        "i18n_67": "Student Registry",
+        "i18n_68": "⬇ Export CSV",
+        "i18n_69": "Live data from blockchain. Send Gas = 0.1 A0GI native transfer.",
+        "i18n_70": "Nickname",
+        "i18n_71": "Group / Guild",
+        "i18n_72": "Address",
+        "i18n_73": "Actions",
+        "i18n_74": "Loading registry...",
+        "i18n_75": "Mystic Store",
+        "i18n_76": "Exchange your SGC for legendary items.",
+        "i18n_77": "Store is empty.",
+        "i18n_78": "Магия блокчейна в процессе...",
+        "i18n_79": "Enter the Realm",
+        "i18n_80": "Prepare your magical artifacts (MetaMask) to join the Classroom DAO.",
+        "i18n_81": "1. Connect to 0G Realm",
+        "i18n_82": "2. Add Gold (SGC)",
+        "i18n_83": "Enter Dashboard"
+    },
+    "ru": {
+        "i18n_1": "html",
+        "i18n_2": "Classroom DAO V4 | RPG Edition",
+        "i18n_3": "КЛАСС DAO",
+        "i18n_4": "RPG Издание",
+        "i18n_5": "Настроить Сеть",
+        "i18n_6": "Добавить SGC",
+        "i18n_7": "Подключить кошелек",
+        "i18n_8": "Игрок",
+        "i18n_9": "Gold Stash (SGC)",
+        "i18n_10": "Обновление приватности...",
+        "i18n_11": "Подтвердить Присутствие",
+        "i18n_12": "Введите Код Маяка от Гейм Мастера.",
+        "i18n_13": "Осталось времени: 25 сек",
+        "i18n_14": "Заявить",
+        "i18n_15": "Мой инвентарь",
+        "i18n_16": "У вас пока нет купленных артефактов.",
+        "i18n_17": "Активные Квесты (Голосование)",
+        "i18n_18": "Отдайте свой голос, чтобы определить будущее королевства.",
+        "i18n_19": "Загрузка квестов...",
+        "i18n_20": "Зал Славы",
+        "i18n_21": "Самые легендарные герои Classroom DAO.",
+        "i18n_22": "Ранг",
+        "i18n_23": "Герой",
+        "i18n_24": "Уровень",
+        "i18n_25": "Всего XP",
+        "i18n_26": "Загрузка легенд...",
+        "i18n_27": "Обновить",
+        "i18n_28": "Владения Гейм Мастера",
+        "i18n_29": "Призывайте новых героев и даруйте легендарные награды.",
+        "i18n_30": "QR Сканер — Зачисление Студента",
+        "i18n_31": "Запустить Камеру",
+        "i18n_32": "Отсканированный Адрес",
+        "i18n_33": "Nickname (Unique)",
+        "i18n_34": "Group / Guild Name",
+        "i18n_35": "📲 Зарегистрировать в сети (+ 0.01 OGI)",
+        "i18n_36": "↩ Сканировать другой адрес",
+        "i18n_37": "Ручное Зачисление",
+        "i18n_38": "Nickname (Unique)",
+        "i18n_39": "Group / Guild Name",
+        "i18n_40": "Wallet Address",
+        "i18n_41": "Зачислить & Выдать 0.01 OGI",
+        "i18n_42": "Даровать Добычу",
+        "i18n_43": "Целевой Адрес Кошелька",
+        "i18n_44": "Целевой ID Группы (Необязательно)",
+        "i18n_45": "Своя Сумма (XP)",
+        "i18n_46": "Причина Награды",
+        "i18n_47": "Таймер Маяка",
+        "i18n_48": "Вознаграждение за посещаемость (SGC)",
+        "i18n_49": "Сгенерировать Код Дня",
+        "i18n_50": "Осталось времени: 25 сек",
+        "i18n_51": "Логи Магазина",
+        "i18n_52": "Студент",
+        "i18n_53": "Предмет",
+        "i18n_54": "Цена",
+        "i18n_55": "Дата",
+        "i18n_56": "Загрузка логов...",
+        "i18n_57": "Менеджер Опросов",
+        "i18n_58": "Установите темы для квестов. Оставьте пустым для стандартных.",
+        "i18n_59": "Сохранить Темы",
+        "i18n_60": "Начать Новый Раунд",
+        "i18n_61": "Resets all votes. Students can vote again from scratch.",
+        "i18n_62": "Менеджер Магазина",
+        "i18n_63": "Управление ассортиментом и ценами Мистического Магазина.",
+        "i18n_64": "Название Предмета",
+        "i18n_65": "Цена в SGC",
+        "i18n_66": "Добавить Предмет",
+        "i18n_67": "Реестр Студентов",
+        "i18n_68": "⬇ Экспорт CSV",
+        "i18n_69": "Живые данные из блокчейна. Отправка газа = 0.1 A0GI.",
+        "i18n_70": "Никнейм",
+        "i18n_71": "Группа / Гильдия",
+        "i18n_72": "Address",
+        "i18n_73": "Действия",
+        "i18n_74": "Загрузка реестра...",
+        "i18n_75": "Mystic Store",
+        "i18n_76": "Exchange your SGC for legendary items.",
+        "i18n_77": "Магазин пуст.",
+        "i18n_78": "Магия блокчейна в процессе...",
+        "i18n_79": "Войти в Королевство",
+        "i18n_80": "Подготовьте свои магические артефакты (MetaMask), чтобы присоединиться к Classroom DAO.",
+        "i18n_81": "1. Подключиться к 0G Realm",
+        "i18n_82": "2. Добавить Золото (SGC)",
+        "i18n_83": "Войти в Панель"
+    }
+};
 
+    function setLanguage(lang) {
+        localStorage.setItem('lang', lang);
+        const toggleBtn = document.getElementById('lang-toggle-btn');
+        if(toggleBtn) {
+            toggleBtn.innerText = lang === 'ru' ? 'EN' : 'RU'; 
+        }
+        
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (translations[lang] && translations[lang][key]) {
+                const originalText = el.textContent;
+                const matchStart = originalText.match(/^\s*/);
+                const matchEnd = originalText.match(/\s*$/);
+                el.textContent = (matchStart ? matchStart[0] : '') + translations[lang][key] + (matchEnd ? matchEnd[0] : '');
+            }
+        });
+    }
+
+    function toggleLang() {
+        const currentLang = localStorage.getItem('lang') || 'en';
+        setLanguage(currentLang === 'en' ? 'ru' : 'en');
+    }
+
+    // Apply language on load
+    window.addEventListener('DOMContentLoaded', () => {
+        const savedLang = localStorage.getItem('lang') || 'en';
+        setLanguage(savedLang);
+    });
+    </script></body>
 </html>
