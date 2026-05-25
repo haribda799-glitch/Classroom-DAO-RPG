@@ -1289,7 +1289,7 @@
                             </div>
                             <div>
                                 <h3 class="font-bold text-xl text-slate-100 tracking-wide">${p.name}</h3>
-                                <p class="text-sm text-slate-400 font-semibold mt-1">Votes: <span class="text-emerald-400 font-mono font-bold text-base">${p.votes}</span></p>
+                                <p class="text-sm text-slate-400 font-semibold mt-1"><span class="text-emerald-400 font-mono font-bold text-base">${p.votes}</span> <span data-i18n="votes_count">${translations[localStorage.getItem('lang') || 'en'].votes_count}</span></p>
                             </div>
                         </div>
                         <div class="mt-5 flex justify-end">
@@ -2483,7 +2483,8 @@
         "tab_quests": "📜 QUESTS",
         "tab_ranks": "🏆 RANKS",
         "tab_store": "💰 STORE",
-        "student_inventory_title": "My Inventory"
+        "student_inventory_title": "My Inventory",
+        "votes_count": "Votes"
     },
     "ru": {
         "i18n_1": "html",
@@ -2571,7 +2572,8 @@
         "tab_quests": "📜 КВЕСТЫ",
         "tab_ranks": "🏆 РЕЙТИНГ",
         "tab_store": "💰 МАГАЗИН",
-        "student_inventory_title": "Мой инвентарь"
+        "student_inventory_title": "Мой инвентарь",
+        "votes_count": "Голосов"
     }
 };
 
