@@ -362,7 +362,7 @@
 <button class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-800/80 border border-sky-500/30 text-sky-400 hover:bg-sky-600 hover:text-white hover:border-sky-400 transition-all shadow text-lg" id="inventory-refresh-btn" onclick="loadStudentInventory()" style="cursor:pointer;" title="Refresh Inventory">↻</button>
 </div>
 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4" id="student-inventory-container">
-<div class="text-slate-400 py-4 col-span-full"><span data-i18n="i18n_16">У вас пока нет купленных артефактов.</span></div>
+<div class="text-slate-400 py-4 col-span-full"><span data-i18n="no_artifacts">У вас пока нет купленных артефактов.</span></div>
 </div>
 </div>
 <!-- Navigation Tabs -->
@@ -1169,7 +1169,8 @@
                 if (!container) return;
 
                 if (inventoryIds.length === 0) {
-                    container.innerHTML = "<div class='text-slate-400 py-4 col-span-full'>У вас пока нет купленных артефактов.</div>";
+                    const currentLang = localStorage.getItem('lang') || 'en';
+                    container.innerHTML = `<div class='text-slate-400 py-4 col-span-full' data-i18n='no_artifacts'>${translations[currentLang].no_artifacts}</div>`;
                     return;
                 }
 
@@ -2411,7 +2412,7 @@
         "i18n_12": "Enter the Beacon Code provided by the Game Master.",
         "i18n_13": "Осталось времени: 25 сек",
         "i18n_14": "Claim",
-        "i18n_16": "У вас пока нет купленных артефактов.",
+        "no_artifacts": "You don't have any purchased artifacts yet.",
         "i18n_17": "Active Quests (Voting)",
         "i18n_18": "Cast your vote to shape the realm's future.",
         "i18n_19": "Loading quests...",
@@ -2499,7 +2500,7 @@
         "i18n_12": "Введите Код Маяка от Гейм Мастера.",
         "i18n_13": "Осталось времени: 25 сек",
         "i18n_14": "Заявить",
-        "i18n_16": "У вас пока нет купленных артефактов.",
+        "no_artifacts": "У вас пока нет купленных артефактов.",
         "i18n_17": "Активные Квесты (Голосование)",
         "i18n_18": "Отдайте свой голос, чтобы определить будущее королевства.",
         "i18n_19": "Загрузка квестов...",
