@@ -1666,6 +1666,7 @@
                     studentsList.push({
                         address: sAddr,
                         nickname: sData[0],
+                        group: sData[1],
                         xp: sData[2].toNumber(),
                         isHidden: sData[3]
                     });
@@ -1684,7 +1685,9 @@
                     else if (index === 2) { rankDisplay = "🥉"; rankClass = "text-2xl drop-shadow-[0_0_10px_rgba(180,83,9,0.8)]"; rowClass = "bg-amber-900/10 hover:bg-amber-900/20 border-l-2 border-amber-600"; }
 
                     const level = getLevel(s.xp);
-                    const groupDisplay = s.group || "No Guild";
+                    const hasNoGuild = !s.group || s.group === "No Guild";
+                    const groupDisplay = hasNoGuild ? (translations[lg2].no_guild || "No Guild") : s.group;
+                    const i18nAttr = hasNoGuild ? 'data-i18n="no_guild"' : '';
 
                     // Dynamic address truncation for mobile
                     const fullAddr = s.address;
@@ -1703,7 +1706,7 @@
                                 </div>
                                 <div>
                                     <p class="font-bold text-slate-100 text-base sm:text-lg leading-tight">${s.nickname || "Unknown"}</p>
-                                    <p class="text-[10px] sm:text-xs text-amber-400 font-semibold uppercase tracking-wider">${groupDisplay}</p>
+                                    <p class="text-[10px] sm:text-xs text-amber-400 font-semibold uppercase tracking-wider" ${i18nAttr}>${groupDisplay}</p>
                                     <p class="text-[9px] sm:text-[10px] uppercase tracking-widest text-slate-500 font-mono mt-0.5 ${s.isHidden ? 'italic' : ''}">${displayAddr}</p>
                                 </div>
                             </div>
@@ -2961,7 +2964,8 @@
                 "activate_success": "Item activated! Effect logged on-chain. ✅",
                 "recycle_success": "Item recycled! SGC refunded to your wallet. ✅",
                 "transform_success": "+%s XP gained! Permanently added. ✅",
-                "err_not_owned": "You don't own this item or already used it!"
+                "err_not_owned": "You don't own this item or already used it!",
+                "no_guild": "No Guild"
             },
             "ru": {
                 "i18n_1": "html",
@@ -3068,7 +3072,8 @@
                 "activate_success": "Предмет активирован! Эффект записан в блокчейн. ✅",
                 "recycle_success": "Предмет сдан! SGC возвращены на ваш кошелёк. ✅",
                 "transform_success": "+%s XP получено! Постоянно добавлено к профилю. ✅",
-                "err_not_owned": "Вы не владеете этим предметом или уже использовали его!"
+                "err_not_owned": "Вы не владеете этим предметом или уже использовали его!",
+                "no_guild": "Без гильдии"
             }
         };
 
