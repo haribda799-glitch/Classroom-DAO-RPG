@@ -2046,7 +2046,29 @@
 
         function exportRegistryCSV() {
             if (registryData.length === 0) return showToast("Registry empty", true);
-            const csvContent = "data:text/csv;charset=utf-8," + "Nickname,Group,Address\n" + registryData.map(r => `${r.nickname},${r.group},${r.address}`).join("\n");
+
+            // Build rows: XP is already loaded in registryData from the chain.
+            // Level uses the existing getLevel() formula (Math.floor(xp / 100) + 1).
+            // Per-row try/catch ensures a single bad entry never aborts the full export.
+            const rows = registryData.map(r => {
+                let xp = 0, level = 0;
+                try {
+                    xp    = typeof r.xp === "number" ? r.xp : 0;
+                    level = getLevel(xp);
+                } catch (_) {
+                    // Contract unreachable or data malformed — default to zeros
+                    xp = 0; level = 0;
+                }
+                // Wrap fields in quotes to handle commas in names/groups
+                const nickname = `"${(r.nickname || "").replace(/"/g, '""')}"`;
+                const group    = `"${(r.group    || "").replace(/"/g, '""')}"`;
+                return `${nickname},${group},${r.address},${xp},${level}`;
+            });
+
+            const csvContent = "data:text/csv;charset=utf-8,"
+                + "Nickname,Group,Address,XP,Level\n"
+                + rows.join("\n");
+
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
             link.setAttribute("href", encodedUri);
