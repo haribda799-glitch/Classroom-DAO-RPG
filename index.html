@@ -359,10 +359,10 @@
                 </div>
             </div>
             
-            <!-- Guild Vault Display -->
+            <!-- <span data-i18n="guild_vault">Guild Vault</span> Display -->
             <div id="guild-vault-display" class="hidden text-center md:text-right bg-indigo-900/40 p-2 md:p-3 rounded-xl border border-indigo-500/30 w-full md:w-auto">
                 <p class="text-[10px] md:text-xs text-indigo-400 uppercase tracking-widest font-bold mb-1">
-                    Guild Vault <span id="user-guild-id" class="ml-1 px-2 py-0.5 rounded-md bg-indigo-950/80 border border-indigo-400/30 text-indigo-300 text-[10px]">#0</span>
+                    <span data-i18n="guild_vault">Guild Vault</span> <span id="user-guild-id" class="ml-1 px-2 py-0.5 rounded-md bg-indigo-950/80 border border-indigo-400/30 text-indigo-300 text-[10px]">#0</span>
                 </p>
                 <div class="flex items-center justify-center md:justify-end mt-1">
                     <p class="text-xl md:text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 to-purple-400"
@@ -478,12 +478,12 @@
             </div>
             <p class="mt-6 text-center text-sm font-bold" id="voting-status"></p>
 
-            <!-- ── DAO Premiums (Guild Proposals) ───────────────────────── -->
+            <!-- ── <span data-i18n="dao_premiums">DAO Premiums</span> (Guild Proposals) ───────────────────────── -->
             <div id="dao-premiums-section" class="hidden mt-12 pt-8 border-t border-indigo-500/30 relative">
                 <div class="flex items-center justify-between mb-6">
                     <div class="flex items-center gap-3">
-                        <h2 class="text-2xl font-bold text-indigo-400 rpg-title">DAO Premiums</h2>
-                        <span class="text-xs font-bold px-3 py-1 rounded-full bg-indigo-900/80 border border-indigo-500/50 text-indigo-300 tracking-widest uppercase">Guild <span id="dao-premium-guild-id">0</span></span>
+                        <h2 class="text-2xl font-bold text-indigo-400 rpg-title"><span data-i18n="dao_premiums">DAO Premiums</span></h2>
+                        <span class="text-xs font-bold px-3 py-1 rounded-full bg-indigo-900/80 border border-indigo-500/50 text-indigo-300 tracking-widest uppercase"><span data-i18n="guild_label">Guild</span> <span id="dao-premium-guild-id">0</span></span>
                     </div>
                     <button onclick="refreshGuildProposals()" class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-800/80 border border-indigo-500/30 text-indigo-400 hover:bg-indigo-600 hover:text-white hover:border-indigo-400 transition-all shadow text-lg" title="Refresh Proposals">↻</button>
                 </div>
@@ -491,14 +491,14 @@
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <!-- Create Proposal Form -->
                     <div class="lg:col-span-1 bg-slate-900/60 p-5 rounded-2xl border border-indigo-500/30 shadow-[inset_0_0_15px_rgba(0,0,0,0.3)] h-fit">
-                        <h4 class="text-sm font-bold text-indigo-300 uppercase tracking-widest mb-4">Create Proposal</h4>
+                        <h4 class="text-sm font-bold text-indigo-300 uppercase tracking-widest mb-4"><span data-i18n="create_proposal">Create Proposal</span></h4>
                         <div class="space-y-3">
                             <div class="p-3 bg-indigo-950/50 border border-indigo-500/20 rounded-xl mb-4">
-                                <p class="text-xs text-indigo-300/80 mb-2 font-mono">Format Targets / Amounts arrays as JSON.</p>
+                                <p class="text-xs text-indigo-300/80 mb-2 font-mono"><span data-i18n="format_targets_json">Format Targets / Amounts arrays as JSON.</span></p>
                                 <textarea id="student-proposal-payload" rows="3" class="w-full bg-black/50 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-indigo-500 transition-all font-mono text-xs" placeholder='[{"address":"0x...","amount":50}]'></textarea>
                             </div>
                             <button onclick="createProposalAction()" class="w-full py-3 bg-gradient-to-r from-indigo-700 to-blue-700 hover:from-indigo-600 hover:to-blue-600 transition-all rounded-xl font-bold text-white shadow-[0_0_15px_rgba(99,102,241,0.4)] hover:scale-[1.02] uppercase tracking-wider text-xs">
-                                Submit to AI Oracle
+                                <span data-i18n="submit_to_ai">Submit to AI Oracle</span>
                             </button>
                         </div>
                     </div>
@@ -506,7 +506,7 @@
                     <!-- Proposals List -->
                     <div class="lg:col-span-2">
                         <div id="guild-proposals-container" class="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-                            <div class="text-center text-slate-500 py-8"><span class="italic text-sm">No active proposals in your guild.</span></div>
+                            <div class="text-center text-slate-500 py-8"><span class="italic text-sm" data-i18n="no_active_proposals">${t("no_active_proposals")}</span></div>
                         </div>
                     </div>
                 </div>
@@ -942,27 +942,27 @@
                         <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
                         <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                     </svg>
-                    Guild Manager
+                    <span data-i18n="guild_manager">Guild Manager</span>
                 </h3>
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <!-- Create Guild -->
                     <div>
-                        <h4 class="text-sm font-bold text-indigo-300 uppercase tracking-widest mb-3 border-b border-indigo-500/30 pb-2">Create Guild</h4>
+                        <h4 class="text-sm font-bold text-indigo-300 uppercase tracking-widest mb-3 border-b border-indigo-500/30 pb-2"><span data-i18n="create_guild">Create Guild</span></h4>
                         <div class="space-y-3">
                             <div>
-                                <label class="block text-xs uppercase tracking-widest text-slate-500 mb-1 font-bold">Guild ID</label>
+                                <label class="block text-xs uppercase tracking-widest text-slate-500 mb-1 font-bold"><span data-i18n="guild_id">Guild ID</span></label>
                                 <input id="admin-create-guild-id" type="number" class="w-full bg-black/50 border border-slate-700 rounded-xl px-4 py-2 text-slate-200 focus:outline-none focus:border-indigo-500 transition-all font-mono" placeholder="e.g. 1" />
                             </div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                <input id="admin-guild-member-1" type="text" class="w-full bg-black/50 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-indigo-500 transition-all font-mono text-xs" placeholder="Member 1 (0x...)" />
-                                <input id="admin-guild-member-2" type="text" class="w-full bg-black/50 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-indigo-500 transition-all font-mono text-xs" placeholder="Member 2 (0x...)" />
-                                <input id="admin-guild-member-3" type="text" class="w-full bg-black/50 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-indigo-500 transition-all font-mono text-xs" placeholder="Member 3 (0x...)" />
-                                <input id="admin-guild-member-4" type="text" class="w-full bg-black/50 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-indigo-500 transition-all font-mono text-xs" placeholder="Member 4 (0x...)" />
-                                <input id="admin-guild-member-5" type="text" class="w-full bg-black/50 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-indigo-500 transition-all font-mono text-xs md:col-span-2" placeholder="Member 5 (0x...) - Optional" />
+                                <input id="admin-guild-member-1" type="text" class="w-full bg-black/50 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-indigo-500 transition-all font-mono text-xs" placeholder="Member 1 (0x...)" data-i18n-ph="ph_member" />
+                                <input id="admin-guild-member-2" type="text" class="w-full bg-black/50 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-indigo-500 transition-all font-mono text-xs" placeholder="Member 2 (0x...)" data-i18n-ph="ph_member" />
+                                <input id="admin-guild-member-3" type="text" class="w-full bg-black/50 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-indigo-500 transition-all font-mono text-xs" placeholder="Member 3 (0x...)" data-i18n-ph="ph_member" />
+                                <input id="admin-guild-member-4" type="text" class="w-full bg-black/50 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-indigo-500 transition-all font-mono text-xs" placeholder="Member 4 (0x...)" data-i18n-ph="ph_member" />
+                                <input id="admin-guild-member-5" type="text" class="w-full bg-black/50 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-indigo-500 transition-all font-mono text-xs md:col-span-2" placeholder="Member 5 (0x...) - Optional" data-i18n-ph="ph_member_opt" />
                             </div>
                             <button onclick="createGuildAction()" class="w-full py-3 mt-2 bg-slate-800 hover:bg-indigo-600 hover:text-white transition-all rounded-xl font-bold border border-slate-600 hover:border-indigo-400 shadow-lg text-indigo-300 uppercase tracking-wider text-sm">
-                                Create Guild
+                                <span data-i18n="create_guild">Create Guild</span>
                             </button>
                         </div>
                     </div>
@@ -970,40 +970,40 @@
                     <div class="space-y-6">
                         <!-- Distribute 50/50 Reward -->
                         <div>
-                            <h4 class="text-sm font-bold text-indigo-300 uppercase tracking-widest mb-3 border-b border-indigo-500/30 pb-2">Distribute 50/50 Reward</h4>
+                            <h4 class="text-sm font-bold text-indigo-300 uppercase tracking-widest mb-3 border-b border-indigo-500/30 pb-2"><span data-i18n="distribute_reward">Distribute 50/50 Reward</span></h4>
                             <div class="grid grid-cols-3 gap-2">
                                 <div>
-                                    <label class="block text-xs uppercase tracking-widest text-slate-500 mb-1 font-bold">Guild ID</label>
+                                    <label class="block text-xs uppercase tracking-widest text-slate-500 mb-1 font-bold"><span data-i18n="guild_id">Guild ID</span></label>
                                     <input id="admin-dist-guild-id" type="number" class="w-full bg-black/50 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-indigo-500 transition-all font-mono text-sm" placeholder="ID" />
                                 </div>
                                 <div>
-                                    <label class="block text-xs uppercase tracking-widest text-slate-500 mb-1 font-bold">Total SGC</label>
+                                    <label class="block text-xs uppercase tracking-widest text-slate-500 mb-1 font-bold"><span data-i18n="total_sgc">Total SGC</span></label>
                                     <input id="admin-dist-sgc" type="number" class="w-full bg-black/50 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-indigo-500 transition-all font-mono text-sm" placeholder="SGC" />
                                 </div>
                                 <div>
-                                    <label class="block text-xs uppercase tracking-widest text-slate-500 mb-1 font-bold">Total XP</label>
+                                    <label class="block text-xs uppercase tracking-widest text-slate-500 mb-1 font-bold"><span data-i18n="total_xp">Total XP</span></label>
                                     <input id="admin-dist-xp" type="number" class="w-full bg-black/50 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-indigo-500 transition-all font-mono text-sm" placeholder="XP" />
                                 </div>
                             </div>
                             <button onclick="distributeGuildRewardAction()" class="w-full py-3 mt-3 bg-gradient-to-r from-indigo-700 to-purple-700 hover:from-indigo-600 hover:to-purple-600 transition-all rounded-xl font-bold text-white shadow-[0_0_15px_rgba(99,102,241,0.4)] hover:scale-[1.02] uppercase tracking-wider text-sm">
-                                Distribute Reward
+                                <span data-i18n="btn_distribute_reward">Distribute Reward</span>
                             </button>
                         </div>
 
                         <!-- Arbitration -->
                         <div>
-                            <h4 class="text-sm font-bold text-indigo-300 uppercase tracking-widest mb-3 border-b border-indigo-500/30 pb-2">Dispute Arbitration</h4>
+                            <h4 class="text-sm font-bold text-indigo-300 uppercase tracking-widest mb-3 border-b border-indigo-500/30 pb-2"><span data-i18n="dispute_arb">Dispute Arbitration</span></h4>
                             <div class="space-y-3">
                                 <div>
-                                    <label class="block text-xs uppercase tracking-widest text-slate-500 mb-1 font-bold">Proposal ID</label>
+                                    <label class="block text-xs uppercase tracking-widest text-slate-500 mb-1 font-bold"><span data-i18n="proposal_id">Proposal ID</span></label>
                                     <input id="admin-arb-proposal-id" type="number" class="w-full bg-black/50 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-indigo-500 transition-all font-mono text-sm" placeholder="ID" />
                                 </div>
                                 <div>
-                                    <label class="block text-xs uppercase tracking-widest text-slate-500 mb-1 font-bold">Resolution Payload (JSON format)</label>
+                                    <label class="block text-xs uppercase tracking-widest text-slate-500 mb-1 font-bold"><span data-i18n="resolution_payload">Resolution Payload (JSON format)</span></label>
                                     <textarea id="admin-arb-payload" rows="3" class="w-full bg-black/50 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-indigo-500 transition-all font-mono text-xs" placeholder='[{"address":"0x...","amount":50}, {"address":"0x...","amount":50}]'></textarea>
                                 </div>
                                 <button onclick="resolveDisputeAction()" class="w-full py-3 bg-slate-800 hover:bg-rose-600 hover:text-white transition-all rounded-xl font-bold border border-slate-600 hover:border-rose-400 shadow-lg text-rose-300 uppercase tracking-wider text-sm flex items-center justify-center gap-2">
-                                    <span>⚖️</span> Resolve Dispute
+                                    <span>⚖️</span> <span data-i18n="resolve_dispute">Resolve Dispute</span>
                                 </button>
                             </div>
                         </div>
@@ -2976,6 +2976,54 @@
     <script>
         const translations = {
             "en": {
+
+                "guild_vault": "<span data-i18n="guild_vault">Guild Vault</span>",
+                "dao_premiums": "<span data-i18n="dao_premiums">DAO Premiums</span>",
+                "guild_label": "Guild",
+                "create_proposal": "Create Proposal",
+                "format_targets_json": "<span data-i18n="format_targets_json">Format Targets / Amounts arrays as JSON.</span>",
+                "submit_to_ai": "<span data-i18n="submit_to_ai">Submit to AI Oracle</span>",
+                "guild_manager": "Guild Manager",
+                "create_guild": "Create Guild",
+                "guild_id": "Guild ID",
+                "distribute_reward": "Distribute 50/50 Reward",
+                "total_sgc": "Total SGC",
+                "total_xp": "Total XP",
+                "btn_distribute_reward": "Distribute Reward",
+                "dispute_arb": "Dispute Arbitration",
+                "proposal_id": "Proposal ID",
+                "resolution_payload": "Resolution Payload (JSON format)",
+                "resolve_dispute": "Resolve Dispute",
+                "no_active_proposals": "No active proposals in your guild.",
+                "status_pending": "Pending",
+                "status_executed": "Executed",
+                "status_disputed": "Disputed",
+                "approvals_label": "${t("approvals_label")}",
+                "btn_sign": "${t("btn_sign")}",
+                "btn_dispute": "${t("btn_dispute")}",
+                "ph_member": "Member",
+                "ph_member_opt": "Member 5 (0x...) - Optional",
+                "toast_invalid_guild": t("toast_invalid_guild"),
+                "toast_invalid_addr": "Invalid address for Member",
+                "toast_guild_min": t("toast_guild_min"),
+                "toast_creating_guild": t("toast_creating_guild"),
+                "toast_guild_created": "Guild successfully created!",
+                "toast_fill_all": t("toast_fill_all"),
+                "toast_distributing": t("toast_distributing"),
+                "toast_reward_distributed": "Reward distributed to Guild",
+                "toast_missing_id": t("toast_missing_id"),
+                "toast_invalid_json": t("toast_invalid_json"),
+                "toast_invalid_item": t("toast_invalid_item"),
+                "toast_resolving": t("toast_resolving"),
+                "toast_dispute_resolved": "Dispute resolved for Proposal",
+                "toast_payload_req": t("toast_payload_req"),
+                "toast_submitting": t("toast_submitting"),
+                "toast_proposal_submitted": "Proposal successfully submitted!",
+                "toast_signing": "Signing Proposal",
+                "toast_proposal_signed": "Proposal signed!",
+                "toast_raising_dispute": "Raising Dispute for Proposal",
+                "toast_dispute_raised": "Dispute raised on Proposal!",
+
                 "i18n_1": "html",
                 "i18n_2": "Classroom DAO V4 | RPG Edition",
                 "i18n_3": "CLASSROOM DAO",
@@ -3084,6 +3132,54 @@
                 "no_guild": "No Guild"
             },
             "ru": {
+
+                "guild_vault": "Сейф Гильдии",
+                "dao_premiums": "DAO Премии",
+                "guild_label": "Гильдия",
+                "create_proposal": "Создать Предложение",
+                "format_targets_json": "Формат массивов адресов / сумм: JSON.",
+                "submit_to_ai": "Отправить ИИ Оракулу",
+                "guild_manager": "Управление Гильдиями",
+                "create_guild": "Создать Гильдию",
+                "guild_id": "ID Гильдии",
+                "distribute_reward": "Выплата 50/50",
+                "total_sgc": "Всего SGC",
+                "total_xp": "Всего XP",
+                "btn_distribute_reward": "Распределить Награду",
+                "dispute_arb": "Арбитраж Споров",
+                "proposal_id": "ID Предложения",
+                "resolution_payload": "Данные (JSON формат)",
+                "resolve_dispute": "Разрешить Спор",
+                "no_active_proposals": "Нет активных предложений в вашей гильдии.",
+                "status_pending": "Ожидает",
+                "status_executed": "Исполнено",
+                "status_disputed": "Оспорено",
+                "approvals_label": "Голоса:",
+                "btn_sign": "✍️ Подписать",
+                "btn_dispute": "⚠️ Оспорить",
+                "ph_member": "Участник",
+                "ph_member_opt": "Участник 5 (0x...) - Оп.",
+                "toast_invalid_guild": "Неверный ID Гильдии.",
+                "toast_invalid_addr": "Неверный адрес для участника",
+                "toast_guild_min": "В гильдии должен быть хотя бы 1 участник.",
+                "toast_creating_guild": "Создание Гильдии...",
+                "toast_guild_created": "Гильдия успешно создана!",
+                "toast_fill_all": "Заполните все поля корректно.",
+                "toast_distributing": "Распределение награды гильдии...",
+                "toast_reward_distributed": "Награда распределена Гильдии",
+                "toast_missing_id": "Отсутствует ID или Данные.",
+                "toast_invalid_json": "Неверный формат JSON.",
+                "toast_invalid_item": "Неверный элемент в данных.",
+                "toast_resolving": "Разрешение спора...",
+                "toast_dispute_resolved": "Спор разрешен для Предложения",
+                "toast_payload_req": "Требуются данные (Payload).",
+                "toast_submitting": "Отправка Предложения...",
+                "toast_proposal_submitted": "Предложение успешно отправлено!",
+                "toast_signing": "Подписание Предложения",
+                "toast_proposal_signed": "Предложение подписано!",
+                "toast_raising_dispute": "Поднятие спора для Предложения",
+                "toast_dispute_raised": "Спор поднят по Предложению!",
+
                 "i18n_1": "html",
                 "i18n_2": "Classroom DAO V4 | RPG Edition",
                 "i18n_3": "CLASSROOM DAO",
@@ -3232,6 +3328,14 @@
                     el.textContent = (matchStart ? matchStart[0] : '') + translations[lang][key] + (matchEnd ? matchEnd[0] : '');
                 }
             });
+
+            document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+                const key = el.getAttribute('data-i18n-ph');
+                if (translations[lang] && translations[lang][key]) {
+                    el.placeholder = translations[lang][key];
+                }
+            });
+
         }
 
         function toggleLang() {
@@ -3239,13 +3343,20 @@
             setLanguage(currentLang === 'en' ? 'ru' : 'en');
         }
 
-        // ── Guilds & DAO Premiums Logic (V8) ─────────────────────────────
+        // ── Guilds & <span data-i18n="dao_premiums">DAO Premiums</span> Logic (V8) ─────────────────────────────
+
+        
+        function t(key) {
+            const lang = localStorage.getItem('lang') || 'en';
+            return (translations[lang] && translations[lang][key]) ? translations[lang][key] : key;
+        }
 
         async function createGuildAction() {
+
             const guildIdStr = document.getElementById("admin-create-guild-id").value;
             const guildId = parseInt(guildIdStr);
             if(isNaN(guildId) || guildId <= 0) {
-                showToast("Invalid Guild ID.", "error");
+                showToast(t("toast_invalid_guild"), "error");
                 return;
             }
             
@@ -3255,22 +3366,22 @@
                 if(addr && ethers.utils.isAddress(addr)) {
                     members.push(addr);
                 } else if(addr) {
-                    showToast(`Invalid address for Member ${i}`, "error");
+                    showToast(`${t("toast_invalid_addr")} ${i}`, "error");
                     return;
                 }
             }
             
             if(members.length === 0) {
-                showToast("Guild must have at least 1 member.", "error");
+                showToast(t("toast_guild_min"), "error");
                 return;
             }
             
             try {
-                showLoader("Creating Guild...");
+                showLoader(t("toast_creating_guild"));
                 const tx = await voterContract.create_guild(guildId, members);
                 showToast(`Tx sent: ${tx.hash.substring(0,10)}...`, "info");
                 await waitWithTimeout(tx);
-                showToast(`Guild #${guildId} successfully created!`, "success");
+                showToast(`${t("toast_guild_created")} #${guildId}`, "success");
             } catch (e) {
                 console.error(e);
                 showToast(e.reason || "Failed to create guild.", "error");
@@ -3285,7 +3396,7 @@
             const xpAmt = parseInt(document.getElementById("admin-dist-xp").value);
             
             if(isNaN(guildId) || guildId <= 0 || !sgcAmt || isNaN(xpAmt)) {
-                showToast("Please fill all fields correctly.", "error");
+                showToast(t("toast_fill_all"), "error");
                 return;
             }
             
@@ -3293,11 +3404,11 @@
                 const decimals = await tokenContract.decimals();
                 const sgcWei = ethers.utils.parseUnits(sgcAmt, decimals);
                 
-                showLoader("Distributing Guild Reward...");
+                showLoader(t("toast_distributing"));
                 const tx = await voterContract.distribute_guild_reward(guildId, sgcWei, xpAmt);
                 showToast(`Tx sent: ${tx.hash.substring(0,10)}...`, "info");
                 await waitWithTimeout(tx);
-                showToast(`Reward distributed to Guild #${guildId}!`, "success");
+                showToast(`${t("toast_reward_distributed")} #${guildId}!`, "success");
             } catch (e) {
                 console.error(e);
                 showToast(e.reason || "Failed to distribute reward.", "error");
@@ -3311,7 +3422,7 @@
             const payloadStr = document.getElementById("admin-arb-payload").value.trim();
             
             if(isNaN(proposalId) || !payloadStr) {
-                showToast("Missing Proposal ID or Payload.", "error");
+                showToast(t("toast_missing_id"), "error");
                 return;
             }
             
@@ -3320,7 +3431,7 @@
                 payload = JSON.parse(payloadStr);
                 if(!Array.isArray(payload)) throw new Error("Must be an array");
             } catch (e) {
-                showToast("Invalid JSON Payload format.", "error");
+                showToast(t("toast_invalid_json"), "error");
                 return;
             }
             
@@ -3328,7 +3439,7 @@
             const amounts = [];
             for(const item of payload) {
                 if(!item.address || !ethers.utils.isAddress(item.address) || typeof item.amount === 'undefined') {
-                    showToast("Invalid item in payload.", "error");
+                    showToast(t("toast_invalid_item"), "error");
                     return;
                 }
                 targets.push(item.address);
@@ -3337,11 +3448,11 @@
             }
             
             try {
-                showLoader("Resolving Dispute...");
+                showLoader(t("toast_resolving"));
                 const tx = await voterContract.resolve_dispute(proposalId, targets, amounts);
                 showToast(`Tx sent: ${tx.hash.substring(0,10)}...`, "info");
                 await waitWithTimeout(tx);
-                showToast(`Dispute resolved for Proposal #${proposalId}!`, "success");
+                showToast(`${t("toast_dispute_resolved")} #${proposalId}!`, "success");
             } catch (e) {
                 console.error(e);
                 showToast(e.reason || "Failed to resolve dispute.", "error");
@@ -3353,7 +3464,7 @@
         async function createProposalAction() {
             const payloadStr = document.getElementById("student-proposal-payload").value.trim();
             if(!payloadStr) {
-                showToast("Payload is required.", "error");
+                showToast(t("toast_payload_req"), "error");
                 return;
             }
             
@@ -3362,7 +3473,7 @@
                 payload = JSON.parse(payloadStr);
                 if(!Array.isArray(payload)) throw new Error("Must be an array");
             } catch (e) {
-                showToast("Invalid JSON Payload format.", "error");
+                showToast(t("toast_invalid_json"), "error");
                 return;
             }
             
@@ -3372,7 +3483,7 @@
             
             for(const item of payload) {
                 if(!item.address || !ethers.utils.isAddress(item.address) || typeof item.amount === 'undefined') {
-                    showToast("Invalid item in payload.", "error");
+                    showToast(t("toast_invalid_item"), "error");
                     return;
                 }
                 targets.push(item.address);
@@ -3382,11 +3493,11 @@
             const aiProofHash = "0x0000000000000000000000000000000000000000000000000000000000000000";
             
             try {
-                showLoader("Submitting Proposal...");
+                showLoader(t("toast_submitting"));
                 const tx = await voterContract.create_distribution_proposal(targets, amounts, aiProofHash);
                 showToast(`Tx sent: ${tx.hash.substring(0,10)}...`, "info");
                 await waitWithTimeout(tx);
-                showToast(`Proposal successfully submitted!`, "success");
+                showToast(t("toast_proposal_submitted"), "success");
                 refreshGuildProposals();
             } catch (e) {
                 console.error(e);
@@ -3420,10 +3531,10 @@
                     if(prop.guild_id.toNumber() === guildId) {
                         foundAny = true;
                         
-                        let statusText = "Pending";
+                        let statusText = t("status_pending");
                         let statusColor = "text-yellow-400";
-                        if(prop.is_executed) { statusText = "Executed"; statusColor = "text-emerald-400"; }
-                        else if(prop.is_disputed) { statusText = "Disputed"; statusColor = "text-rose-400"; }
+                        if(prop.is_executed) { statusText = t("status_executed"); statusColor = "text-emerald-400"; }
+                        else if(prop.is_disputed) { statusText = t("status_disputed"); statusColor = "text-rose-400"; }
                         
                         html += `
                         <div class="bg-indigo-950/40 p-4 rounded-xl border border-indigo-500/30">
@@ -3432,18 +3543,18 @@
                                 <span class="text-xs font-bold ${statusColor} uppercase tracking-wider">${statusText}</span>
                             </div>
                             <div class="text-xs text-slate-400 mb-3 font-mono">
-                                Approvals: <span class="text-indigo-300">${prop.approvals_count.toString()} / 5</span>
+                                ${t("approvals_label")} <span class="text-indigo-300">${prop.approvals_count.toString()} / 5</span>
                             </div>
                             <div class="flex gap-2">
-                                <button onclick="signProposalAction(${i})" class="flex-1 py-2 bg-indigo-600/20 hover:bg-indigo-500/40 text-indigo-300 rounded-lg text-xs font-bold border border-indigo-500/50 transition-colors uppercase" ${prop.is_executed || prop.is_disputed ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : ''}>✍️ Sign</button>
-                                <button onclick="raiseDisputeAction(${i})" class="flex-1 py-2 bg-rose-600/20 hover:bg-rose-500/40 text-rose-300 rounded-lg text-xs font-bold border border-rose-500/50 transition-colors uppercase" ${prop.is_executed || prop.is_disputed ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : ''}>⚠️ Dispute</button>
+                                <button onclick="signProposalAction(${i})" class="flex-1 py-2 bg-indigo-600/20 hover:bg-indigo-500/40 text-indigo-300 rounded-lg text-xs font-bold border border-indigo-500/50 transition-colors uppercase" ${prop.is_executed || prop.is_disputed ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : ''}>${t("btn_sign")}</button>
+                                <button onclick="raiseDisputeAction(${i})" class="flex-1 py-2 bg-rose-600/20 hover:bg-rose-500/40 text-rose-300 rounded-lg text-xs font-bold border border-rose-500/50 transition-colors uppercase" ${prop.is_executed || prop.is_disputed ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : ''}>${t("btn_dispute")}</button>
                             </div>
                         </div>`;
                     }
                 }
                 
                 if(!foundAny) {
-                    html = `<div class="text-center text-slate-500 py-8"><span class="italic text-sm">No active proposals in your guild.</span></div>`;
+                    html = `<div class="text-center text-slate-500 py-8"><span class="italic text-sm" data-i18n="no_active_proposals">${t("no_active_proposals")}</span></div>`;
                 }
                 
                 container.innerHTML = html;
@@ -3455,11 +3566,11 @@
 
         async function signProposalAction(id) {
             try {
-                showLoader(`Signing Proposal #${id}...`);
+                showLoader(`${t("toast_signing")} #${id}...`);
                 const tx = await voterContract.sign_proposal(id);
                 showToast(`Tx sent: ${tx.hash.substring(0,10)}...`, "info");
                 await waitWithTimeout(tx);
-                showToast(`Proposal #${id} signed!`, "success");
+                showToast(`${t("toast_proposal_signed")}`, "success");
                 refreshGuildProposals();
                 fetchUserData();
             } catch (e) {
@@ -3472,11 +3583,11 @@
 
         async function raiseDisputeAction(id) {
             try {
-                showLoader(`Raising Dispute for Proposal #${id}...`);
+                showLoader(`${t("toast_raising_dispute")} #${id}...`);
                 const tx = await voterContract.raise_dispute(id);
                 showToast(`Tx sent: ${tx.hash.substring(0,10)}...`, "info");
                 await waitWithTimeout(tx);
-                showToast(`Dispute raised on Proposal #${id}!`, "warning");
+                showToast(`${t("toast_dispute_raised")}`, "warning");
                 refreshGuildProposals();
             } catch (e) {
                 console.error(e);
