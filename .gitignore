@@ -4,3 +4,4 @@ __pycache__/
 *.log
 .agent/
 .gemini/
+students_export.csv

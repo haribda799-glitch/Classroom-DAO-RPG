@@ -1,10 +1,10 @@
 # pragma version ^0.4.0
 
 """
-@title Classroom DAO V7 - RPG Edition
+@title Classroom DAO V8 - Hybrid Guilds Edition
 @author Antigravity
-@notice Educational platform contract with voter rights, RPG leveling and tokens.
-@dev V7: Token Sinks — Item Burning, Recycling, and XP Transformation.
+@notice Educational platform contract with voter rights, RPG leveling, tokens, and hybrid guilds.
+@dev V8: Hybrid Guilds — 50/50 Reward Model, AI-Powered KPI Distribution, Arbitration, and Batch Migration.
 """
 
 interface ERC20:
@@ -58,6 +58,43 @@ event ItemTransformedToXP:
     item_id: uint256
     xp_gained: uint256
 
+# ── V8: Hybrid Guild Events ────────────────────────────────────────────────────
+
+event GuildCreated:
+    guild_id: indexed(uint256)
+    member_count: uint256
+
+event GuildRewardDistributed:
+    guild_id: indexed(uint256)
+    total_sgc: uint256
+    total_xp: uint256
+
+event GuildProposalCreated:
+    proposal_id: indexed(uint256)
+    guild_id: uint256
+    ai_proof_hash: bytes32
+
+event GuildProposalSigned:
+    proposal_id: indexed(uint256)
+    signer: indexed(address)
+    approvals_count: uint256
+
+event GuildProposalExecuted:
+    proposal_id: indexed(uint256)
+
+event GuildDisputeRaised:
+    proposal_id: indexed(uint256)
+    guild_id: uint256
+    disputer: indexed(address)
+
+event GuildDisputeResolved:
+    proposal_id: indexed(uint256)
+    guild_id: uint256
+    penalty_returned: uint256
+
+event LegacyXPImported:
+    student_count: uint256
+
 # ── Structs ────────────────────────────────────────────────────────────────────
 
 struct Voter:
@@ -89,6 +126,25 @@ struct PurchaseLog:
     item_name: String[64]
     price: uint256
     timestamp: uint256
+
+# ── V8: Guild Structs ──────────────────────────────────────────────────────────
+
+struct Guild:
+    guild_id: uint256
+    total_xp: uint256
+    member_count: uint256
+    members: DynArray[address, 5]
+    is_active: bool
+
+struct GuildProposal:
+    proposal_id: uint256
+    guild_id: uint256
+    amounts: DynArray[uint256, 5]       # Premium token distribution per member
+    targets: DynArray[address, 5]       # Recipient wallet addresses
+    ai_proof_hash: bytes32              # 0G Storage AI report hash
+    approvals_count: uint256            # Current signature count
+    is_disputed: bool                   # Arbitration freeze flag
+    is_executed: bool                   # Completion flag
 
 # ── State Variables ────────────────────────────────────────────────────────────
 
@@ -126,6 +182,16 @@ pollVotes: public(HashMap[uint256, HashMap[uint256, uint256]])
 hasVoted: public(HashMap[uint256, HashMap[address, bool]])
 receivedDelegations: public(HashMap[uint256, HashMap[address, uint256]])
 roundVote: public(HashMap[uint256, HashMap[address, uint256]])
+
+# ── V8: Hybrid Guild State ─────────────────────────────────────────────────────
+
+guilds: public(HashMap[uint256, Guild])
+guild_proposals: public(HashMap[uint256, GuildProposal])
+proposal_signatures: public(HashMap[uint256, HashMap[address, bool]])
+guild_vaults: public(HashMap[uint256, uint256])      # SGC balance on guild vault (base units)
+guild_locked: public(HashMap[uint256, bool])         # Vault lock status (dispute freeze)
+student_to_guild: public(HashMap[address, uint256])  # Student -> Guild binding (0 = unassigned)
+next_proposal_id: public(uint256)
 
 # ── Constructor ────────────────────────────────────────────────────────────────
 
@@ -396,6 +462,331 @@ def transform_item_to_xp(item_id: uint256):
     self.students[msg.sender].academicXP += xp_gained
 
     log ItemTransformedToXP(student=msg.sender, item_id=item_id, xp_gained=xp_gained)
+
+# ── V8: Hybrid Guild Management ───────────────────────────────────────────────
+
+@external
+def create_guild(guild_id: uint256, members: DynArray[address, 5]):
+    """
+    @notice Creates a new hybrid guild and binds students to it.
+    @dev Only callable by chairperson (Game Master / boss_address).
+         Each student can belong to exactly one guild. Guild IDs must be > 0.
+         Duplicate detection is implicit: the second occurrence would see
+         student_to_guild already set (non-zero) and revert.
+    @param guild_id Unique guild identifier (must be > 0).
+    @param members Array of registered student addresses (1-5 members).
+    """
+    assert msg.sender == self.chairperson, "Only Game Master can create guilds"
+    assert guild_id > 0, "Guild ID must be greater than 0"
+    assert len(members) > 0 and len(members) <= 5, "Guild must have 1 to 5 members"
+    assert not self.guilds[guild_id].is_active, "Guild with this ID already exists"
+
+    # Validate and bind each member in a single pass
+    for m: address in members:
+        assert self.voters[m].weight > 0, "Member is not a registered student"
+        assert self.student_to_guild[m] == 0, "Student already assigned to a guild"
+        self.student_to_guild[m] = guild_id
+
+    self.guilds[guild_id] = Guild(
+        guild_id=guild_id,
+        total_xp=0,
+        member_count=len(members),
+        members=members,
+        is_active=True
+    )
+
+    log GuildCreated(guild_id=guild_id, member_count=len(members))
+
+
+# ── V8: Hybrid Reward System (50/50 Model) ────────────────────────────────────
+
+@external
+@nonreentrant
+def distribute_guild_reward(guild_id: uint256, total_sgc: uint256, total_xp: uint256):
+    """
+    @notice Distribute guild reward using the 50/50 hybrid model.
+    @dev Only callable by chairperson.
+         - Base 50% SGC: split equally among members, transferred immediately.
+         - Premium 50% SGC: deposited into guild_vaults for DAO-governed distribution.
+         - XP: added to guild total and split equally among members' personal XP.
+    @param guild_id Target guild identifier.
+    @param total_sgc Total SGC reward in base units (without 10**18 decimals).
+    @param total_xp Total Academic XP reward.
+    """
+    assert msg.sender == self.chairperson, "Only Game Master can distribute rewards"
+    assert self.guilds[guild_id].is_active, "Guild is not active"
+    assert total_sgc > 0 or total_xp > 0, "Reward must be non-zero"
+
+    guild: Guild = self.guilds[guild_id]
+    member_count: uint256 = guild.member_count
+
+    # 50/50 split: base guaranteed income + premium KPI pool
+    base_share: uint256 = total_sgc // 2
+    premium: uint256 = total_sgc - base_share  # Handles odd totals correctly
+
+    # Per-member equal shares
+    per_member_sgc: uint256 = base_share // member_count
+    per_member_xp: uint256 = total_xp // member_count
+
+    # Distribute base SGC and XP to each guild member
+    for i: uint256 in range(5):
+        if i >= member_count:
+            break
+        member: address = guild.members[i]
+
+        # Credit personal Academic XP
+        self.students[member].academicXP += per_member_xp
+
+        # Transfer base SGC share from chairperson wallet
+        if per_member_sgc > 0:
+            sgc_wei: uint256 = per_member_sgc * 10 ** 18
+            extcall ERC20(self.token_address).transferFrom(
+                self.chairperson_wallet, member, sgc_wei
+            )
+
+    # Deposit premium portion into guild vault for DAO-governed distribution
+    self.guild_vaults[guild_id] += premium
+
+    # Update guild cumulative XP
+    self.guilds[guild_id].total_xp += total_xp
+
+    log GuildRewardDistributed(guild_id=guild_id, total_sgc=total_sgc, total_xp=total_xp)
+
+
+# ── V8: Internal DAO & 0G Storage Integration ─────────────────────────────────
+
+@external
+def create_distribution_proposal(
+    guild_id: uint256,
+    targets: DynArray[address, 5],
+    amounts: DynArray[uint256, 5],
+    ai_proof_hash: bytes32
+):
+    """
+    @notice Create a proposal to distribute premium SGC from the guild vault.
+    @dev Any guild member can propose. Vault must not be frozen.
+         ai_proof_hash is the keccak256 of the AI analysis report stored on 0G Storage.
+         Sum of amounts must exactly equal the current vault balance.
+    @param guild_id Guild whose vault is being distributed.
+    @param targets Recipient addresses (guild members).
+    @param amounts SGC amounts per recipient (base units, sum must equal vault balance).
+    @param ai_proof_hash 32-byte hash of the AI recommendation report from 0G Storage.
+    """
+    assert guild_id > 0, "Invalid guild ID"
+    assert self.student_to_guild[msg.sender] == guild_id, "Not a member of this guild"
+    assert not self.guild_locked[guild_id], "Guild vault is locked (dispute in progress)"
+    assert len(targets) == len(amounts), "Targets and amounts length mismatch"
+    assert len(targets) > 0, "Proposal cannot be empty"
+
+    # Verify that proposed distribution exactly matches vault balance
+    total: uint256 = 0
+    for a: uint256 in amounts:
+        total += a
+    assert total == self.guild_vaults[guild_id], "Amounts must equal vault balance"
+
+    proposal_id: uint256 = self.next_proposal_id
+
+    self.guild_proposals[proposal_id] = GuildProposal(
+        proposal_id=proposal_id,
+        guild_id=guild_id,
+        amounts=amounts,
+        targets=targets,
+        ai_proof_hash=ai_proof_hash,
+        approvals_count=0,
+        is_disputed=False,
+        is_executed=False
+    )
+
+    self.next_proposal_id += 1
+
+    log GuildProposalCreated(
+        proposal_id=proposal_id,
+        guild_id=guild_id,
+        ai_proof_hash=ai_proof_hash
+    )
+
+
+@external
+@nonreentrant
+def sign_proposal(proposal_id: uint256):
+    """
+    @notice Sign a guild distribution proposal.
+    @dev When all guild members sign (100% consensus), the proposal auto-executes:
+         tokens are transferred from chairperson_wallet to targets and vault is cleared.
+    @param proposal_id ID of the proposal to sign.
+    """
+    proposal: GuildProposal = self.guild_proposals[proposal_id]
+    assert proposal.guild_id > 0, "Proposal does not exist"
+    assert not proposal.is_executed, "Proposal already executed"
+    assert not proposal.is_disputed, "Proposal is under dispute"
+
+    guild_id: uint256 = proposal.guild_id
+    assert self.student_to_guild[msg.sender] == guild_id, "Not a member of this guild"
+    assert not self.proposal_signatures[proposal_id][msg.sender], "Already signed this proposal"
+
+    # Record signature
+    self.proposal_signatures[proposal_id][msg.sender] = True
+    self.guild_proposals[proposal_id].approvals_count += 1
+
+    new_count: uint256 = self.guild_proposals[proposal_id].approvals_count
+    member_count: uint256 = self.guilds[guild_id].member_count
+
+    log GuildProposalSigned(
+        proposal_id=proposal_id,
+        signer=msg.sender,
+        approvals_count=new_count
+    )
+
+    # Auto-execute on 100% consensus (all members signed)
+    if new_count == member_count:
+        # Effects first: mark executed and clear vault before external calls
+        self.guild_proposals[proposal_id].is_executed = True
+        self.guild_vaults[guild_id] = 0
+
+        # Interactions: distribute tokens to targets
+        for i: uint256 in range(5):
+            if i >= len(proposal.targets):
+                break
+            if proposal.amounts[i] > 0:
+                sgc_wei: uint256 = proposal.amounts[i] * 10 ** 18
+                extcall ERC20(self.token_address).transferFrom(
+                    self.chairperson_wallet, proposal.targets[i], sgc_wei
+                )
+
+        log GuildProposalExecuted(proposal_id=proposal_id)
+
+
+# ── V8: Dispute & Arbitration Mechanics ────────────────────────────────────────
+
+@external
+def raise_dispute(proposal_id: uint256):
+    """
+    @notice Raise a dispute against a distribution proposal.
+    @dev Any guild member can dispute. This freezes the guild vault and blocks
+         new proposals and withdrawals until the Game Master resolves it.
+    @param proposal_id ID of the proposal to dispute.
+    """
+    proposal: GuildProposal = self.guild_proposals[proposal_id]
+    assert proposal.guild_id > 0, "Proposal does not exist"
+    assert not proposal.is_executed, "Proposal already executed"
+    assert not proposal.is_disputed, "Proposal already disputed"
+
+    guild_id: uint256 = proposal.guild_id
+    assert self.student_to_guild[msg.sender] == guild_id, "Not a member of this guild"
+
+    # Freeze proposal and lock guild vault
+    self.guild_proposals[proposal_id].is_disputed = True
+    self.guild_locked[guild_id] = True
+
+    log GuildDisputeRaised(
+        proposal_id=proposal_id,
+        guild_id=guild_id,
+        disputer=msg.sender
+    )
+
+
+@external
+@nonreentrant
+def resolve_dispute(
+    proposal_id: uint256,
+    final_targets: DynArray[address, 5],
+    final_amounts: DynArray[uint256, 5]
+):
+    """
+    @notice Resolve a disputed proposal via Game Master arbitration.
+    @dev 10% penalty is confiscated (remains on chairperson_wallet for future bounties).
+         Remaining 90% is distributed according to the Game Master's final decision.
+    @param proposal_id ID of the disputed proposal.
+    @param final_targets Addresses to receive the remaining 90%.
+    @param final_amounts SGC amounts per target (must sum to 90% of vault after penalty).
+    """
+    assert msg.sender == self.chairperson, "Only Game Master can resolve disputes"
+
+    proposal: GuildProposal = self.guild_proposals[proposal_id]
+    assert proposal.is_disputed, "Proposal is not under dispute"
+    assert not proposal.is_executed, "Proposal already executed"
+    assert len(final_targets) == len(final_amounts), "Targets and amounts length mismatch"
+
+    guild_id: uint256 = proposal.guild_id
+    vault_balance: uint256 = self.guild_vaults[guild_id]
+
+    # Calculate 10% penalty (confiscated — stays on chairperson_wallet for future bounties)
+    penalty: uint256 = vault_balance // 10
+    remaining: uint256 = vault_balance - penalty
+
+    # Verify final distribution matches the remaining 90%
+    total: uint256 = 0
+    for a: uint256 in final_amounts:
+        total += a
+    assert total == remaining, "Final amounts must equal 90 pct of vault after penalty"
+
+    # Effects: finalize state before external calls
+    self.guild_proposals[proposal_id].is_executed = True
+    self.guild_vaults[guild_id] = 0
+    self.guild_locked[guild_id] = False
+
+    # Interactions: distribute remaining tokens per arbitration decision
+    for i: uint256 in range(5):
+        if i >= len(final_targets):
+            break
+        if final_amounts[i] > 0:
+            sgc_wei: uint256 = final_amounts[i] * 10 ** 18
+            extcall ERC20(self.token_address).transferFrom(
+                self.chairperson_wallet, final_targets[i], sgc_wei
+            )
+
+    log GuildDisputeResolved(
+        proposal_id=proposal_id,
+        guild_id=guild_id,
+        penalty_returned=penalty
+    )
+
+
+# ── V8: Batch Data Migration ──────────────────────────────────────────────────
+
+@external
+def batch_import_legacy_xp(
+    students_list: DynArray[address, 20],
+    legacy_xp: DynArray[uint256, 20]
+):
+    """
+    @notice Batch-import historical Academic XP after contract redeployment.
+    @dev Only callable by chairperson. Additive — does not reset existing XP.
+         Used to restore player levels from a previous contract version.
+    @param students_list Array of student wallet addresses (up to 20).
+    @param legacy_xp Array of XP values to credit (must match students_list length).
+    """
+    assert msg.sender == self.chairperson, "Only Game Master can import legacy data"
+    assert len(students_list) == len(legacy_xp), "Arrays length mismatch"
+
+    for i: uint256 in range(20):
+        if i >= len(students_list):
+            break
+        self.students[students_list[i]].academicXP += legacy_xp[i]
+
+    log LegacyXPImported(student_count=len(students_list))
+
+
+# ── V8: Guild View Functions ───────────────────────────────────────────────────
+
+@external
+@view
+def get_guild_members(guild_id: uint256) -> DynArray[address, 5]:
+    """
+    @notice Returns the list of member addresses for a given guild.
+    @param guild_id The guild to query.
+    """
+    return self.guilds[guild_id].members
+
+@external
+@view
+def get_guild_vault_balance(guild_id: uint256) -> uint256:
+    """
+    @notice Returns the current SGC balance in the guild vault (base units).
+    @param guild_id The guild to query.
+    """
+    return self.guild_vaults[guild_id]
+
 
 # ── Voting / Governance ────────────────────────────────────────────────────────
 
