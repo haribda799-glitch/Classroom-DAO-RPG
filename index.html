@@ -283,7 +283,8 @@
             class="text-5xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-emerald-400 neon-text">
             <span data-i18n="i18n_3">
                 CLASSROOM DAO
-            </span></h1>
+            </span>
+        </h1>
         <p class="text-sky-300/80 text-xl font-medium tracking-[0.2em] uppercase"><span data-i18n="i18n_4">RPG
                 Edition</span></p>
     </div>
@@ -1001,7 +1002,7 @@
         const CHAIN_ID_HEX = "0x" + CHAIN_ID.toString(16);
 
         // Update these if you deploy new contracts
-        const VOTER_ADDRESS = "0x4B3D05b9B6190A5c898cF9ECc471f92039435250";
+        const VOTER_ADDRESS = "0xe01649BD07EdA66CfEd3EA6A1e7ebfA66996542C";
         const TOKEN_ADDRESS = "0x1731F7F26F6ff2B79A9a5f9C86B6Fec319B7e6E2";
         const ADMIN_ADDRESS = "0xbdCAb5CF57680818B833CFCAaE751416cA7809d7".toLowerCase();
 
@@ -2053,7 +2054,7 @@
             const rows = registryData.map(r => {
                 let xp = 0, level = 0;
                 try {
-                    xp    = typeof r.xp === "number" ? r.xp : 0;
+                    xp = typeof r.xp === "number" ? r.xp : 0;
                     level = getLevel(xp);
                 } catch (_) {
                     // Contract unreachable or data malformed — default to zeros
@@ -2061,7 +2062,7 @@
                 }
                 // Wrap fields in quotes to handle commas in names/groups
                 const nickname = `"${(r.nickname || "").replace(/"/g, '""')}"`;
-                const group    = `"${(r.group    || "").replace(/"/g, '""')}"`;
+                const group = `"${(r.group || "").replace(/"/g, '""')}"`;
                 return `${nickname},${group},${r.address},${xp},${level}`;
             });
 
