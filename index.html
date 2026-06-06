@@ -274,6 +274,84 @@
                 padding: 12px !important;
             }
         }
+
+        /* ── Guild Builder DnD ─────────────────────────────── */
+        .guild-student-card {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            background: linear-gradient(135deg, rgba(99,102,241,0.12), rgba(139,92,246,0.08));
+            border: 1px solid rgba(99,102,241,0.3);
+            border-radius: 12px;
+            cursor: grab;
+            user-select: none;
+            transition: all 0.18s ease;
+            position: relative;
+        }
+        .guild-student-card:hover {
+            border-color: rgba(99,102,241,0.7);
+            background: linear-gradient(135deg, rgba(99,102,241,0.22), rgba(139,92,246,0.14));
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(99,102,241,0.25);
+        }
+        .guild-student-card:active { cursor: grabbing; opacity: 0.7; }
+        .guild-student-card.dragging { opacity: 0.35; border-style: dashed; }
+        .guild-student-card .card-avatar {
+            width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 900; font-size: 13px; color: white;
+            box-shadow: 0 0 8px rgba(99,102,241,0.4);
+        }
+        .guild-student-card .card-nick {
+            font-weight: 700; font-size: 0.8rem; color: #e2e8f0;
+        }
+        .guild-student-card .card-meta {
+            font-size: 0.65rem; color: #94a3b8; font-family: monospace;
+        }
+        .guild-student-card .card-remove-btn {
+            margin-left: auto; flex-shrink: 0;
+            width: 20px; height: 20px; border-radius: 50%;
+            background: rgba(239,68,68,0.15);
+            border: 1px solid rgba(239,68,68,0.3);
+            color: #f87171; font-size: 11px; line-height: 1;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: all 0.15s;
+        }
+        .guild-student-card .card-remove-btn:hover {
+            background: rgba(239,68,68,0.35); border-color: #f87171;
+        }
+
+        .guild-drop-slot {
+            min-height: 48px;
+            border: 2px dashed rgba(99,102,241,0.25);
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.18s ease;
+            position: relative;
+            background: rgba(0,0,0,0.15);
+            overflow: hidden;
+        }
+        .guild-drop-slot.slot-empty .slot-hint {
+            font-size: 0.7rem; color: #475569; font-style: italic;
+            pointer-events: none;
+        }
+        .guild-drop-slot.drag-over {
+            border-color: #818cf8;
+            background: rgba(99,102,241,0.12);
+            box-shadow: 0 0 16px rgba(99,102,241,0.3) inset;
+        }
+        .guild-drop-slot.slot-filled {
+            border-style: solid;
+            border-color: rgba(99,102,241,0.4);
+            background: transparent;
+            padding: 0;
+        }
+        .guild-drop-slot.slot-filled .guild-student-card {
+            width: 100%; border: none; background: none;
+            box-shadow: none; border-radius: 10px;
+        }
     </style>
 </head>
 
@@ -945,29 +1023,54 @@
                     <span data-i18n="guild_manager">Guild Manager</span>
                 </h3>
 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <!-- Create Guild -->
+                <div class="space-y-8">
+                    <!-- Create Guild — Drag & Drop Builder -->
                     <div>
-                        <h4 class="text-sm font-bold text-indigo-300 uppercase tracking-widest mb-3 border-b border-indigo-500/30 pb-2"><span data-i18n="create_guild">Create Guild</span></h4>
-                        <div class="space-y-3">
-                            <div>
-                                <label class="block text-xs uppercase tracking-widest text-slate-500 mb-1 font-bold"><span data-i18n="guild_id">Guild ID</span></label>
-                                <input id="admin-create-guild-id" type="number" class="w-full bg-black/50 border border-slate-700 rounded-xl px-4 py-2 text-slate-200 focus:outline-none focus:border-indigo-500 transition-all font-mono" placeholder="e.g. 1" />
-                            </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                <input id="admin-guild-member-1" type="text" class="w-full bg-black/50 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-indigo-500 transition-all font-mono text-xs" placeholder="Member 1 (0x...)" data-i18n-ph="ph_member" />
-                                <input id="admin-guild-member-2" type="text" class="w-full bg-black/50 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-indigo-500 transition-all font-mono text-xs" placeholder="Member 2 (0x...)" data-i18n-ph="ph_member" />
-                                <input id="admin-guild-member-3" type="text" class="w-full bg-black/50 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-indigo-500 transition-all font-mono text-xs" placeholder="Member 3 (0x...)" data-i18n-ph="ph_member" />
-                                <input id="admin-guild-member-4" type="text" class="w-full bg-black/50 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-indigo-500 transition-all font-mono text-xs" placeholder="Member 4 (0x...)" data-i18n-ph="ph_member" />
-                                <input id="admin-guild-member-5" type="text" class="w-full bg-black/50 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-indigo-500 transition-all font-mono text-xs md:col-span-2" placeholder="Member 5 (0x...) - Optional" data-i18n-ph="ph_member_opt" />
-                            </div>
-                            <button onclick="createGuildAction()" class="w-full py-3 mt-2 bg-slate-800 hover:bg-indigo-600 hover:text-white transition-all rounded-xl font-bold border border-slate-600 hover:border-indigo-400 shadow-lg text-indigo-300 uppercase tracking-wider text-sm">
-                                <span data-i18n="create_guild">Create Guild</span>
-                            </button>
+                        <h4 class="text-sm font-bold text-indigo-300 uppercase tracking-widest mb-4 border-b border-indigo-500/30 pb-2 flex items-center gap-2">
+                            ⚔️ <span data-i18n="create_guild">Create Guild</span>
+                        </h4>
+                        <!-- Guild ID -->
+                        <div class="mb-4">
+                            <label class="block text-xs uppercase tracking-widest text-slate-500 mb-1 font-bold"><span data-i18n="guild_id">Guild ID</span></label>
+                            <input id="admin-create-guild-id" type="number" min="1"
+                                class="w-40 bg-black/50 border border-slate-700 rounded-xl px-4 py-2 text-slate-200 focus:outline-none focus:border-indigo-500 transition-all font-mono"
+                                placeholder="e.g. 1" />
                         </div>
+                        <!-- Drag-and-Drop area: two columns -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Left: Available Students -->
+                            <div>
+                                <p class="text-xs uppercase tracking-widest text-slate-500 font-bold mb-3">
+                                    🧑‍🎓 <span data-i18n="guild_free_students">Available Students</span>
+                                </p>
+                                <div id="guild-student-pool"
+                                    class="min-h-[180px] space-y-2 p-3 rounded-xl border border-slate-700/60 bg-black/30 overflow-y-auto max-h-72"
+                                    ondragover="guildPoolDragOver(event)"
+                                    ondrop="guildPoolDrop(event)">
+                                    <p class="text-slate-600 text-xs text-center py-6 italic" id="guild-pool-empty-hint">
+                                        <span data-i18n="guild_load_hint">Load registry to see students</span>
+                                    </p>
+                                </div>
+                            </div>
+                            <!-- Right: Guild Slots -->
+                            <div>
+                                <p class="text-xs uppercase tracking-widest text-slate-500 font-bold mb-3">
+                                    🏰 <span data-i18n="guild_new_guild">New Guild</span>
+                                    <span class="ml-2 text-indigo-400 font-mono" id="guild-slot-count">0/5</span>
+                                </p>
+                                <div id="guild-drop-zone" class="space-y-2">
+                                    <!-- 5 slots rendered by JS -->
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="createGuildAction()"
+                            class="w-full py-3 mt-5 bg-gradient-to-r from-indigo-700 to-purple-700 hover:from-indigo-600 hover:to-purple-600 transition-all rounded-xl font-bold text-white shadow-[0_0_20px_rgba(99,102,241,0.5)] hover:scale-[1.02] uppercase tracking-wider text-sm flex items-center justify-center gap-2">
+                            ⚔️ <span data-i18n="create_guild">Create Guild</span>
+                        </button>
                     </div>
 
-                    <div class="space-y-6">
+                    <!-- Distribute & Arbitration in 2 columns -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                         <!-- Distribute 50/50 Reward -->
                         <div>
                             <h4 class="text-sm font-bold text-indigo-300 uppercase tracking-widest mb-3 border-b border-indigo-500/30 pb-2"><span data-i18n="distribute_reward">Distribute 50/50 Reward</span></h4>
@@ -2108,6 +2211,9 @@
                         </td>
                     </tr>
                 `).join("");
+
+                // Sync the Guild Builder student pool with fresh registry data
+                populateGuildPool();
             } catch (err) {
                 console.error(err);
                 tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-rose-500 font-bold">Failed to load registry.</td></tr>`;
@@ -2971,7 +3077,10 @@
             }
         }
 
-        window.addEventListener('DOMContentLoaded', init);
+        window.addEventListener('DOMContentLoaded', () => {
+            init();
+            guildBuilderInit();
+        });
     </script>
     <script>
         const translations = {
@@ -3023,6 +3132,11 @@
                 "toast_proposal_signed": "Proposal signed!",
                 "toast_raising_dispute": "Raising Dispute for Proposal",
                 "toast_dispute_raised": "Dispute raised on Proposal!",
+                "guild_free_students": "Available Students",
+                "guild_new_guild": "New Guild",
+                "guild_slot_empty": "Slot",
+                "guild_load_hint": "Load registry to see students",
+                "guild_slot_full_single": "This slot is already filled. Drop onto an empty slot.",
 
                 "i18n_1": "html",
                 "i18n_2": "Classroom DAO V4 | RPG Edition",
@@ -3179,6 +3293,11 @@
                 "toast_proposal_signed": "Предложение подписано!",
                 "toast_raising_dispute": "Поднятие спора для Предложения",
                 "toast_dispute_raised": "Спор поднят по Предложению!",
+                "guild_free_students": "Свободные Студенты",
+                "guild_new_guild": "Новая Гильдия",
+                "guild_slot_empty": "Слот",
+                "guild_load_hint": "Загрузите реестр, чтобы увидеть студентов",
+                "guild_slot_full_single": "Этот слот уже занят. Перетащите в пустой.",
 
                 "i18n_1": "html",
                 "i18n_2": "Classroom DAO V4 | RPG Edition",
@@ -3351,37 +3470,221 @@
             return (translations[lang] && translations[lang][key]) ? translations[lang][key] : key;
         }
 
-        async function createGuildAction() {
+        // ── Guild Builder Drag-and-Drop ──────────────────────────────────
 
+        const ZERO_ADDR = "0x0000000000000000000000000000000000000000";
+        let guildDraggedCardData = null; // { address, nickname, xp, fromSlot: null | slotIndex }
+
+        function guildBuilderInit() {
+            // Render 5 empty drop slots
+            const zone = document.getElementById("guild-drop-zone");
+            if (!zone) return;
+            zone.innerHTML = "";
+            for (let i = 0; i < 5; i++) {
+                zone.appendChild(createEmptySlot(i));
+            }
+            updateGuildSlotCount();
+        }
+
+        function createEmptySlot(index) {
+            const slot = document.createElement("div");
+            slot.className = "guild-drop-slot slot-empty";
+            slot.dataset.slotIndex = index;
+            slot.innerHTML = `<span class="slot-hint">— ${t("guild_slot_empty")} ${index + 1} —</span>`;
+            slot.addEventListener("dragover", e => { e.preventDefault(); slot.classList.add("drag-over"); });
+            slot.addEventListener("dragleave", () => slot.classList.remove("drag-over"));
+            slot.addEventListener("drop", e => { e.preventDefault(); slot.classList.remove("drag-over"); guildSlotDrop(slot); });
+            return slot;
+        }
+
+        function createStudentCard(student, inSlot = false) {
+            const card = document.createElement("div");
+            card.className = "guild-student-card";
+            card.draggable = true;
+            card.dataset.address = student.address;
+            card.dataset.nickname = student.nickname;
+            card.dataset.xp = student.xp;
+
+            const level = Math.floor(student.xp / 100) + 1;
+            card.innerHTML = `
+                <div class="card-avatar">${(student.nickname || "?").charAt(0).toUpperCase()}</div>
+                <div>
+                    <div class="card-nick">${student.nickname}</div>
+                    <div class="card-meta">Lv.${level} · ${student.xp} XP</div>
+                </div>
+                ${inSlot ? `<button class="card-remove-btn" title="Remove">✕</button>` : ""}
+            `;
+
+            card.addEventListener("dragstart", () => {
+                guildDraggedCardData = { address: student.address, nickname: student.nickname, xp: student.xp };
+                if (inSlot) {
+                    const slot = card.closest(".guild-drop-slot");
+                    guildDraggedCardData.fromSlot = slot ? parseInt(slot.dataset.slotIndex) : null;
+                } else {
+                    guildDraggedCardData.fromSlot = null;
+                }
+                card.classList.add("dragging");
+                // Mark pool card as source
+                setTimeout(() => { if (!inSlot) card.style.opacity = "0.35"; }, 0);
+            });
+            card.addEventListener("dragend", () => {
+                card.classList.remove("dragging");
+                card.style.opacity = "";
+                guildDraggedCardData = null;
+            });
+
+            if (inSlot) {
+                card.querySelector(".card-remove-btn").addEventListener("click", () => {
+                    const slot = card.closest(".guild-drop-slot");
+                    clearSlot(slot);
+                    returnCardToPool(student);
+                });
+            }
+            return card;
+        }
+
+        function guildSlotDrop(slot) {
+            if (!guildDraggedCardData) return;
+            const { address, nickname, xp, fromSlot } = guildDraggedCardData;
+
+            // If slot already filled, reject
+            if (slot.classList.contains("slot-filled")) {
+                showToast(t("guild_slot_full_single"), "error");
+                return;
+            }
+
+            // If came from another slot → clear source slot
+            if (fromSlot !== null) {
+                const srcSlot = document.querySelector(`.guild-drop-slot[data-slot-index="${fromSlot}"]`);
+                if (srcSlot) clearSlot(srcSlot, false); // clear without returning to pool
+            } else {
+                // From pool → remove card from pool
+                const poolCard = document.querySelector(`#guild-student-pool [data-address="${address}"]`);
+                if (poolCard) poolCard.remove();
+                updatePoolEmptyHint();
+            }
+
+            // Fill slot
+            slot.innerHTML = "";
+            slot.classList.remove("slot-empty");
+            slot.classList.add("slot-filled");
+            slot.appendChild(createStudentCard({ address, nickname, xp }, true));
+            updateGuildSlotCount();
+        }
+
+        function clearSlot(slot, returnToPool = true) {
+            const card = slot.querySelector(".guild-student-card");
+            const student = card ? { address: card.dataset.address, nickname: card.dataset.nickname, xp: parseInt(card.dataset.xp) } : null;
+            slot.innerHTML = "";
+            slot.classList.remove("slot-filled");
+            slot.classList.add("slot-empty");
+            const idx = parseInt(slot.dataset.slotIndex);
+            slot.appendChild(createEmptySlot(idx).querySelector(".slot-hint") || (() => {
+                const hint = document.createElement("span");
+                hint.className = "slot-hint";
+                hint.textContent = `— ${t("guild_slot_empty")} ${idx + 1} —`;
+                return hint;
+            })());
+            // Rebuild slot events
+            slot.innerHTML = `<span class="slot-hint">— ${t("guild_slot_empty")} ${idx + 1} —</span>`;
+            slot.addEventListener("dragover", e => { e.preventDefault(); slot.classList.add("drag-over"); });
+            slot.addEventListener("dragleave", () => slot.classList.remove("drag-over"));
+            slot.addEventListener("drop", e => { e.preventDefault(); slot.classList.remove("drag-over"); guildSlotDrop(slot); });
+            if (returnToPool && student) returnCardToPool(student);
+            updateGuildSlotCount();
+        }
+
+        function returnCardToPool(student) {
+            const pool = document.getElementById("guild-student-pool");
+            if (!pool) return;
+            // Avoid duplicates
+            if (pool.querySelector(`[data-address="${student.address}"]`)) return;
+            pool.appendChild(createStudentCard(student, false));
+            updatePoolEmptyHint();
+        }
+
+        function guildPoolDragOver(e) { e.preventDefault(); }
+
+        function guildPoolDrop(e) {
+            e.preventDefault();
+            if (!guildDraggedCardData || guildDraggedCardData.fromSlot === null) return;
+            // Dragged from a slot back to pool
+            const { fromSlot, address, nickname, xp } = guildDraggedCardData;
+            const srcSlot = document.querySelector(`.guild-drop-slot[data-slot-index="${fromSlot}"]`);
+            if (srcSlot) clearSlot(srcSlot, false);
+            returnCardToPool({ address, nickname, xp });
+        }
+
+        function updatePoolEmptyHint() {
+            const pool = document.getElementById("guild-student-pool");
+            const hint = document.getElementById("guild-pool-empty-hint");
+            if (!pool || !hint) return;
+            const hasCards = pool.querySelectorAll(".guild-student-card").length > 0;
+            hint.style.display = hasCards ? "none" : "block";
+        }
+
+        function updateGuildSlotCount() {
+            const filled = document.querySelectorAll("#guild-drop-zone .guild-drop-slot.slot-filled").length;
+            const el = document.getElementById("guild-slot-count");
+            if (el) el.textContent = `${filled}/5`;
+        }
+
+        function populateGuildPool() {
+            const pool = document.getElementById("guild-student-pool");
+            if (!pool) return;
+            pool.innerHTML = "";
+            if (!registryData || registryData.length === 0) {
+                pool.innerHTML = `<p class="text-slate-600 text-xs text-center py-6 italic" id="guild-pool-empty-hint"><span data-i18n="guild_load_hint">${t("guild_load_hint")}</span></p>`;
+                return;
+            }
+            const hint = document.createElement("p");
+            hint.id = "guild-pool-empty-hint";
+            hint.className = "text-slate-600 text-xs text-center py-6 italic";
+            hint.style.display = "none";
+            hint.innerHTML = `<span data-i18n="guild_load_hint">${t("guild_load_hint")}</span>`;
+            pool.appendChild(hint);
+
+            // Filter out students already in slots
+            const inSlotAddresses = new Set(
+                Array.from(document.querySelectorAll("#guild-drop-zone .guild-student-card")).map(c => c.dataset.address)
+            );
+            registryData.forEach(student => {
+                if (!inSlotAddresses.has(student.address)) {
+                    pool.appendChild(createStudentCard(student, false));
+                }
+            });
+            updatePoolEmptyHint();
+        }
+
+        async function createGuildAction() {
             const guildIdStr = document.getElementById("admin-create-guild-id").value;
             const guildId = parseInt(guildIdStr);
-            if(isNaN(guildId) || guildId <= 0) {
+            if (isNaN(guildId) || guildId <= 0) {
                 showToast(t("toast_invalid_guild"), "error");
                 return;
             }
-            
-            const members = [];
-            for(let i=1; i<=5; i++) {
-                const addr = document.getElementById(`admin-guild-member-${i}`).value.trim();
-                if(addr && ethers.utils.isAddress(addr)) {
-                    members.push(addr);
-                } else if(addr) {
-                    showToast(`${t("toast_invalid_addr")} ${i}`, "error");
-                    return;
-                }
-            }
-            
-            if(members.length === 0) {
+
+            // Collect members from filled slots
+            const slotCards = document.querySelectorAll("#guild-drop-zone .guild-drop-slot.slot-filled .guild-student-card");
+            const members = Array.from(slotCards).map(c => c.dataset.address);
+
+            if (members.length === 0) {
                 showToast(t("toast_guild_min"), "error");
                 return;
             }
-            
+
+            // Pad to 5 with zero address (contract expects DynArray[address, 5])
+            while (members.length < 5) members.push(ZERO_ADDR);
+
             try {
                 showLoader(t("toast_creating_guild"));
                 const tx = await voterContract.create_guild(guildId, members);
                 showToast(`Tx sent: ${tx.hash.substring(0,10)}...`, "info");
                 await waitWithTimeout(tx);
                 showToast(`${t("toast_guild_created")} #${guildId}`, "success");
+                // Reset DnD builder
+                guildBuilderInit();
+                populateGuildPool();
             } catch (e) {
                 console.error(e);
                 showToast(e.reason || "Failed to create guild.", "error");
