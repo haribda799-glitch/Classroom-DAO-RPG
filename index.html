@@ -2301,14 +2301,18 @@
                 for (let i = 0; i < count; i++) {
                     const addr = await voterContract.student_addresses(i);
                     const s = await voterContract.students(addr);
-                    registryData.push({ address: addr, nickname: s[0], group: s[1], xp: s[2].toNumber() });
+                    let guildId = 0;
+                    try { guildId = (await voterContract.student_to_guild(addr)).toNumber(); } catch {}
+                    registryData.push({ address: addr, nickname: s[0], group: s[1], xp: s[2].toNumber(), guildId });
                 }
 
-                tbody.innerHTML = registryData.map((r, i) => `
+                tbody.innerHTML = registryData.map((r, i) => {
+                    const guildBadge = r.guildId > 0 ? `<span class="ml-2 text-[10px] sm:text-xs text-sky-300 font-bold bg-sky-900/40 px-2 py-1 rounded-lg border border-sky-500/30 whitespace-nowrap">Guild #${r.guildId}</span>` : '';
+                    return `
                     <tr>
                         <td class="text-slate-600 font-bold text-xs">${i + 1}</td>
                         <td><span class="font-bold text-slate-100 text-sm">${r.nickname}</span></td>
-                        <td><span class="text-xs text-amber-300 font-semibold bg-amber-900/20 px-2 py-1 rounded-lg border border-amber-500/20">${r.group}</span></td>
+                        <td><div class="flex items-center"><span class="text-xs text-amber-300 font-semibold bg-amber-900/20 px-2 py-1 rounded-lg border border-amber-500/20">${r.group}</span>${guildBadge}</div></td>
                         <td><span class="font-mono text-xs text-slate-400">${r.address.substring(0, 6)}...${r.address.substring(38)}</span></td>
                         <td>
                             <div class="flex items-center justify-center gap-2">
@@ -2317,7 +2321,7 @@
                             </div>
                         </td>
                     </tr>
-                `).join("");
+                `}).join("");
 
                 // Sync the Guild Builder student pool with fresh registry data
                 populateGuildPool();
@@ -2351,17 +2355,23 @@
             document.getElementById("reward-address").scrollIntoView({ behavior: "smooth", block: "center" });
         }
 
-        function exportRegistryCSV() {
+        async function exportRegistryCSV() {
             if (registryData.length === 0) return showToast("Registry empty", true);
 
             // Build rows: XP is already loaded in registryData from the chain.
             // Level uses the existing getLevel() formula (Math.floor(xp / 100) + 1).
+            // Guild info is fetched asynchronously if missing, otherwise uses cached data.
             // Per-row try/catch ensures a single bad entry never aborts the full export.
-            const rows = registryData.map(r => {
-                let xp = 0, level = 0;
+            const rows = await Promise.all(registryData.map(async r => {
+                let xp = 0, level = 0, guildStr = "None";
                 try {
                     xp = typeof r.xp === "number" ? r.xp : 0;
                     level = getLevel(xp);
+                    let gid = r.guildId;
+                    if (gid === undefined) {
+                        try { gid = (await voterContract.student_to_guild(r.address)).toNumber(); } catch {}
+                    }
+                    if (gid > 0) guildStr = gid.toString();
                 } catch (_) {
                     // Contract unreachable or data malformed — default to zeros
                     xp = 0; level = 0;
@@ -2369,11 +2379,11 @@
                 // Wrap fields in quotes to handle commas in names/groups
                 const nickname = `"${(r.nickname || "").replace(/"/g, '""')}"`;
                 const group = `"${(r.group || "").replace(/"/g, '""')}"`;
-                return `${nickname},${group},${r.address},${xp},${level}`;
-            });
+                return `${nickname},${group},${r.address},${xp},${level},${guildStr}`;
+            }));
 
             const csvContent = "data:text/csv;charset=utf-8,"
-                + "Nickname,Group,Address,XP,Level\n"
+                + "Nickname,Group,Address,XP,Level,Guild\n"
                 + rows.join("\n");
 
             const encodedUri = encodeURI(csvContent);
