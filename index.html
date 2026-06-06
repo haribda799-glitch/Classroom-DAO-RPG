@@ -281,76 +281,121 @@
             align-items: center;
             gap: 10px;
             padding: 8px 12px;
-            background: linear-gradient(135deg, rgba(99,102,241,0.12), rgba(139,92,246,0.08));
-            border: 1px solid rgba(99,102,241,0.3);
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(139, 92, 246, 0.08));
+            border: 1px solid rgba(99, 102, 241, 0.3);
             border-radius: 12px;
             cursor: grab;
             user-select: none;
             transition: all 0.18s ease;
             position: relative;
         }
+
         .guild-student-card:hover {
-            border-color: rgba(99,102,241,0.7);
-            background: linear-gradient(135deg, rgba(99,102,241,0.22), rgba(139,92,246,0.14));
+            border-color: rgba(99, 102, 241, 0.7);
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.22), rgba(139, 92, 246, 0.14));
             transform: translateY(-1px);
-            box-shadow: 0 4px 16px rgba(99,102,241,0.25);
+            box-shadow: 0 4px 16px rgba(99, 102, 241, 0.25);
         }
-        .guild-student-card:active { cursor: grabbing; opacity: 0.7; }
-        .guild-student-card.dragging { opacity: 0.35; border-style: dashed; }
+
+        .guild-student-card:active {
+            cursor: grabbing;
+            opacity: 0.7;
+        }
+
+        .guild-student-card.dragging {
+            opacity: 0.35;
+            border-style: dashed;
+        }
+
         .guild-student-card .card-avatar {
-            width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            flex-shrink: 0;
             background: linear-gradient(135deg, #6366f1, #8b5cf6);
-            display: flex; align-items: center; justify-content: center;
-            font-weight: 900; font-size: 13px; color: white;
-            box-shadow: 0 0 8px rgba(99,102,241,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 13px;
+            color: white;
+            box-shadow: 0 0 8px rgba(99, 102, 241, 0.4);
         }
+
         .guild-student-card .card-nick {
-            font-weight: 700; font-size: 0.8rem; color: #e2e8f0;
+            font-weight: 700;
+            font-size: 0.8rem;
+            color: #e2e8f0;
         }
+
         .guild-student-card .card-meta {
-            font-size: 0.65rem; color: #94a3b8; font-family: monospace;
+            font-size: 0.65rem;
+            color: #94a3b8;
+            font-family: monospace;
         }
+
         .guild-student-card .card-remove-btn {
-            margin-left: auto; flex-shrink: 0;
-            width: 20px; height: 20px; border-radius: 50%;
-            background: rgba(239,68,68,0.15);
-            border: 1px solid rgba(239,68,68,0.3);
-            color: #f87171; font-size: 11px; line-height: 1;
-            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            margin-left: auto;
+            flex-shrink: 0;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #f87171;
+            font-size: 11px;
+            line-height: 1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             transition: all 0.15s;
         }
+
         .guild-student-card .card-remove-btn:hover {
-            background: rgba(239,68,68,0.35); border-color: #f87171;
+            background: rgba(239, 68, 68, 0.35);
+            border-color: #f87171;
         }
 
         .guild-drop-slot {
             min-height: 48px;
-            border: 2px dashed rgba(99,102,241,0.25);
+            border: 2px dashed rgba(99, 102, 241, 0.25);
             border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             transition: all 0.18s ease;
             position: relative;
-            background: rgba(0,0,0,0.15);
+            background: rgba(0, 0, 0, 0.15);
             overflow: hidden;
         }
+
         .guild-drop-slot.slot-empty .slot-hint {
-            font-size: 0.7rem; color: #475569; font-style: italic;
+            font-size: 0.7rem;
+            color: #475569;
+            font-style: italic;
             pointer-events: none;
         }
+
         .guild-drop-slot.drag-over {
             border-color: #818cf8;
-            background: rgba(99,102,241,0.12);
-            box-shadow: 0 0 16px rgba(99,102,241,0.3) inset;
+            background: rgba(99, 102, 241, 0.12);
+            box-shadow: 0 0 16px rgba(99, 102, 241, 0.3) inset;
         }
+
         .guild-drop-slot.slot-filled {
             border-style: solid;
-            border-color: rgba(99,102,241,0.4);
+            border-color: rgba(99, 102, 241, 0.4);
             background: transparent;
             padding: 0;
         }
+
         .guild-drop-slot.slot-filled .guild-student-card {
-            width: 100%; border: none; background: none;
-            box-shadow: none; border-radius: 10px;
+            width: 100%;
+            border: none;
+            background: none;
+            box-shadow: none;
+            border-radius: 10px;
         }
     </style>
 </head>
@@ -436,11 +481,13 @@
                         title="Refresh Balance">↻</button>
                 </div>
             </div>
-            
+
             <!-- <span data-i18n="guild_vault">Guild Vault</span> Display -->
-            <div id="guild-vault-display" class="hidden text-center md:text-right bg-indigo-900/40 p-2 md:p-3 rounded-xl border border-indigo-500/30 w-full md:w-auto">
+            <div id="guild-vault-display"
+                class="hidden text-center md:text-right bg-indigo-900/40 p-2 md:p-3 rounded-xl border border-indigo-500/30 w-full md:w-auto">
                 <p class="text-[10px] md:text-xs text-indigo-400 uppercase tracking-widest font-bold mb-1">
-                    <span data-i18n="guild_vault">Guild Vault</span> <span id="user-guild-id" class="ml-1 px-2 py-0.5 rounded-md bg-indigo-950/80 border border-indigo-400/30 text-indigo-300 text-[10px]">#0</span>
+                    <span data-i18n="guild_vault">Guild Vault</span> <span id="user-guild-id"
+                        class="ml-1 px-2 py-0.5 rounded-md bg-indigo-950/80 border border-indigo-400/30 text-indigo-300 text-[10px]">#0</span>
                 </p>
                 <div class="flex items-center justify-center md:justify-end mt-1">
                     <p class="text-xl md:text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 to-purple-400"
@@ -560,22 +607,34 @@
             <div id="dao-premiums-section" class="hidden mt-12 pt-8 border-t border-indigo-500/30 relative">
                 <div class="flex items-center justify-between mb-6">
                     <div class="flex items-center gap-3">
-                        <h2 class="text-2xl font-bold text-indigo-400 rpg-title"><span data-i18n="dao_premiums">DAO Premiums</span></h2>
-                        <span class="text-xs font-bold px-3 py-1 rounded-full bg-indigo-900/80 border border-indigo-500/50 text-indigo-300 tracking-widest uppercase"><span data-i18n="guild_label">Guild</span> <span id="dao-premium-guild-id">0</span></span>
+                        <h2 class="text-2xl font-bold text-indigo-400 rpg-title"><span data-i18n="dao_premiums">DAO
+                                Premiums</span></h2>
+                        <span
+                            class="text-xs font-bold px-3 py-1 rounded-full bg-indigo-900/80 border border-indigo-500/50 text-indigo-300 tracking-widest uppercase"><span
+                                data-i18n="guild_label">Guild</span> <span id="dao-premium-guild-id">0</span></span>
                     </div>
-                    <button onclick="refreshGuildProposals()" class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-800/80 border border-indigo-500/30 text-indigo-400 hover:bg-indigo-600 hover:text-white hover:border-indigo-400 transition-all shadow text-lg" title="Refresh Proposals">↻</button>
+                    <button onclick="refreshGuildProposals()"
+                        class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-800/80 border border-indigo-500/30 text-indigo-400 hover:bg-indigo-600 hover:text-white hover:border-indigo-400 transition-all shadow text-lg"
+                        title="Refresh Proposals">↻</button>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <!-- Create Proposal Form -->
-                    <div class="lg:col-span-1 bg-slate-900/60 p-5 rounded-2xl border border-indigo-500/30 shadow-[inset_0_0_15px_rgba(0,0,0,0.3)] h-fit">
-                        <h4 class="text-sm font-bold text-indigo-300 uppercase tracking-widest mb-4"><span data-i18n="create_proposal">Create Proposal</span></h4>
+                    <div
+                        class="lg:col-span-1 bg-slate-900/60 p-5 rounded-2xl border border-indigo-500/30 shadow-[inset_0_0_15px_rgba(0,0,0,0.3)] h-fit">
+                        <h4 class="text-sm font-bold text-indigo-300 uppercase tracking-widest mb-4"><span
+                                data-i18n="create_proposal">Create Proposal</span></h4>
                         <div class="space-y-3">
                             <div class="p-3 bg-indigo-950/50 border border-indigo-500/20 rounded-xl mb-4">
-                                <p class="text-xs text-indigo-300/80 mb-2 font-mono"><span data-i18n="format_targets_json">Format Targets / Amounts arrays as JSON.</span></p>
-                                <textarea id="student-proposal-payload" rows="3" class="w-full bg-black/50 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-indigo-500 transition-all font-mono text-xs" placeholder='[{"address":"0x...","amount":50}]'></textarea>
+                                <p class="text-xs text-indigo-300/80 mb-2 font-mono"><span
+                                        data-i18n="format_targets_json">Format Targets / Amounts arrays as JSON.</span>
+                                </p>
+                                <textarea id="student-proposal-payload" rows="3"
+                                    class="w-full bg-black/50 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-indigo-500 transition-all font-mono text-xs"
+                                    placeholder='[{"address":"0x...","amount":50}]'></textarea>
                             </div>
-                            <button onclick="createProposalAction()" class="w-full py-3 bg-gradient-to-r from-indigo-700 to-blue-700 hover:from-indigo-600 hover:to-blue-600 transition-all rounded-xl font-bold text-white shadow-[0_0_15px_rgba(99,102,241,0.4)] hover:scale-[1.02] uppercase tracking-wider text-xs">
+                            <button onclick="createProposalAction()"
+                                class="w-full py-3 bg-gradient-to-r from-indigo-700 to-blue-700 hover:from-indigo-600 hover:to-blue-600 transition-all rounded-xl font-bold text-white shadow-[0_0_15px_rgba(99,102,241,0.4)] hover:scale-[1.02] uppercase tracking-wider text-xs">
                                 <span data-i18n="submit_to_ai">Submit to AI Oracle</span>
                             </button>
                         </div>
@@ -583,8 +642,10 @@
 
                     <!-- Proposals List -->
                     <div class="lg:col-span-2">
-                        <div id="guild-proposals-container" class="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-                            <div class="text-center text-slate-500 py-8"><span class="italic text-sm" data-i18n="no_active_proposals">${t("no_active_proposals")}</span></div>
+                        <div id="guild-proposals-container"
+                            class="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                            <div class="text-center text-slate-500 py-8"><span class="italic text-sm"
+                                    data-i18n="no_active_proposals">${t("no_active_proposals")}</span></div>
                         </div>
                     </div>
                 </div>
@@ -1012,7 +1073,8 @@
                 <div class="mt-8 space-y-4" id="marketmanager-items-container"></div>
             </div>
             <!-- ── Guild Manager (V8) ───────────────────────────────────────── -->
-            <div class="bg-slate-900/70 p-6 rounded-2xl border border-indigo-500/20 shadow-[inset_0_0_15px_rgba(0,0,0,0.5)] mt-8">
+            <div
+                class="bg-slate-900/70 p-6 rounded-2xl border border-indigo-500/20 shadow-[inset_0_0_15px_rgba(0,0,0,0.5)] mt-8">
                 <h3 class="text-xl font-bold mb-5 text-indigo-400 uppercase tracking-widest flex items-center gap-2">
                     <svg fill="none" height="20" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="20">
                         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
@@ -1026,12 +1088,14 @@
                 <div class="space-y-8">
                     <!-- Create Guild — Drag & Drop Builder -->
                     <div>
-                        <h4 class="text-sm font-bold text-indigo-300 uppercase tracking-widest mb-4 border-b border-indigo-500/30 pb-2 flex items-center gap-2">
+                        <h4
+                            class="text-sm font-bold text-indigo-300 uppercase tracking-widest mb-4 border-b border-indigo-500/30 pb-2 flex items-center gap-2">
                             ⚔️ <span data-i18n="create_guild">Create Guild</span>
                         </h4>
                         <!-- Guild ID -->
                         <div class="mb-4">
-                            <label class="block text-xs uppercase tracking-widest text-slate-500 mb-1 font-bold"><span data-i18n="guild_id">Guild ID</span></label>
+                            <label class="block text-xs uppercase tracking-widest text-slate-500 mb-1 font-bold"><span
+                                    data-i18n="guild_id">Guild ID</span></label>
                             <input id="admin-create-guild-id" type="number" min="1"
                                 class="w-40 bg-black/50 border border-slate-700 rounded-xl px-4 py-2 text-slate-200 focus:outline-none focus:border-indigo-500 transition-all font-mono"
                                 placeholder="e.g. 1" />
@@ -1045,9 +1109,9 @@
                                 </p>
                                 <div id="guild-student-pool"
                                     class="min-h-[180px] space-y-2 p-3 rounded-xl border border-slate-700/60 bg-black/30 overflow-y-auto max-h-72"
-                                    ondragover="guildPoolDragOver(event)"
-                                    ondrop="guildPoolDrop(event)">
-                                    <p class="text-slate-600 text-xs text-center py-6 italic" id="guild-pool-empty-hint">
+                                    ondragover="guildPoolDragOver(event)" ondrop="guildPoolDrop(event)">
+                                    <p class="text-slate-600 text-xs text-center py-6 italic"
+                                        id="guild-pool-empty-hint">
                                         <span data-i18n="guild_load_hint">Load registry to see students</span>
                                     </p>
                                 </div>
@@ -1073,39 +1137,66 @@
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                         <!-- Distribute 50/50 Reward -->
                         <div>
-                            <h4 class="text-sm font-bold text-indigo-300 uppercase tracking-widest mb-3 border-b border-indigo-500/30 pb-2"><span data-i18n="distribute_reward">Distribute 50/50 Reward</span></h4>
+                            <h4
+                                class="text-sm font-bold text-indigo-300 uppercase tracking-widest mb-3 border-b border-indigo-500/30 pb-2">
+                                <span data-i18n="distribute_reward">Distribute 50/50 Reward</span></h4>
                             <div class="grid grid-cols-3 gap-2">
                                 <div>
-                                    <label class="block text-xs uppercase tracking-widest text-slate-500 mb-1 font-bold"><span data-i18n="guild_id">Guild ID</span></label>
-                                    <input id="admin-dist-guild-id" type="number" class="w-full bg-black/50 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-indigo-500 transition-all font-mono text-sm" placeholder="ID" />
+                                    <label
+                                        class="block text-xs uppercase tracking-widest text-slate-500 mb-1 font-bold"><span
+                                            data-i18n="guild_id">Guild ID</span></label>
+                                    <input id="admin-dist-guild-id" type="number"
+                                        class="w-full bg-black/50 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-indigo-500 transition-all font-mono text-sm"
+                                        placeholder="ID" />
                                 </div>
                                 <div>
-                                    <label class="block text-xs uppercase tracking-widest text-slate-500 mb-1 font-bold"><span data-i18n="total_sgc">Total SGC</span></label>
-                                    <input id="admin-dist-sgc" type="number" class="w-full bg-black/50 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-indigo-500 transition-all font-mono text-sm" placeholder="SGC" />
+                                    <label
+                                        class="block text-xs uppercase tracking-widest text-slate-500 mb-1 font-bold"><span
+                                            data-i18n="total_sgc">Total SGC</span></label>
+                                    <input id="admin-dist-sgc" type="number"
+                                        class="w-full bg-black/50 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-indigo-500 transition-all font-mono text-sm"
+                                        placeholder="SGC" />
                                 </div>
                                 <div>
-                                    <label class="block text-xs uppercase tracking-widest text-slate-500 mb-1 font-bold"><span data-i18n="total_xp">Total XP</span></label>
-                                    <input id="admin-dist-xp" type="number" class="w-full bg-black/50 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-indigo-500 transition-all font-mono text-sm" placeholder="XP" />
+                                    <label
+                                        class="block text-xs uppercase tracking-widest text-slate-500 mb-1 font-bold"><span
+                                            data-i18n="total_xp">Total XP</span></label>
+                                    <input id="admin-dist-xp" type="number"
+                                        class="w-full bg-black/50 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-indigo-500 transition-all font-mono text-sm"
+                                        placeholder="XP" />
                                 </div>
                             </div>
-                            <button onclick="distributeGuildRewardAction()" class="w-full py-3 mt-3 bg-gradient-to-r from-indigo-700 to-purple-700 hover:from-indigo-600 hover:to-purple-600 transition-all rounded-xl font-bold text-white shadow-[0_0_15px_rgba(99,102,241,0.4)] hover:scale-[1.02] uppercase tracking-wider text-sm">
+                            <button onclick="distributeGuildRewardAction()"
+                                class="w-full py-3 mt-3 bg-gradient-to-r from-indigo-700 to-purple-700 hover:from-indigo-600 hover:to-purple-600 transition-all rounded-xl font-bold text-white shadow-[0_0_15px_rgba(99,102,241,0.4)] hover:scale-[1.02] uppercase tracking-wider text-sm">
                                 <span data-i18n="btn_distribute_reward">Distribute Reward</span>
                             </button>
                         </div>
 
                         <!-- Arbitration -->
                         <div>
-                            <h4 class="text-sm font-bold text-indigo-300 uppercase tracking-widest mb-3 border-b border-indigo-500/30 pb-2"><span data-i18n="dispute_arb">Dispute Arbitration</span></h4>
+                            <h4
+                                class="text-sm font-bold text-indigo-300 uppercase tracking-widest mb-3 border-b border-indigo-500/30 pb-2">
+                                <span data-i18n="dispute_arb">Dispute Arbitration</span></h4>
                             <div class="space-y-3">
                                 <div>
-                                    <label class="block text-xs uppercase tracking-widest text-slate-500 mb-1 font-bold"><span data-i18n="proposal_id">Proposal ID</span></label>
-                                    <input id="admin-arb-proposal-id" type="number" class="w-full bg-black/50 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-indigo-500 transition-all font-mono text-sm" placeholder="ID" />
+                                    <label
+                                        class="block text-xs uppercase tracking-widest text-slate-500 mb-1 font-bold"><span
+                                            data-i18n="proposal_id">Proposal ID</span></label>
+                                    <input id="admin-arb-proposal-id" type="number"
+                                        class="w-full bg-black/50 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-indigo-500 transition-all font-mono text-sm"
+                                        placeholder="ID" />
                                 </div>
                                 <div>
-                                    <label class="block text-xs uppercase tracking-widest text-slate-500 mb-1 font-bold"><span data-i18n="resolution_payload">Resolution Payload (JSON format)</span></label>
-                                    <textarea id="admin-arb-payload" rows="3" class="w-full bg-black/50 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-indigo-500 transition-all font-mono text-xs" placeholder='[{"address":"0x...","amount":50}, {"address":"0x...","amount":50}]'></textarea>
+                                    <label
+                                        class="block text-xs uppercase tracking-widest text-slate-500 mb-1 font-bold"><span
+                                            data-i18n="resolution_payload">Resolution Payload (JSON
+                                            format)</span></label>
+                                    <textarea id="admin-arb-payload" rows="3"
+                                        class="w-full bg-black/50 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-indigo-500 transition-all font-mono text-xs"
+                                        placeholder='[{"address":"0x...","amount":50}, {"address":"0x...","amount":50}]'></textarea>
                                 </div>
-                                <button onclick="resolveDisputeAction()" class="w-full py-3 bg-slate-800 hover:bg-rose-600 hover:text-white transition-all rounded-xl font-bold border border-slate-600 hover:border-rose-400 shadow-lg text-rose-300 uppercase tracking-wider text-sm flex items-center justify-center gap-2">
+                                <button onclick="resolveDisputeAction()"
+                                    class="w-full py-3 bg-slate-800 hover:bg-rose-600 hover:text-white transition-all rounded-xl font-bold border border-slate-600 hover:border-rose-400 shadow-lg text-rose-300 uppercase tracking-wider text-sm flex items-center justify-center gap-2">
                                     <span>⚖️</span> <span data-i18n="resolve_dispute">Resolve Dispute</span>
                                 </button>
                             </div>
@@ -1231,7 +1322,7 @@
         const CHAIN_ID_HEX = "0x" + CHAIN_ID.toString(16);
 
         // Update these if you deploy new contracts
-        const VOTER_ADDRESS = "0x00C3E200E9deAC0E19E4E3ab5501bc2C1E704cbB";
+        const VOTER_ADDRESS = "0x9d284AB26f101a70fF96dC0728E0eD62e35D5122";
         const TOKEN_ADDRESS = "0x1731F7F26F6ff2B79A9a5f9C86B6Fec319B7e6E2";
         const ADMIN_ADDRESS = "0xbdCAb5CF57680818B833CFCAaE751416cA7809d7".toLowerCase();
 
@@ -1244,7 +1335,7 @@
         ];
 
         // ── V7 ABI ─────────────────────────────────────────────────────────────────
-        const VOTER_ABI = [{"name": "Voted", "inputs": [{"name": "voter", "type": "address", "indexed": true}, {"name": "proposal", "type": "uint256", "indexed": false}, {"name": "weight", "type": "uint256", "indexed": false}], "anonymous": false, "type": "event"}, {"name": "Delegated", "inputs": [{"name": "voter", "type": "address", "indexed": true}, {"name": "delegate", "type": "address", "indexed": true}], "anonymous": false, "type": "event"}, {"name": "StudentRegistered", "inputs": [{"name": "student", "type": "address", "indexed": true}, {"name": "nickname", "type": "string", "indexed": false}, {"name": "group", "type": "string", "indexed": false}], "anonymous": false, "type": "event"}, {"name": "StudentRewarded", "inputs": [{"name": "student", "type": "address", "indexed": true}, {"name": "amount", "type": "uint256", "indexed": false}, {"name": "sgc_amount", "type": "uint256", "indexed": false}, {"name": "reason", "type": "string", "indexed": false}], "anonymous": false, "type": "event"}, {"name": "AttendanceClaimed", "inputs": [{"name": "student", "type": "address", "indexed": true}, {"name": "xp_rewarded", "type": "uint256", "indexed": false}], "anonymous": false, "type": "event"}, {"name": "ItemPurchased", "inputs": [{"name": "student", "type": "address", "indexed": true}, {"name": "item_name", "type": "string", "indexed": false}, {"name": "price", "type": "uint256", "indexed": false}], "anonymous": false, "type": "event"}, {"name": "NewRoundStarted", "inputs": [{"name": "pollId", "type": "uint256", "indexed": false}], "anonymous": false, "type": "event"}, {"name": "ConsumableActivated", "inputs": [{"name": "student", "type": "address", "indexed": true}, {"name": "item_id", "type": "uint256", "indexed": false}], "anonymous": false, "type": "event"}, {"name": "ItemRecycled", "inputs": [{"name": "student", "type": "address", "indexed": true}, {"name": "item_id", "type": "uint256", "indexed": false}, {"name": "sgc_refund", "type": "uint256", "indexed": false}], "anonymous": false, "type": "event"}, {"name": "ItemTransformedToXP", "inputs": [{"name": "student", "type": "address", "indexed": true}, {"name": "item_id", "type": "uint256", "indexed": false}, {"name": "xp_gained", "type": "uint256", "indexed": false}], "anonymous": false, "type": "event"}, {"name": "GuildCreated", "inputs": [{"name": "guild_id", "type": "uint256", "indexed": true}, {"name": "member_count", "type": "uint256", "indexed": false}], "anonymous": false, "type": "event"}, {"name": "GuildRewardDistributed", "inputs": [{"name": "guild_id", "type": "uint256", "indexed": true}, {"name": "total_sgc", "type": "uint256", "indexed": false}, {"name": "total_xp", "type": "uint256", "indexed": false}], "anonymous": false, "type": "event"}, {"name": "GuildProposalCreated", "inputs": [{"name": "proposal_id", "type": "uint256", "indexed": true}, {"name": "guild_id", "type": "uint256", "indexed": false}, {"name": "ai_proof_hash", "type": "bytes32", "indexed": false}], "anonymous": false, "type": "event"}, {"name": "GuildProposalSigned", "inputs": [{"name": "proposal_id", "type": "uint256", "indexed": true}, {"name": "signer", "type": "address", "indexed": true}, {"name": "approvals_count", "type": "uint256", "indexed": false}], "anonymous": false, "type": "event"}, {"name": "GuildProposalExecuted", "inputs": [{"name": "proposal_id", "type": "uint256", "indexed": true}], "anonymous": false, "type": "event"}, {"name": "GuildDisputeRaised", "inputs": [{"name": "proposal_id", "type": "uint256", "indexed": true}, {"name": "guild_id", "type": "uint256", "indexed": false}, {"name": "disputer", "type": "address", "indexed": true}], "anonymous": false, "type": "event"}, {"name": "GuildDisputeResolved", "inputs": [{"name": "proposal_id", "type": "uint256", "indexed": true}, {"name": "guild_id", "type": "uint256", "indexed": false}, {"name": "penalty_returned", "type": "uint256", "indexed": false}], "anonymous": false, "type": "event"}, {"name": "LegacyXPImported", "inputs": [{"name": "student_count", "type": "uint256", "indexed": false}], "anonymous": false, "type": "event"}, {"stateMutability": "payable", "type": "function", "name": "registerStudent", "inputs": [{"name": "addr", "type": "address"}, {"name": "nickname", "type": "string"}, {"name": "group", "type": "string"}], "outputs": []}, {"stateMutability": "nonpayable", "type": "function", "name": "setPrivacy", "inputs": [{"name": "hidden", "type": "bool"}], "outputs": []}, {"stateMutability": "nonpayable", "type": "function", "name": "rewardStudent", "inputs": [{"name": "addr", "type": "address"}, {"name": "amount", "type": "uint256"}, {"name": "reason", "type": "string"}], "outputs": []}, {"stateMutability": "nonpayable", "type": "function", "name": "rewardBatch", "inputs": [{"name": "addrs", "type": "address[]"}, {"name": "amount", "type": "uint256"}, {"name": "reason", "type": "string"}], "outputs": []}, {"stateMutability": "nonpayable", "type": "function", "name": "generateDailyCode", "inputs": [{"name": "code_hash", "type": "bytes32"}, {"name": "reward_amount", "type": "uint256"}], "outputs": []}, {"stateMutability": "nonpayable", "type": "function", "name": "claimAttendance", "inputs": [{"name": "code", "type": "string"}], "outputs": []}, {"stateMutability": "nonpayable", "type": "function", "name": "addMarketItem", "inputs": [{"name": "name", "type": "string"}, {"name": "price", "type": "uint256"}, {"name": "item_type", "type": "uint256"}, {"name": "refund_percent", "type": "uint256"}, {"name": "xp_bonus", "type": "uint256"}], "outputs": []}, {"stateMutability": "nonpayable", "type": "function", "name": "setMarketItemActive", "inputs": [{"name": "itemId", "type": "uint256"}, {"name": "active", "type": "bool"}], "outputs": []}, {"stateMutability": "nonpayable", "type": "function", "name": "buyItem", "inputs": [{"name": "itemId", "type": "uint256"}], "outputs": []}, {"stateMutability": "nonpayable", "type": "function", "name": "activate_consumable_item", "inputs": [{"name": "item_id", "type": "uint256"}], "outputs": []}, {"stateMutability": "nonpayable", "type": "function", "name": "recycle_item", "inputs": [{"name": "item_id", "type": "uint256"}], "outputs": []}, {"stateMutability": "nonpayable", "type": "function", "name": "transform_item_to_xp", "inputs": [{"name": "item_id", "type": "uint256"}], "outputs": []}, {"stateMutability": "nonpayable", "type": "function", "name": "create_guild", "inputs": [{"name": "guild_id", "type": "uint256"}, {"name": "members", "type": "address[]"}], "outputs": []}, {"stateMutability": "nonpayable", "type": "function", "name": "distribute_guild_reward", "inputs": [{"name": "guild_id", "type": "uint256"}, {"name": "total_sgc", "type": "uint256"}, {"name": "total_xp", "type": "uint256"}], "outputs": []}, {"stateMutability": "nonpayable", "type": "function", "name": "create_distribution_proposal", "inputs": [{"name": "guild_id", "type": "uint256"}, {"name": "targets", "type": "address[]"}, {"name": "amounts", "type": "uint256[]"}, {"name": "ai_proof_hash", "type": "bytes32"}], "outputs": []}, {"stateMutability": "nonpayable", "type": "function", "name": "sign_proposal", "inputs": [{"name": "proposal_id", "type": "uint256"}], "outputs": []}, {"stateMutability": "nonpayable", "type": "function", "name": "raise_dispute", "inputs": [{"name": "proposal_id", "type": "uint256"}], "outputs": []}, {"stateMutability": "nonpayable", "type": "function", "name": "resolve_dispute", "inputs": [{"name": "proposal_id", "type": "uint256"}, {"name": "final_targets", "type": "address[]"}, {"name": "final_amounts", "type": "uint256[]"}], "outputs": []}, {"stateMutability": "nonpayable", "type": "function", "name": "batch_import_legacy_xp", "inputs": [{"name": "students_list", "type": "address[]"}, {"name": "legacy_xp", "type": "uint256[]"}], "outputs": []}, {"stateMutability": "view", "type": "function", "name": "get_guild_members", "inputs": [{"name": "guild_id", "type": "uint256"}], "outputs": [{"name": "", "type": "address[]"}]}, {"stateMutability": "view", "type": "function", "name": "get_guild_vault_balance", "inputs": [{"name": "guild_id", "type": "uint256"}], "outputs": [{"name": "", "type": "uint256"}]}, {"stateMutability": "nonpayable", "type": "function", "name": "setQuestNames", "inputs": [{"name": "names", "type": "string[]"}], "outputs": []}, {"stateMutability": "nonpayable", "type": "function", "name": "startNewRound", "inputs": [], "outputs": []}, {"stateMutability": "nonpayable", "type": "function", "name": "delegate", "inputs": [{"name": "to", "type": "address"}], "outputs": []}, {"stateMutability": "nonpayable", "type": "function", "name": "vote", "inputs": [{"name": "proposalIndex", "type": "uint256"}], "outputs": []}, {"stateMutability": "view", "type": "function", "name": "winning_proposal", "inputs": [], "outputs": [{"name": "", "type": "uint256"}]}, {"stateMutability": "view", "type": "function", "name": "winner_name", "inputs": [], "outputs": [{"name": "", "type": "string"}]}, {"stateMutability": "view", "type": "function", "name": "get_student_count", "inputs": [], "outputs": [{"name": "", "type": "uint256"}]}, {"stateMutability": "view", "type": "function", "name": "get_student_inventory", "inputs": [{"name": "student", "type": "address"}], "outputs": [{"name": "", "type": "uint256[]"}]}, {"stateMutability": "view", "type": "function", "name": "get_market_purchases", "inputs": [], "outputs": [{"name": "", "type": "tuple[]", "components": [{"name": "student", "type": "address"}, {"name": "item_name", "type": "string"}, {"name": "price", "type": "uint256"}, {"name": "timestamp", "type": "uint256"}]}]}, {"stateMutability": "view", "type": "function", "name": "chairperson", "inputs": [], "outputs": [{"name": "", "type": "address"}]}, {"stateMutability": "view", "type": "function", "name": "voters", "inputs": [{"name": "arg0", "type": "address"}], "outputs": [{"name": "", "type": "tuple", "components": [{"name": "weight", "type": "uint256"}, {"name": "voted", "type": "bool"}, {"name": "delegate", "type": "address"}, {"name": "vote", "type": "uint256"}]}]}, {"stateMutability": "view", "type": "function", "name": "proposals", "inputs": [{"name": "arg0", "type": "uint256"}], "outputs": [{"name": "", "type": "tuple", "components": [{"name": "name", "type": "string"}, {"name": "voteCount", "type": "uint256"}]}]}, {"stateMutability": "view", "type": "function", "name": "students", "inputs": [{"name": "arg0", "type": "address"}], "outputs": [{"name": "", "type": "tuple", "components": [{"name": "nickname", "type": "string"}, {"name": "group", "type": "string"}, {"name": "academicXP", "type": "uint256"}, {"name": "is_hidden", "type": "bool"}]}]}, {"stateMutability": "view", "type": "function", "name": "student_addresses", "inputs": [{"name": "arg0", "type": "uint256"}], "outputs": [{"name": "", "type": "address"}]}, {"stateMutability": "view", "type": "function", "name": "used_nicknames", "inputs": [{"name": "arg0", "type": "string"}], "outputs": [{"name": "", "type": "bool"}]}, {"stateMutability": "view", "type": "function", "name": "token_address", "inputs": [], "outputs": [{"name": "", "type": "address"}]}, {"stateMutability": "view", "type": "function", "name": "reward_amount", "inputs": [], "outputs": [{"name": "", "type": "uint256"}]}, {"stateMutability": "view", "type": "function", "name": "chairperson_wallet", "inputs": [], "outputs": [{"name": "", "type": "address"}]}, {"stateMutability": "view", "type": "function", "name": "has_received_reward", "inputs": [{"name": "arg0", "type": "address"}], "outputs": [{"name": "", "type": "bool"}]}, {"stateMutability": "view", "type": "function", "name": "active_code_hash", "inputs": [], "outputs": [{"name": "", "type": "bytes32"}]}, {"stateMutability": "view", "type": "function", "name": "code_expiration_time", "inputs": [], "outputs": [{"name": "", "type": "uint256"}]}, {"stateMutability": "view", "type": "function", "name": "current_attendance_reward", "inputs": [], "outputs": [{"name": "", "type": "uint256"}]}, {"stateMutability": "view", "type": "function", "name": "has_claimed_attendance", "inputs": [{"name": "arg0", "type": "address"}], "outputs": [{"name": "", "type": "bytes32"}]}, {"stateMutability": "view", "type": "function", "name": "student_inventory", "inputs": [{"name": "arg0", "type": "address"}, {"name": "arg1", "type": "uint256"}], "outputs": [{"name": "", "type": "uint256"}]}, {"stateMutability": "view", "type": "function", "name": "market_purchases", "inputs": [{"name": "arg0", "type": "uint256"}], "outputs": [{"name": "", "type": "tuple", "components": [{"name": "student", "type": "address"}, {"name": "item_name", "type": "string"}, {"name": "price", "type": "uint256"}, {"name": "timestamp", "type": "uint256"}]}]}, {"stateMutability": "view", "type": "function", "name": "marketItems", "inputs": [{"name": "arg0", "type": "uint256"}], "outputs": [{"name": "", "type": "tuple", "components": [{"name": "name", "type": "string"}, {"name": "price", "type": "uint256"}, {"name": "isActive", "type": "bool"}, {"name": "item_type", "type": "uint256"}, {"name": "refund_percent", "type": "uint256"}, {"name": "xp_bonus", "type": "uint256"}]}]}, {"stateMutability": "view", "type": "function", "name": "marketItemCount", "inputs": [], "outputs": [{"name": "", "type": "uint256"}]}, {"stateMutability": "view", "type": "function", "name": "student_item_count", "inputs": [{"name": "arg0", "type": "address"}, {"name": "arg1", "type": "uint256"}], "outputs": [{"name": "", "type": "uint256"}]}, {"stateMutability": "view", "type": "function", "name": "questNames", "inputs": [{"name": "arg0", "type": "uint256"}], "outputs": [{"name": "", "type": "string"}]}, {"stateMutability": "view", "type": "function", "name": "currentPollId", "inputs": [], "outputs": [{"name": "", "type": "uint256"}]}, {"stateMutability": "view", "type": "function", "name": "pollVotes", "inputs": [{"name": "arg0", "type": "uint256"}, {"name": "arg1", "type": "uint256"}], "outputs": [{"name": "", "type": "uint256"}]}, {"stateMutability": "view", "type": "function", "name": "hasVoted", "inputs": [{"name": "arg0", "type": "uint256"}, {"name": "arg1", "type": "address"}], "outputs": [{"name": "", "type": "bool"}]}, {"stateMutability": "view", "type": "function", "name": "receivedDelegations", "inputs": [{"name": "arg0", "type": "uint256"}, {"name": "arg1", "type": "address"}], "outputs": [{"name": "", "type": "uint256"}]}, {"stateMutability": "view", "type": "function", "name": "roundVote", "inputs": [{"name": "arg0", "type": "uint256"}, {"name": "arg1", "type": "address"}], "outputs": [{"name": "", "type": "uint256"}]}, {"stateMutability": "view", "type": "function", "name": "guilds", "inputs": [{"name": "arg0", "type": "uint256"}], "outputs": [{"name": "", "type": "tuple", "components": [{"name": "guild_id", "type": "uint256"}, {"name": "total_xp", "type": "uint256"}, {"name": "member_count", "type": "uint256"}, {"name": "members", "type": "address[]"}, {"name": "is_active", "type": "bool"}]}]}, {"stateMutability": "view", "type": "function", "name": "guild_proposals", "inputs": [{"name": "arg0", "type": "uint256"}], "outputs": [{"name": "", "type": "tuple", "components": [{"name": "proposal_id", "type": "uint256"}, {"name": "guild_id", "type": "uint256"}, {"name": "amounts", "type": "uint256[]"}, {"name": "targets", "type": "address[]"}, {"name": "ai_proof_hash", "type": "bytes32"}, {"name": "approvals_count", "type": "uint256"}, {"name": "is_disputed", "type": "bool"}, {"name": "is_executed", "type": "bool"}]}]}, {"stateMutability": "view", "type": "function", "name": "proposal_signatures", "inputs": [{"name": "arg0", "type": "uint256"}, {"name": "arg1", "type": "address"}], "outputs": [{"name": "", "type": "bool"}]}, {"stateMutability": "view", "type": "function", "name": "guild_vaults", "inputs": [{"name": "arg0", "type": "uint256"}], "outputs": [{"name": "", "type": "uint256"}]}, {"stateMutability": "view", "type": "function", "name": "guild_locked", "inputs": [{"name": "arg0", "type": "uint256"}], "outputs": [{"name": "", "type": "bool"}]}, {"stateMutability": "view", "type": "function", "name": "student_to_guild", "inputs": [{"name": "arg0", "type": "address"}], "outputs": [{"name": "", "type": "uint256"}]}, {"stateMutability": "view", "type": "function", "name": "next_proposal_id", "inputs": [], "outputs": [{"name": "", "type": "uint256"}]}, {"stateMutability": "nonpayable", "type": "constructor", "inputs": [{"name": "proposalNames", "type": "string[]"}, {"name": "_token_address", "type": "address"}], "outputs": []}];
+        const VOTER_ABI = [{ "name": "Voted", "inputs": [{ "name": "voter", "type": "address", "indexed": true }, { "name": "proposal", "type": "uint256", "indexed": false }, { "name": "weight", "type": "uint256", "indexed": false }], "anonymous": false, "type": "event" }, { "name": "Delegated", "inputs": [{ "name": "voter", "type": "address", "indexed": true }, { "name": "delegate", "type": "address", "indexed": true }], "anonymous": false, "type": "event" }, { "name": "StudentRegistered", "inputs": [{ "name": "student", "type": "address", "indexed": true }, { "name": "nickname", "type": "string", "indexed": false }, { "name": "group", "type": "string", "indexed": false }], "anonymous": false, "type": "event" }, { "name": "StudentRewarded", "inputs": [{ "name": "student", "type": "address", "indexed": true }, { "name": "amount", "type": "uint256", "indexed": false }, { "name": "sgc_amount", "type": "uint256", "indexed": false }, { "name": "reason", "type": "string", "indexed": false }], "anonymous": false, "type": "event" }, { "name": "AttendanceClaimed", "inputs": [{ "name": "student", "type": "address", "indexed": true }, { "name": "xp_rewarded", "type": "uint256", "indexed": false }], "anonymous": false, "type": "event" }, { "name": "ItemPurchased", "inputs": [{ "name": "student", "type": "address", "indexed": true }, { "name": "item_name", "type": "string", "indexed": false }, { "name": "price", "type": "uint256", "indexed": false }], "anonymous": false, "type": "event" }, { "name": "NewRoundStarted", "inputs": [{ "name": "pollId", "type": "uint256", "indexed": false }], "anonymous": false, "type": "event" }, { "name": "ConsumableActivated", "inputs": [{ "name": "student", "type": "address", "indexed": true }, { "name": "item_id", "type": "uint256", "indexed": false }], "anonymous": false, "type": "event" }, { "name": "ItemRecycled", "inputs": [{ "name": "student", "type": "address", "indexed": true }, { "name": "item_id", "type": "uint256", "indexed": false }, { "name": "sgc_refund", "type": "uint256", "indexed": false }], "anonymous": false, "type": "event" }, { "name": "ItemTransformedToXP", "inputs": [{ "name": "student", "type": "address", "indexed": true }, { "name": "item_id", "type": "uint256", "indexed": false }, { "name": "xp_gained", "type": "uint256", "indexed": false }], "anonymous": false, "type": "event" }, { "name": "GuildCreated", "inputs": [{ "name": "guild_id", "type": "uint256", "indexed": true }, { "name": "member_count", "type": "uint256", "indexed": false }], "anonymous": false, "type": "event" }, { "name": "GuildRewardDistributed", "inputs": [{ "name": "guild_id", "type": "uint256", "indexed": true }, { "name": "total_sgc", "type": "uint256", "indexed": false }, { "name": "total_xp", "type": "uint256", "indexed": false }], "anonymous": false, "type": "event" }, { "name": "GuildProposalCreated", "inputs": [{ "name": "proposal_id", "type": "uint256", "indexed": true }, { "name": "guild_id", "type": "uint256", "indexed": false }, { "name": "ai_proof_hash", "type": "bytes32", "indexed": false }], "anonymous": false, "type": "event" }, { "name": "GuildProposalSigned", "inputs": [{ "name": "proposal_id", "type": "uint256", "indexed": true }, { "name": "signer", "type": "address", "indexed": true }, { "name": "approvals_count", "type": "uint256", "indexed": false }], "anonymous": false, "type": "event" }, { "name": "GuildProposalExecuted", "inputs": [{ "name": "proposal_id", "type": "uint256", "indexed": true }], "anonymous": false, "type": "event" }, { "name": "GuildDisputeRaised", "inputs": [{ "name": "proposal_id", "type": "uint256", "indexed": true }, { "name": "guild_id", "type": "uint256", "indexed": false }, { "name": "disputer", "type": "address", "indexed": true }], "anonymous": false, "type": "event" }, { "name": "GuildDisputeResolved", "inputs": [{ "name": "proposal_id", "type": "uint256", "indexed": true }, { "name": "guild_id", "type": "uint256", "indexed": false }, { "name": "penalty_returned", "type": "uint256", "indexed": false }], "anonymous": false, "type": "event" }, { "name": "LegacyXPImported", "inputs": [{ "name": "student_count", "type": "uint256", "indexed": false }], "anonymous": false, "type": "event" }, { "stateMutability": "payable", "type": "function", "name": "registerStudent", "inputs": [{ "name": "addr", "type": "address" }, { "name": "nickname", "type": "string" }, { "name": "group", "type": "string" }], "outputs": [] }, { "stateMutability": "nonpayable", "type": "function", "name": "setPrivacy", "inputs": [{ "name": "hidden", "type": "bool" }], "outputs": [] }, { "stateMutability": "nonpayable", "type": "function", "name": "rewardStudent", "inputs": [{ "name": "addr", "type": "address" }, { "name": "amount", "type": "uint256" }, { "name": "reason", "type": "string" }], "outputs": [] }, { "stateMutability": "nonpayable", "type": "function", "name": "rewardBatch", "inputs": [{ "name": "addrs", "type": "address[]" }, { "name": "amount", "type": "uint256" }, { "name": "reason", "type": "string" }], "outputs": [] }, { "stateMutability": "nonpayable", "type": "function", "name": "generateDailyCode", "inputs": [{ "name": "code_hash", "type": "bytes32" }, { "name": "reward_amount", "type": "uint256" }], "outputs": [] }, { "stateMutability": "nonpayable", "type": "function", "name": "claimAttendance", "inputs": [{ "name": "code", "type": "string" }], "outputs": [] }, { "stateMutability": "nonpayable", "type": "function", "name": "addMarketItem", "inputs": [{ "name": "name", "type": "string" }, { "name": "price", "type": "uint256" }, { "name": "item_type", "type": "uint256" }, { "name": "refund_percent", "type": "uint256" }, { "name": "xp_bonus", "type": "uint256" }], "outputs": [] }, { "stateMutability": "nonpayable", "type": "function", "name": "setMarketItemActive", "inputs": [{ "name": "itemId", "type": "uint256" }, { "name": "active", "type": "bool" }], "outputs": [] }, { "stateMutability": "nonpayable", "type": "function", "name": "buyItem", "inputs": [{ "name": "itemId", "type": "uint256" }], "outputs": [] }, { "stateMutability": "nonpayable", "type": "function", "name": "activate_consumable_item", "inputs": [{ "name": "item_id", "type": "uint256" }], "outputs": [] }, { "stateMutability": "nonpayable", "type": "function", "name": "recycle_item", "inputs": [{ "name": "item_id", "type": "uint256" }], "outputs": [] }, { "stateMutability": "nonpayable", "type": "function", "name": "transform_item_to_xp", "inputs": [{ "name": "item_id", "type": "uint256" }], "outputs": [] }, { "stateMutability": "nonpayable", "type": "function", "name": "create_guild", "inputs": [{ "name": "guild_id", "type": "uint256" }, { "name": "members", "type": "address[]" }], "outputs": [] }, { "stateMutability": "nonpayable", "type": "function", "name": "distribute_guild_reward", "inputs": [{ "name": "guild_id", "type": "uint256" }, { "name": "total_sgc", "type": "uint256" }, { "name": "total_xp", "type": "uint256" }], "outputs": [] }, { "stateMutability": "nonpayable", "type": "function", "name": "create_distribution_proposal", "inputs": [{ "name": "guild_id", "type": "uint256" }, { "name": "targets", "type": "address[]" }, { "name": "amounts", "type": "uint256[]" }, { "name": "ai_proof_hash", "type": "bytes32" }], "outputs": [] }, { "stateMutability": "nonpayable", "type": "function", "name": "sign_proposal", "inputs": [{ "name": "proposal_id", "type": "uint256" }], "outputs": [] }, { "stateMutability": "nonpayable", "type": "function", "name": "raise_dispute", "inputs": [{ "name": "proposal_id", "type": "uint256" }], "outputs": [] }, { "stateMutability": "nonpayable", "type": "function", "name": "resolve_dispute", "inputs": [{ "name": "proposal_id", "type": "uint256" }, { "name": "final_targets", "type": "address[]" }, { "name": "final_amounts", "type": "uint256[]" }], "outputs": [] }, { "stateMutability": "nonpayable", "type": "function", "name": "batch_import_legacy_xp", "inputs": [{ "name": "students_list", "type": "address[]" }, { "name": "legacy_xp", "type": "uint256[]" }], "outputs": [] }, { "stateMutability": "view", "type": "function", "name": "get_guild_members", "inputs": [{ "name": "guild_id", "type": "uint256" }], "outputs": [{ "name": "", "type": "address[]" }] }, { "stateMutability": "view", "type": "function", "name": "get_guild_vault_balance", "inputs": [{ "name": "guild_id", "type": "uint256" }], "outputs": [{ "name": "", "type": "uint256" }] }, { "stateMutability": "nonpayable", "type": "function", "name": "setQuestNames", "inputs": [{ "name": "names", "type": "string[]" }], "outputs": [] }, { "stateMutability": "nonpayable", "type": "function", "name": "startNewRound", "inputs": [], "outputs": [] }, { "stateMutability": "nonpayable", "type": "function", "name": "delegate", "inputs": [{ "name": "to", "type": "address" }], "outputs": [] }, { "stateMutability": "nonpayable", "type": "function", "name": "vote", "inputs": [{ "name": "proposalIndex", "type": "uint256" }], "outputs": [] }, { "stateMutability": "view", "type": "function", "name": "winning_proposal", "inputs": [], "outputs": [{ "name": "", "type": "uint256" }] }, { "stateMutability": "view", "type": "function", "name": "winner_name", "inputs": [], "outputs": [{ "name": "", "type": "string" }] }, { "stateMutability": "view", "type": "function", "name": "get_student_count", "inputs": [], "outputs": [{ "name": "", "type": "uint256" }] }, { "stateMutability": "view", "type": "function", "name": "get_student_inventory", "inputs": [{ "name": "student", "type": "address" }], "outputs": [{ "name": "", "type": "uint256[]" }] }, { "stateMutability": "view", "type": "function", "name": "get_market_purchases", "inputs": [], "outputs": [{ "name": "", "type": "tuple[]", "components": [{ "name": "student", "type": "address" }, { "name": "item_name", "type": "string" }, { "name": "price", "type": "uint256" }, { "name": "timestamp", "type": "uint256" }] }] }, { "stateMutability": "view", "type": "function", "name": "chairperson", "inputs": [], "outputs": [{ "name": "", "type": "address" }] }, { "stateMutability": "view", "type": "function", "name": "voters", "inputs": [{ "name": "arg0", "type": "address" }], "outputs": [{ "name": "", "type": "tuple", "components": [{ "name": "weight", "type": "uint256" }, { "name": "voted", "type": "bool" }, { "name": "delegate", "type": "address" }, { "name": "vote", "type": "uint256" }] }] }, { "stateMutability": "view", "type": "function", "name": "proposals", "inputs": [{ "name": "arg0", "type": "uint256" }], "outputs": [{ "name": "", "type": "tuple", "components": [{ "name": "name", "type": "string" }, { "name": "voteCount", "type": "uint256" }] }] }, { "stateMutability": "view", "type": "function", "name": "students", "inputs": [{ "name": "arg0", "type": "address" }], "outputs": [{ "name": "", "type": "tuple", "components": [{ "name": "nickname", "type": "string" }, { "name": "group", "type": "string" }, { "name": "academicXP", "type": "uint256" }, { "name": "is_hidden", "type": "bool" }] }] }, { "stateMutability": "view", "type": "function", "name": "student_addresses", "inputs": [{ "name": "arg0", "type": "uint256" }], "outputs": [{ "name": "", "type": "address" }] }, { "stateMutability": "view", "type": "function", "name": "used_nicknames", "inputs": [{ "name": "arg0", "type": "string" }], "outputs": [{ "name": "", "type": "bool" }] }, { "stateMutability": "view", "type": "function", "name": "token_address", "inputs": [], "outputs": [{ "name": "", "type": "address" }] }, { "stateMutability": "view", "type": "function", "name": "reward_amount", "inputs": [], "outputs": [{ "name": "", "type": "uint256" }] }, { "stateMutability": "view", "type": "function", "name": "chairperson_wallet", "inputs": [], "outputs": [{ "name": "", "type": "address" }] }, { "stateMutability": "view", "type": "function", "name": "has_received_reward", "inputs": [{ "name": "arg0", "type": "address" }], "outputs": [{ "name": "", "type": "bool" }] }, { "stateMutability": "view", "type": "function", "name": "active_code_hash", "inputs": [], "outputs": [{ "name": "", "type": "bytes32" }] }, { "stateMutability": "view", "type": "function", "name": "code_expiration_time", "inputs": [], "outputs": [{ "name": "", "type": "uint256" }] }, { "stateMutability": "view", "type": "function", "name": "current_attendance_reward", "inputs": [], "outputs": [{ "name": "", "type": "uint256" }] }, { "stateMutability": "view", "type": "function", "name": "has_claimed_attendance", "inputs": [{ "name": "arg0", "type": "address" }], "outputs": [{ "name": "", "type": "bytes32" }] }, { "stateMutability": "view", "type": "function", "name": "student_inventory", "inputs": [{ "name": "arg0", "type": "address" }, { "name": "arg1", "type": "uint256" }], "outputs": [{ "name": "", "type": "uint256" }] }, { "stateMutability": "view", "type": "function", "name": "market_purchases", "inputs": [{ "name": "arg0", "type": "uint256" }], "outputs": [{ "name": "", "type": "tuple", "components": [{ "name": "student", "type": "address" }, { "name": "item_name", "type": "string" }, { "name": "price", "type": "uint256" }, { "name": "timestamp", "type": "uint256" }] }] }, { "stateMutability": "view", "type": "function", "name": "marketItems", "inputs": [{ "name": "arg0", "type": "uint256" }], "outputs": [{ "name": "", "type": "tuple", "components": [{ "name": "name", "type": "string" }, { "name": "price", "type": "uint256" }, { "name": "isActive", "type": "bool" }, { "name": "item_type", "type": "uint256" }, { "name": "refund_percent", "type": "uint256" }, { "name": "xp_bonus", "type": "uint256" }] }] }, { "stateMutability": "view", "type": "function", "name": "marketItemCount", "inputs": [], "outputs": [{ "name": "", "type": "uint256" }] }, { "stateMutability": "view", "type": "function", "name": "student_item_count", "inputs": [{ "name": "arg0", "type": "address" }, { "name": "arg1", "type": "uint256" }], "outputs": [{ "name": "", "type": "uint256" }] }, { "stateMutability": "view", "type": "function", "name": "questNames", "inputs": [{ "name": "arg0", "type": "uint256" }], "outputs": [{ "name": "", "type": "string" }] }, { "stateMutability": "view", "type": "function", "name": "currentPollId", "inputs": [], "outputs": [{ "name": "", "type": "uint256" }] }, { "stateMutability": "view", "type": "function", "name": "pollVotes", "inputs": [{ "name": "arg0", "type": "uint256" }, { "name": "arg1", "type": "uint256" }], "outputs": [{ "name": "", "type": "uint256" }] }, { "stateMutability": "view", "type": "function", "name": "hasVoted", "inputs": [{ "name": "arg0", "type": "uint256" }, { "name": "arg1", "type": "address" }], "outputs": [{ "name": "", "type": "bool" }] }, { "stateMutability": "view", "type": "function", "name": "receivedDelegations", "inputs": [{ "name": "arg0", "type": "uint256" }, { "name": "arg1", "type": "address" }], "outputs": [{ "name": "", "type": "uint256" }] }, { "stateMutability": "view", "type": "function", "name": "roundVote", "inputs": [{ "name": "arg0", "type": "uint256" }, { "name": "arg1", "type": "address" }], "outputs": [{ "name": "", "type": "uint256" }] }, { "stateMutability": "view", "type": "function", "name": "guilds", "inputs": [{ "name": "arg0", "type": "uint256" }], "outputs": [{ "name": "", "type": "tuple", "components": [{ "name": "guild_id", "type": "uint256" }, { "name": "total_xp", "type": "uint256" }, { "name": "member_count", "type": "uint256" }, { "name": "members", "type": "address[]" }, { "name": "is_active", "type": "bool" }] }] }, { "stateMutability": "view", "type": "function", "name": "guild_proposals", "inputs": [{ "name": "arg0", "type": "uint256" }], "outputs": [{ "name": "", "type": "tuple", "components": [{ "name": "proposal_id", "type": "uint256" }, { "name": "guild_id", "type": "uint256" }, { "name": "amounts", "type": "uint256[]" }, { "name": "targets", "type": "address[]" }, { "name": "ai_proof_hash", "type": "bytes32" }, { "name": "approvals_count", "type": "uint256" }, { "name": "is_disputed", "type": "bool" }, { "name": "is_executed", "type": "bool" }] }] }, { "stateMutability": "view", "type": "function", "name": "proposal_signatures", "inputs": [{ "name": "arg0", "type": "uint256" }, { "name": "arg1", "type": "address" }], "outputs": [{ "name": "", "type": "bool" }] }, { "stateMutability": "view", "type": "function", "name": "guild_vaults", "inputs": [{ "name": "arg0", "type": "uint256" }], "outputs": [{ "name": "", "type": "uint256" }] }, { "stateMutability": "view", "type": "function", "name": "guild_locked", "inputs": [{ "name": "arg0", "type": "uint256" }], "outputs": [{ "name": "", "type": "bool" }] }, { "stateMutability": "view", "type": "function", "name": "student_to_guild", "inputs": [{ "name": "arg0", "type": "address" }], "outputs": [{ "name": "", "type": "uint256" }] }, { "stateMutability": "view", "type": "function", "name": "next_proposal_id", "inputs": [], "outputs": [{ "name": "", "type": "uint256" }] }, { "stateMutability": "nonpayable", "type": "constructor", "inputs": [{ "name": "proposalNames", "type": "string[]" }, { "name": "_token_address", "type": "address" }], "outputs": [] }];
 
         let provider;
         let signer;
@@ -1748,28 +1839,28 @@
                     try {
                         const guildIdBN = await voterContract.student_to_guild(userAddress);
                         const guildId = guildIdBN.toNumber();
-                        
+
                         const vaultDisplay = document.getElementById("guild-vault-display");
                         const daoPremiumsSec = document.getElementById("dao-premiums-section");
-                        
+
                         if (guildId > 0) {
                             vaultDisplay.classList.remove("hidden");
-                            if(daoPremiumsSec) daoPremiumsSec.classList.remove("hidden");
-                            
+                            if (daoPremiumsSec) daoPremiumsSec.classList.remove("hidden");
+
                             document.getElementById("user-guild-id").innerText = `#${guildId}`;
-                            if(document.getElementById("dao-premium-guild-id")) {
+                            if (document.getElementById("dao-premium-guild-id")) {
                                 document.getElementById("dao-premium-guild-id").innerText = guildId;
                             }
-                            
+
                             const vaultBalBN = await voterContract.get_guild_vault_balance(guildId);
                             const vaultBalStr = ethers.utils.formatUnits(vaultBalBN, decimals);
                             document.getElementById("guild-vault-balance").innerText = `${parseFloat(vaultBalStr).toFixed(2)} SGC`;
-                            
+
                             // Load proposals for this guild
                             refreshGuildProposals();
                         } else {
                             vaultDisplay.classList.add("hidden");
-                            if(daoPremiumsSec) daoPremiumsSec.classList.add("hidden");
+                            if (daoPremiumsSec) daoPremiumsSec.classList.add("hidden");
                         }
                     } catch (e) {
                         console.error("Guild fetch error:", e);
@@ -3132,6 +3223,12 @@
                 "toast_proposal_signed": "Proposal signed!",
                 "toast_raising_dispute": "Raising Dispute for Proposal",
                 "toast_dispute_raised": "Dispute raised on Proposal!",
+                "revert_not_student": "One of the members is not a registered student.",
+                "revert_already_in_guild": "A student is already assigned to another guild.",
+                "revert_guild_exists": "A guild with this ID already exists.",
+                "revert_guild_no_members": "Guild must have at least one real member.",
+                "revert_not_gamemaster": "Only the Game Master can perform this action.",
+                "revert_generic": "Transaction rejected by smart contract.",
                 "guild_free_students": "Available Students",
                 "guild_new_guild": "New Guild",
                 "guild_slot_empty": "Slot",
@@ -3293,6 +3390,12 @@
                 "toast_proposal_signed": "Предложение подписано!",
                 "toast_raising_dispute": "Поднятие спора для Предложения",
                 "toast_dispute_raised": "Спор поднят по Предложению!",
+                "revert_not_student": "Один из участников не является зарегистрированным студентом.",
+                "revert_already_in_guild": "Студент уже состоит в другой гильдии.",
+                "revert_guild_exists": "Гильдия с таким ID уже существует.",
+                "revert_guild_no_members": "В гильдии должен быть хотя бы один реальный участник.",
+                "revert_not_gamemaster": "Только Гейм-Мастер может выполнить это действие.",
+                "revert_generic": "Транзакция отклонена смарт-контрактом.",
                 "guild_free_students": "Свободные Студенты",
                 "guild_new_guild": "Новая Гильдия",
                 "guild_slot_empty": "Слот",
@@ -3464,10 +3567,43 @@
 
         // ── Guilds & <span data-i18n="dao_premiums">DAO Premiums</span> Logic (V8) ─────────────────────────────
 
-        
+
         function t(key) {
             const lang = localStorage.getItem('lang') || 'en';
             return (translations[lang] && translations[lang][key]) ? translations[lang][key] : key;
+        }
+
+        /**
+         * Extracts the revert reason from an ethers.js error and returns a
+         * localized string. Falls back to the raw reason or a generic message.
+         */
+        function parseContractError(e) {
+            // ethers v5 puts the human-readable reason in e.reason
+            // Some RPC providers also nest it in e.error.message or e.data.message
+            const raw = e.reason
+                || (e.error && e.error.message)
+                || (e.data && e.data.message)
+                || e.message
+                || "";
+
+            // Map known contract revert strings → i18n keys
+            const revertMap = [
+                { match: "Member is not a registered student", key: "revert_not_student" },
+                { match: "Student already assigned to a guild", key: "revert_already_in_guild" },
+                { match: "Guild with this ID already exists", key: "revert_guild_exists" },
+                { match: "Guild must have at least one real member", key: "revert_guild_no_members" },
+                { match: "Only Game Master can", key: "revert_not_gamemaster" },
+            ];
+
+            for (const { match, key } of revertMap) {
+                if (raw.includes(match)) return t(key);
+            }
+
+            // If it's some other revert with a reason, show it directly
+            if (e.reason) return e.reason;
+
+            // Last-resort generic message
+            return t("revert_generic");
         }
 
         // ── Guild Builder Drag-and-Drop ──────────────────────────────────
@@ -3536,8 +3672,8 @@
             if (inSlot) {
                 card.querySelector(".card-remove-btn").addEventListener("click", () => {
                     const slot = card.closest(".guild-drop-slot");
-                    clearSlot(slot);
-                    returnCardToPool(student);
+                    // clearSlot with returnToPool=true already puts the card back in the pool
+                    clearSlot(slot, true);
                 });
             }
             return card;
@@ -3573,23 +3709,18 @@
         }
 
         function clearSlot(slot, returnToPool = true) {
+            // Read student data BEFORE clearing innerHTML
             const card = slot.querySelector(".guild-student-card");
-            const student = card ? { address: card.dataset.address, nickname: card.dataset.nickname, xp: parseInt(card.dataset.xp) } : null;
-            slot.innerHTML = "";
-            slot.classList.remove("slot-filled");
-            slot.classList.add("slot-empty");
+            const student = card
+                ? { address: card.dataset.address, nickname: card.dataset.nickname, xp: parseInt(card.dataset.xp) }
+                : null;
+
             const idx = parseInt(slot.dataset.slotIndex);
-            slot.appendChild(createEmptySlot(idx).querySelector(".slot-hint") || (() => {
-                const hint = document.createElement("span");
-                hint.className = "slot-hint";
-                hint.textContent = `— ${t("guild_slot_empty")} ${idx + 1} —`;
-                return hint;
-            })());
-            // Rebuild slot events
-            slot.innerHTML = `<span class="slot-hint">— ${t("guild_slot_empty")} ${idx + 1} —</span>`;
-            slot.addEventListener("dragover", e => { e.preventDefault(); slot.classList.add("drag-over"); });
-            slot.addEventListener("dragleave", () => slot.classList.remove("drag-over"));
-            slot.addEventListener("drop", e => { e.preventDefault(); slot.classList.remove("drag-over"); guildSlotDrop(slot); });
+
+            // Replace the slot element entirely so no stale event listeners accumulate
+            const freshSlot = createEmptySlot(idx);
+            slot.parentNode.replaceChild(freshSlot, slot);
+
             if (returnToPool && student) returnCardToPool(student);
             updateGuildSlotCount();
         }
@@ -3679,7 +3810,7 @@
             try {
                 showLoader(t("toast_creating_guild"));
                 const tx = await voterContract.create_guild(guildId, members);
-                showToast(`Tx sent: ${tx.hash.substring(0,10)}...`, "info");
+                showToast(`Tx sent: ${tx.hash.substring(0, 10)}...`, "info");
                 await waitWithTimeout(tx);
                 showToast(`${t("toast_guild_created")} #${guildId}`, "success");
                 // Reset DnD builder
@@ -3687,7 +3818,7 @@
                 populateGuildPool();
             } catch (e) {
                 console.error(e);
-                showToast(e.reason || "Failed to create guild.", "error");
+                showToast(parseContractError(e), "error");
             } finally {
                 hideLoader();
             }
@@ -3697,19 +3828,19 @@
             const guildId = parseInt(document.getElementById("admin-dist-guild-id").value);
             const sgcAmt = document.getElementById("admin-dist-sgc").value;
             const xpAmt = parseInt(document.getElementById("admin-dist-xp").value);
-            
-            if(isNaN(guildId) || guildId <= 0 || !sgcAmt || isNaN(xpAmt)) {
+
+            if (isNaN(guildId) || guildId <= 0 || !sgcAmt || isNaN(xpAmt)) {
                 showToast(t("toast_fill_all"), "error");
                 return;
             }
-            
+
             try {
                 const decimals = await tokenContract.decimals();
                 const sgcWei = ethers.utils.parseUnits(sgcAmt, decimals);
-                
+
                 showLoader(t("toast_distributing"));
                 const tx = await voterContract.distribute_guild_reward(guildId, sgcWei, xpAmt);
-                showToast(`Tx sent: ${tx.hash.substring(0,10)}...`, "info");
+                showToast(`Tx sent: ${tx.hash.substring(0, 10)}...`, "info");
                 await waitWithTimeout(tx);
                 showToast(`${t("toast_reward_distributed")} #${guildId}!`, "success");
             } catch (e) {
@@ -3723,25 +3854,25 @@
         async function resolveDisputeAction() {
             const proposalId = parseInt(document.getElementById("admin-arb-proposal-id").value);
             const payloadStr = document.getElementById("admin-arb-payload").value.trim();
-            
-            if(isNaN(proposalId) || !payloadStr) {
+
+            if (isNaN(proposalId) || !payloadStr) {
                 showToast(t("toast_missing_id"), "error");
                 return;
             }
-            
+
             let payload;
             try {
                 payload = JSON.parse(payloadStr);
-                if(!Array.isArray(payload)) throw new Error("Must be an array");
+                if (!Array.isArray(payload)) throw new Error("Must be an array");
             } catch (e) {
                 showToast(t("toast_invalid_json"), "error");
                 return;
             }
-            
+
             const targets = [];
             const amounts = [];
-            for(const item of payload) {
-                if(!item.address || !ethers.utils.isAddress(item.address) || typeof item.amount === 'undefined') {
+            for (const item of payload) {
+                if (!item.address || !ethers.utils.isAddress(item.address) || typeof item.amount === 'undefined') {
                     showToast(t("toast_invalid_item"), "error");
                     return;
                 }
@@ -3749,11 +3880,11 @@
                 const decimals = await tokenContract.decimals();
                 amounts.push(ethers.utils.parseUnits(item.amount.toString(), decimals));
             }
-            
+
             try {
                 showLoader(t("toast_resolving"));
                 const tx = await voterContract.resolve_dispute(proposalId, targets, amounts);
-                showToast(`Tx sent: ${tx.hash.substring(0,10)}...`, "info");
+                showToast(`Tx sent: ${tx.hash.substring(0, 10)}...`, "info");
                 await waitWithTimeout(tx);
                 showToast(`${t("toast_dispute_resolved")} #${proposalId}!`, "success");
             } catch (e) {
@@ -3766,39 +3897,39 @@
 
         async function createProposalAction() {
             const payloadStr = document.getElementById("student-proposal-payload").value.trim();
-            if(!payloadStr) {
+            if (!payloadStr) {
                 showToast(t("toast_payload_req"), "error");
                 return;
             }
-            
+
             let payload;
             try {
                 payload = JSON.parse(payloadStr);
-                if(!Array.isArray(payload)) throw new Error("Must be an array");
+                if (!Array.isArray(payload)) throw new Error("Must be an array");
             } catch (e) {
                 showToast(t("toast_invalid_json"), "error");
                 return;
             }
-            
+
             const targets = [];
             const amounts = [];
             const decimals = await tokenContract.decimals();
-            
-            for(const item of payload) {
-                if(!item.address || !ethers.utils.isAddress(item.address) || typeof item.amount === 'undefined') {
+
+            for (const item of payload) {
+                if (!item.address || !ethers.utils.isAddress(item.address) || typeof item.amount === 'undefined') {
                     showToast(t("toast_invalid_item"), "error");
                     return;
                 }
                 targets.push(item.address);
                 amounts.push(ethers.utils.parseUnits(item.amount.toString(), decimals));
             }
-            
+
             const aiProofHash = "0x0000000000000000000000000000000000000000000000000000000000000000";
-            
+
             try {
                 showLoader(t("toast_submitting"));
                 const tx = await voterContract.create_distribution_proposal(targets, amounts, aiProofHash);
-                showToast(`Tx sent: ${tx.hash.substring(0,10)}...`, "info");
+                showToast(`Tx sent: ${tx.hash.substring(0, 10)}...`, "info");
                 await waitWithTimeout(tx);
                 showToast(t("toast_proposal_submitted"), "success");
                 refreshGuildProposals();
@@ -3811,34 +3942,34 @@
         }
 
         async function refreshGuildProposals() {
-            if(!isStudent) return;
+            if (!isStudent) return;
             const container = document.getElementById("guild-proposals-container");
-            if(!container) return;
-            
+            if (!container) return;
+
             try {
                 const guildIdBN = await voterContract.student_to_guild(userAddress);
                 const guildId = guildIdBN.toNumber();
-                if(guildId === 0) return;
-                
+                if (guildId === 0) return;
+
                 const nextIdBN = await voterContract.next_proposal_id();
                 const nextId = nextIdBN.toNumber();
-                
+
                 let html = "";
                 const decimals = await tokenContract.decimals();
-                
+
                 let foundAny = false;
-                
+
                 // Read backwards to show newest first
-                for(let i = nextId - 1; i >= 0; i--) {
+                for (let i = nextId - 1; i >= 0; i--) {
                     const prop = await voterContract.guild_proposals(i);
-                    if(prop.guild_id.toNumber() === guildId) {
+                    if (prop.guild_id.toNumber() === guildId) {
                         foundAny = true;
-                        
+
                         let statusText = t("status_pending");
                         let statusColor = "text-yellow-400";
-                        if(prop.is_executed) { statusText = t("status_executed"); statusColor = "text-emerald-400"; }
-                        else if(prop.is_disputed) { statusText = t("status_disputed"); statusColor = "text-rose-400"; }
-                        
+                        if (prop.is_executed) { statusText = t("status_executed"); statusColor = "text-emerald-400"; }
+                        else if (prop.is_disputed) { statusText = t("status_disputed"); statusColor = "text-rose-400"; }
+
                         html += `
                         <div class="bg-indigo-950/40 p-4 rounded-xl border border-indigo-500/30">
                             <div class="flex justify-between items-center mb-2">
@@ -3855,13 +3986,13 @@
                         </div>`;
                     }
                 }
-                
-                if(!foundAny) {
+
+                if (!foundAny) {
                     html = `<div class="text-center text-slate-500 py-8"><span class="italic text-sm" data-i18n="no_active_proposals">${t("no_active_proposals")}</span></div>`;
                 }
-                
+
                 container.innerHTML = html;
-            } catch(e) {
+            } catch (e) {
                 console.error("Failed fetching proposals:", e);
                 container.innerHTML = `<div class="text-center text-rose-500 py-8 text-sm">Error loading proposals.</div>`;
             }
@@ -3871,7 +4002,7 @@
             try {
                 showLoader(`${t("toast_signing")} #${id}...`);
                 const tx = await voterContract.sign_proposal(id);
-                showToast(`Tx sent: ${tx.hash.substring(0,10)}...`, "info");
+                showToast(`Tx sent: ${tx.hash.substring(0, 10)}...`, "info");
                 await waitWithTimeout(tx);
                 showToast(`${t("toast_proposal_signed")}`, "success");
                 refreshGuildProposals();
@@ -3888,7 +4019,7 @@
             try {
                 showLoader(`${t("toast_raising_dispute")} #${id}...`);
                 const tx = await voterContract.raise_dispute(id);
-                showToast(`Tx sent: ${tx.hash.substring(0,10)}...`, "info");
+                showToast(`Tx sent: ${tx.hash.substring(0, 10)}...`, "info");
                 await waitWithTimeout(tx);
                 showToast(`${t("toast_dispute_raised")}`, "warning");
                 refreshGuildProposals();

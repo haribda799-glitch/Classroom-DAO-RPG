@@ -481,21 +481,27 @@ def create_guild(guild_id: uint256, members: DynArray[address, 5]):
     assert len(members) > 0 and len(members) <= 5, "Guild must have 1 to 5 members"
     assert not self.guilds[guild_id].is_active, "Guild with this ID already exists"
 
-    # Validate and bind each member in a single pass
+    # Validate and bind each member in a single pass.
+    # Zero addresses are treated as empty padding and silently skipped.
+    real_member_count: uint256 = 0
     for m: address in members:
-        assert self.voters[m].weight > 0, "Member is not a registered student"
-        assert self.student_to_guild[m] == 0, "Student already assigned to a guild"
-        self.student_to_guild[m] = guild_id
+        if m != empty(address):
+            assert self.voters[m].weight > 0, "Member is not a registered student"
+            assert self.student_to_guild[m] == 0, "Student already assigned to a guild"
+            self.student_to_guild[m] = guild_id
+            real_member_count += 1
+
+    assert real_member_count > 0, "Guild must have at least one real member"
 
     self.guilds[guild_id] = Guild(
         guild_id=guild_id,
         total_xp=0,
-        member_count=len(members),
+        member_count=real_member_count,
         members=members,
         is_active=True
     )
 
-    log GuildCreated(guild_id=guild_id, member_count=len(members))
+    log GuildCreated(guild_id=guild_id, member_count=real_member_count)
 
 
 # ── V8: Hybrid Reward System (50/50 Model) ────────────────────────────────────
