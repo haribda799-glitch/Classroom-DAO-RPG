@@ -2207,7 +2207,7 @@
                 hideLoader();
                 setStatus(statusEl, `Hero ${nickname} successfully summoned! 🎉`, "success");
 
-                showToast("Студент успешно зарегистрирован!", false);
+                showToast(t("toast_student_registered"), "success");
 
                 fetchStudentRegistry(); // Refresh registry table
 
@@ -2325,7 +2325,7 @@
                 await waitWithTimeout(tx);
                 hideLoader();
                 setStatus(statusEl, `Hero ${nickname} summoned successfully! 🎉`, "success");
-                showToast("Студент успешно зарегистрирован!", false);
+                showToast(t("toast_student_registered"), "success");
                 resetQrScanner();
                 fetchStudentRegistry();
             } catch (err) {
@@ -3451,6 +3451,7 @@
                 "guild_slot_empty": "Slot",
                 "guild_load_hint": "Load registry to see students",
                 "guild_slot_full_single": "This slot is already filled. Drop onto an empty slot.",
+                "toast_student_registered": "Student successfully registered!",
 
                 "i18n_1": "html",
                 "i18n_2": "Classroom DAO V4 | RPG Edition",
@@ -3675,6 +3676,7 @@
                 "guild_slot_empty": "Слот",
                 "guild_load_hint": "Загрузите реестр, чтобы увидеть студентов",
                 "guild_slot_full_single": "Этот слот уже занят. Перетащите в пустой.",
+                "toast_student_registered": "Студент успешно зарегистрирован!",
 
                 "i18n_1": "html",
                 "i18n_2": "Classroom DAO V4 | RPG Edition",
@@ -4006,11 +4008,22 @@
             updateGuildSlotCount();
         }
 
-        function returnCardToPool(student) {
+        async function returnCardToPool(student) {
             const pool = document.getElementById("guild-student-pool");
             if (!pool) return;
             // Avoid duplicates
             if (pool.querySelector(`[data-address="${student.address}"]`)) return;
+
+            // Strict filtering: ONLY students with guild_id == 0 are allowed in the pool
+            try {
+                if (voterContract) {
+                    const gid = await voterContract.student_to_guild(student.address);
+                    if (gid.toNumber() > 0) return;
+                }
+            } catch (e) {
+                console.error("Failed to check student_to_guild in returnCardToPool", e);
+            }
+
             pool.appendChild(createStudentCard(student, false));
             updatePoolEmptyHint();
         }
