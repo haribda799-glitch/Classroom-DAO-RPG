@@ -1395,6 +1395,10 @@
             if (type === true)    type = 'error';
             if (type === false)   type = 'success';
 
+            const currentLang = localStorage.getItem('lang') || 'en';
+            const t = (typeof translations !== 'undefined' && translations[currentLang]) ? translations[currentLang] : (typeof translations !== 'undefined' ? translations['en'] : {});
+            const translatedMessage = t[message] || message;
+
             const styles = {
                 success: 'bg-emerald-600 shadow-[0_0_15px_rgba(16,185,129,0.5)]',
                 error:   'bg-red-600   shadow-[0_0_15px_rgba(239,68,68,0.5)]',
@@ -1406,7 +1410,7 @@
 
             const toast = document.createElement('div');
             toast.className = `fixed top-4 right-4 z-[9999] flex items-center gap-3 px-5 py-3 rounded-xl font-bold text-white shadow-lg transition-all duration-300 transform translate-y-0 opacity-100 ${cls}`;
-            toast.innerHTML = `<span class="text-lg">${icons[type] || ''}</span><span>${message}</span>`;
+            toast.innerHTML = `<span class="text-lg">${icons[type] || ''}</span><span>${translatedMessage}</span>`;
             document.body.appendChild(toast);
 
             setTimeout(() => {
@@ -2091,13 +2095,14 @@
                 await waitWithTimeout(tx);
                 hideLoader();
                 setStatus(statusEl, `Quest Completed! Vote cast successfully! 🎉`, "success");
-                showToast("Голос успешно учтен!", false);
+                showToast("toast_vote_success", false);
                 await fetchProposals();
                 await fetchUserData();
                 loadPollTopics();
             } catch (err) {
                 console.error("Voting error:", err);
-                if (typeof handleWeb3Error === 'function') handleWeb3Error(err, "Вы уже проголосовали или голосование недоступно!");
+                if (statusEl) statusEl.innerText = "";
+                if (typeof handleWeb3Error === 'function') handleWeb3Error(err, "err_AlreadyVoted");
                 else showToast("Произошла ошибка: " + (err?.message || err), true);
             } finally {
                 hideLoader();
@@ -3356,6 +3361,7 @@
                 "err_SelfDeleg": "Error: Self-delegation is disallowed.",
                 "revert_unknown": "Error: Smart contract reverted the transaction. Condition not met.",
                 "err_unknown": "An unknown error occurred: ",
+                "toast_vote_success": "Vote cast successfully!",
 
                 "guild_vault": "Guild Vault",
                 "dao_premiums": "DAO Premiums",
@@ -3579,6 +3585,7 @@
                 "err_SelfDeleg": "Ошибка: Делегирование самому себе запрещено.",
                 "revert_unknown": "Ошибка: Смарт-контракт отклонил транзакцию. Условие не выполнено.",
                 "err_unknown": "Произошла неизвестная ошибка транзакции: ",
+                "toast_vote_success": "Голос успешно учтен!",
 
                 "leave_guild_title": "Покинуть Гильдию",
                 "leave_guild_desc": "Выход из гильдии требует жертвы. Выберите штраф:",
