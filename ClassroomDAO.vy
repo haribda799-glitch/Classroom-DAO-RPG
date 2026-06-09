@@ -490,7 +490,13 @@ def create_guild(guild_id: uint256, members: DynArray[address, 5]):
     assert guild_id > 0, "BadGuildID"
     assert len(members) > 0 and len(members) <= 5, "BadMembers"
 
-    if not self.guilds[guild_id].is_active:
+    if self.guilds[guild_id].is_active:
+        for old_m: address in self.guilds[guild_id].members:
+            if old_m != empty(address):
+                self.student_to_guild[old_m] = 0
+        self.guilds[guild_id].members = []
+        self.guilds[guild_id].member_count = 0
+    else:
         self.guilds[guild_id] = Guild(
             guild_id=guild_id,
             total_xp=0,

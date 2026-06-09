@@ -1137,7 +1137,7 @@
                         </div>
                         <button onclick="createGuildAction()"
                             class="w-full py-3 mt-5 bg-gradient-to-r from-indigo-700 to-purple-700 hover:from-indigo-600 hover:to-purple-600 transition-all rounded-xl font-bold text-white shadow-[0_0_20px_rgba(99,102,241,0.5)] hover:scale-[1.02] uppercase tracking-wider text-sm flex items-center justify-center gap-2">
-                            ⚔️ <span data-i18n="create_guild">Create Guild</span>
+                            ⚔️ <span data-i18n="guild_save_btn">Save Composition</span>
                         </button>
                     </div>
 
@@ -1359,7 +1359,7 @@
         const CHAIN_ID_HEX = "0x" + CHAIN_ID.toString(16);
 
         // Update these if you deploy new contracts
-        const VOTER_ADDRESS = "0x7C1583d4024fd4Ca709F006966D83C328fb49d33";
+        const VOTER_ADDRESS = "0x8589A0782559078B3cD0E3AFd759fe16ae24040E";
         const TOKEN_ADDRESS = "0x1731F7F26F6ff2B79A9a5f9C86B6Fec319B7e6E2";
         const ADMIN_ADDRESS = "0xbdCAb5CF57680818B833CFCAaE751416cA7809d7".toLowerCase();
 
@@ -4329,6 +4329,53 @@
         window.addEventListener('DOMContentLoaded', () => {
             const savedLang = localStorage.getItem('lang') || 'en';
             setLanguage(savedLang);
+
+            // Dynamic Guild Composition Logic
+            const guildInput = document.getElementById("admin-create-guild-id");
+            if (guildInput) {
+                guildInput.addEventListener("input", async (e) => {
+                    if (!voterContract || !registryData || registryData.length === 0) return;
+
+                    const guildId = parseInt(e.target.value.trim());
+
+                    // Clear current slots to prepare for new data (returns any existing cards to pool)
+                    document.querySelectorAll("#guild-drop-zone .guild-drop-slot").forEach(slot => {
+                        clearSlot(slot, true);
+                    });
+
+                    if (!isNaN(guildId) && guildId > 0) {
+                        try {
+                            const members = await voterContract.get_guild_members(guildId);
+                            // Filter out empty addresses
+                            const activeMembers = members.filter(addr => addr !== "0x0000000000000000000000000000000000000000");
+
+                            if (activeMembers.length > 0) {
+                                const slots = document.querySelectorAll("#guild-drop-zone .guild-drop-slot");
+
+                                activeMembers.forEach((addr, i) => {
+                                    // Find student data from registry
+                                    const student = registryData.find(s => s.address.toLowerCase() === addr.toLowerCase());
+                                    if (student && i < slots.length) {
+                                        // First remove from pool if they are there
+                                        const poolCard = document.querySelector(`#guild-student-pool .guild-student-card[data-address="${addr}"]`);
+                                        if (poolCard) poolCard.remove();
+
+                                        const slot = slots[i];
+                                        slot.innerHTML = "";
+                                        slot.classList.remove("slot-empty");
+                                        slot.classList.add("slot-filled");
+                                        slot.appendChild(createStudentCard(student, true));
+                                    }
+                                });
+                                updateGuildSlotCount();
+                                updatePoolEmptyHint();
+                            }
+                        } catch (err) {
+                            console.error("Failed to load guild members", err);
+                        }
+                    }
+                });
+            }
         });
     </script>
 </body>
