@@ -2535,13 +2535,13 @@
                 const tx = await voterContract.leave_guild(payWithTokens, await getGasOverrides());
                 await waitWithTimeout(tx);
                 
-                showToast("Вы успешно покинули гильдию!", false);
+                showToast("toast_leave_guild_success", false);
                 await fetchUserData(); // refresh dashboard
                 await fetchStudentRegistry();
             } catch (err) {
                 console.error(err);
-                if (typeof handleWeb3Error === 'function') handleWeb3Error(err, "Failed to leave guild.");
-                else showToast("Ошибка: " + err.message, true);
+                if (typeof handleWeb3Error === 'function') handleWeb3Error(err, "err_leave_guild");
+                else showToast("toast_error_prefix", true);
             } finally {
                 hideLoader();
                 document.getElementById("tx-loader-msg").innerHTML = `Blockchain magic in progress...<br><span class="text-sky-400 text-sm" data-i18n="loader_network_wait">Waiting for network confirmation</span>`;
@@ -2549,17 +2549,19 @@
         }
 
         async function kickFromGuild(studentAddr) {
-            if (!confirm("Вы уверены, что хотите исключить этого студента из гильдии?")) return;
+            const currentLang = localStorage.getItem('lang') || 'en';
+            const t = translations[currentLang] || translations['en'];
+            if (!confirm(t.kick_confirm || "Вы уверены, что хотите исключить этого студента из гильдии?")) return;
             try {
                 showLoader();
                 const tx = await voterContract.kick_from_guild(studentAddr, await getGasOverrides());
                 await waitWithTimeout(tx);
-                showToast("Студент исключен из гильдии!", false);
+                showToast("toast_kick_success", false);
                 await fetchStudentRegistry();
             } catch (err) {
                 console.error(err);
-                if (typeof handleWeb3Error === 'function') handleWeb3Error(err, "Failed to kick student.");
-                else showToast("Ошибка: " + err.message, true);
+                if (typeof handleWeb3Error === 'function') handleWeb3Error(err, "err_kick");
+                else showToast("toast_error_prefix", true);
             } finally {
                 hideLoader();
             }
@@ -3415,6 +3417,12 @@
                 "leave_pay_xp": "Pay Reputation (-50 XP)",
                 "leave_cancel": "Cancel",
                 "kick_btn": "Kick",
+                "kick_confirm": "Are you sure you want to kick this student from the guild?",
+                "toast_kick_success": "Student successfully kicked from the guild!",
+                "err_kick": "Failed to kick student.",
+                "toast_leave_guild_success": "You have successfully left the guild!",
+                "err_leave_guild": "Failed to leave guild.",
+                "toast_error_prefix": "An error occurred.",,
                 "revert_not_student": "One of the members is not a registered student.",
                 "revert_already_in_guild": "A student is already assigned to another guild.",
                 "revert_guild_exists": "A guild with this ID already exists.",
