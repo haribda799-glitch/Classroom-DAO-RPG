@@ -4,6 +4,10 @@ import boa
 from eth_account import Account
 from dotenv import load_dotenv
 
+
+from boa.contracts.vyper.vyper_contract import VyperContract
+VyperContract.__repr__ = lambda self: "<VyperContract (Deploy Failed)>"
+
 # Загружаем переменные окружения
 load_dotenv()
 
@@ -44,10 +48,8 @@ def main():
 
     # 1. Деплой нового ClassroomDAO
     print("\nРазвертывание нового контракта ClassroomDAO...")
-    proposals = ["Web3 Basics", "DeFi", "Smart Contracts", "Cryptography"]
-
     start_nonce = get_nonce(chairperson.address)
-    classroom_contract = boa.load("ClassroomDAO.vy", proposals, TOKEN_ADDRESS)
+    classroom_contract = boa.load("ClassroomDAO.vy", TOKEN_ADDRESS)
     wait_for_nonce(chairperson.address, start_nonce)
     print(f"\033[1m✅ ClassroomDAO развернут по адресу: {classroom_contract.address}\033[0m")
 

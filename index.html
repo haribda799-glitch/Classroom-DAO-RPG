@@ -489,11 +489,14 @@
                     <span data-i18n="guild_vault">Guild Vault</span> <span id="user-guild-id"
                         class="ml-1 px-2 py-0.5 rounded-md bg-indigo-950/80 border border-indigo-400/30 text-indigo-300 text-[10px]">#0</span>
                 </p>
-                <div class="flex items-center justify-center md:justify-end mt-1">
+                <div class="flex items-center justify-center md:justify-end mt-1 gap-2">
                     <p class="text-xl md:text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 to-purple-400"
                         id="guild-vault-balance">
                         0.00 SGC
                     </p>
+                    <button class="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-800/80 border border-rose-500/30 text-rose-400 hover:bg-rose-600 hover:text-white hover:border-rose-400 transition-all shadow ml-2" onclick="showLeaveGuildModal()" title="Leave Guild">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+                    </button>
                 </div>
             </div>
             <div class="flex items-center gap-3">
@@ -1288,6 +1291,24 @@
             data-i18n="loader_default">Blockchain magic in progress...<br /><span class="text-sky-400 text-sm" data-i18n="loader_network_wait">Waiting for network confirmation</span>
         </p>
     </div>
+    <!-- Leave Guild Modal -->
+    <div class="fixed inset-0 z-50 hidden flex-col items-center justify-center bg-black/80 backdrop-blur-md" id="leave-guild-modal">
+        <div class="glass-panel rounded-3xl p-8 max-w-md w-full mx-4 text-center transform scale-95 transition-transform duration-300 border border-rose-500/50 shadow-[0_0_40px_rgba(225,29,72,0.3)]">
+            <h3 class="text-3xl font-bold mb-4 text-white rpg-title neon-text"><span data-i18n="leave_guild_title">Leave Guild</span></h3>
+            <p class="text-slate-300 mb-8 text-sm"><span data-i18n="leave_guild_desc">Leaving your guild requires a sacrifice. Choose your penalty:</span></p>
+            <div class="flex flex-col space-y-4">
+                <button class="w-full py-4 bg-slate-800 hover:bg-amber-700 hover:text-white transition-all rounded-xl font-bold border border-amber-500/50 hover:border-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.2)] text-amber-400 text-sm" onclick="leaveGuild(true)">
+                    <span data-i18n="leave_pay_tokens">Pay Tokens (-100 SGC)</span>
+                </button>
+                <button class="w-full py-4 bg-slate-800 hover:bg-rose-700 hover:text-white transition-all rounded-xl font-bold border border-rose-500/50 hover:border-rose-400 shadow-[0_0_15px_rgba(225,29,72,0.2)] text-rose-400 text-sm" onclick="leaveGuild(false)">
+                    <span data-i18n="leave_pay_xp">Pay Reputation (-50 XP)</span>
+                </button>
+                <button class="w-full py-3 mt-4 bg-transparent text-slate-500 hover:text-slate-300 transition-colors rounded-xl font-semibold uppercase tracking-widest text-sm" onclick="closeLeaveGuildModal()">
+                    <span data-i18n="leave_cancel">Cancel</span>
+                </button>
+            </div>
+        </div>
+    </div>
     <!-- Welcome Modal -->
     <div class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-md" id="welcome-modal">
         <div
@@ -1429,6 +1450,16 @@
             }
         }
 
+        const REVERT_CODES = [
+            "OnlyGM", "AlreadyVoted", "HasRights", "NickTaken", "Need0.01OGI", "MaxStudents",
+            "NotStudent", "TimeUp", "BadCode", "Claimed", "BadItemType", "BadRefund",
+            "BadItemID", "Inactive", "TxFail", "NoItem", "NotConsum", "NotRecycle",
+            "NotXPItem", "BadGuildID", "BadMembers", "GuildExists", "InGuild", "NoMembers",
+            "NoGuild", "ZeroReward", "NotMember", "VaultLocked", "LenMismatch", "EmptyProp",
+            "BadAmounts", "NoProposal", "Executed", "Disputed", "Signed", "NotDisputed",
+            "Bad90Split", "NotInGuild", "NoVoteRight", "BadPropIdx", "SelfDeleg"
+        ];
+
         function handleWeb3Error(error, customRevertMsg = null) {
             console.log("Safe handling error:", error);
 
@@ -1447,24 +1478,37 @@
                 return;
             }
 
-            const code = error?.code;
-            const message = error?.message || "";
-            const reason = error?.reason || "";
-
-            const isRevert = code === 'CALL_EXCEPTION' || message.includes('CALL_EXCEPTION') || reason.includes('transaction failed');
-
             if (isGasError) {
                 showToast("Ошибка: Недостаточно газа (A0GI) для отправки транзакции. Пожалуйста, попросите преподавателя пополнить ваш баланс.", true);
                 return;
             }
 
+            const currentLang = localStorage.getItem('lang') || 'en';
+            const t = translations[currentLang] || translations["en"];
+            
+            let fullErrorStr = "";
+            try { fullErrorStr = JSON.stringify(error); } catch(e) {}
+            fullErrorStr += " " + (error?.message || "") + " " + (error?.reason || "");
+
+            for (const code of REVERT_CODES) {
+                if (fullErrorStr.includes(code)) {
+                    showToast(t["err_" + code] || `Revert: ${code}`, true);
+                    return;
+                }
+            }
+
+            const codeStr = error?.code;
+            const message = error?.message || "";
+            const reason = error?.reason || "";
+            const isRevert = codeStr === 'CALL_EXCEPTION' || message.includes('CALL_EXCEPTION') || reason.includes('transaction failed');
+
             if (isRevert) {
-                const msg = customRevertMsg || "Ошибка: Смарт-контракт отклонил транзакцию. Условие не выполнено.";
+                const msg = customRevertMsg || t["revert_unknown"] || "Ошибка: Смарт-контракт отклонил транзакцию. Условие не выполнено.";
                 showToast(msg, true);
                 return;
             }
 
-            showToast("Произошла ошибка: " + (error?.message || error), true);
+            showToast((t["err_unknown"] || "Произошла ошибка транзакции: ") + (error?.message || error), true);
         }
 
         async function refreshQuests() {
@@ -2318,6 +2362,7 @@
                             <div class="flex items-center justify-center gap-2">
                                 <button class="btn-send-gas" onclick="sendGasToStudent('${r.address}', this)">⛽ Gas</button>
                                 <button class="btn-reward-quick" onclick="quickRewardFromRegistry('${r.address}', '${r.nickname}')">🏆 Reward</button>
+                                ${r.guildId > 0 ? `<button class="bg-rose-600/20 text-rose-400 px-2 py-1 rounded border border-rose-500/40 hover:bg-rose-600 hover:text-white text-[10px] uppercase font-bold" onclick="kickFromGuild('${r.address}')"><span data-i18n="kick_btn">Kick</span></button>` : ''}
                             </div>
                         </td>
                     </tr>
@@ -2325,6 +2370,7 @@
 
                 // Sync the Guild Builder student pool with fresh registry data
                 populateGuildPool();
+                if (typeof applyTranslations === 'function') applyTranslations();
             } catch (err) {
                 console.error(err);
                 tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-rose-500 font-bold">Failed to load registry.</td></tr>`;
@@ -2448,6 +2494,71 @@
             }
         });
 
+        function showLeaveGuildModal() {
+            const modal = document.getElementById("leave-guild-modal");
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+            setTimeout(() => modal.firstElementChild.classList.remove("scale-95"), 10);
+        }
+
+        function closeLeaveGuildModal() {
+            const modal = document.getElementById("leave-guild-modal");
+            modal.firstElementChild.classList.add("scale-95");
+            setTimeout(() => {
+                modal.classList.add("hidden");
+                modal.classList.remove("flex");
+            }, 300);
+        }
+
+        async function leaveGuild(payWithTokens) {
+            try {
+                if (!userAddress) throw new Error("Not connected");
+                showLoader();
+                closeLeaveGuildModal();
+
+                if (payWithTokens) {
+                    document.getElementById("tx-loader-msg").innerHTML = `Approving 100 SGC...<br><span class="text-sky-400 text-sm">Please sign the approval transaction</span>`;
+                    const tokenContract = new ethers.Contract(TOKEN_ADDRESS, TOKEN_ABI, signer);
+                    const penaltyAmount = ethers.utils.parseEther("100");
+                    const approveTx = await tokenContract.approve(voterContract.address, penaltyAmount);
+                    await waitWithTimeout(approveTx);
+                    document.getElementById("tx-loader-msg").innerHTML = `Leaving Guild...<br><span class="text-sky-400 text-sm">Paying token penalty</span>`;
+                } else {
+                    document.getElementById("tx-loader-msg").innerHTML = `Leaving Guild...<br><span class="text-sky-400 text-sm">Paying XP penalty</span>`;
+                }
+
+                const tx = await voterContract.leave_guild(payWithTokens, await getGasOverrides());
+                await waitWithTimeout(tx);
+                
+                showToast("Вы успешно покинули гильдию!", false);
+                await fetchUserData(); // refresh dashboard
+                await fetchStudentRegistry();
+            } catch (err) {
+                console.error(err);
+                if (typeof handleWeb3Error === 'function') handleWeb3Error(err, "Failed to leave guild.");
+                else showToast("Ошибка: " + err.message, true);
+            } finally {
+                hideLoader();
+                document.getElementById("tx-loader-msg").innerHTML = `Blockchain magic in progress...<br><span class="text-sky-400 text-sm" data-i18n="loader_network_wait">Waiting for network confirmation</span>`;
+            }
+        }
+
+        async function kickFromGuild(studentAddr) {
+            if (!confirm("Вы уверены, что хотите исключить этого студента из гильдии?")) return;
+            try {
+                showLoader();
+                const tx = await voterContract.kick_from_guild(studentAddr, await getGasOverrides());
+                await waitWithTimeout(tx);
+                showToast("Студент исключен из гильдии!", false);
+                await fetchStudentRegistry();
+            } catch (err) {
+                console.error(err);
+                if (typeof handleWeb3Error === 'function') handleWeb3Error(err, "Failed to kick student.");
+                else showToast("Ошибка: " + err.message, true);
+            } finally {
+                hideLoader();
+            }
+        }
 
         async function rewardStudentCustom() {
             const amountStr = document.getElementById("reward-custom-amount").value.trim();
@@ -3202,6 +3313,49 @@
     <script>
         const translations = {
             "en": {
+                "err_OnlyGM": "Access Denied: Only Game Master can perform this action.",
+                "err_AlreadyVoted": "Error: You have already voted this round.",
+                "err_HasRights": "Error: Student already has voting rights.",
+                "err_NickTaken": "Error: This nickname is already taken.",
+                "err_Need0.01OGI": "Error: Exact 0.01 OGI required for gas.",
+                "err_MaxStudents": "Error: Maximum number of students reached.",
+                "err_NotStudent": "Error: You are not registered as an active student.",
+                "err_TimeUp": "Error: Attendance code has expired.",
+                "err_BadCode": "Error: Invalid attendance code.",
+                "err_Claimed": "Error: You have already claimed this attendance reward.",
+                "err_BadItemType": "Error: Invalid item type.",
+                "err_BadRefund": "Error: Refund percent must be 0-100.",
+                "err_BadItemID": "Error: Invalid item ID.",
+                "err_Inactive": "Error: This item is currently inactive.",
+                "err_TxFail": "Transaction Failed: Check token allowance (Approve).",
+                "err_NoItem": "Error: You do not own this item.",
+                "err_NotConsum": "Error: Item is not a consumable.",
+                "err_NotRecycle": "Error: Item is not recyclable.",
+                "err_NotXPItem": "Error: Item is not an XP transform item.",
+                "err_BadGuildID": "Error: Invalid guild ID.",
+                "err_BadMembers": "Error: Guild must have 1 to 5 members.",
+                "err_GuildExists": "Error: Guild with this ID already exists.",
+                "err_InGuild": "Error: Student is already in a guild.",
+                "err_NoMembers": "Error: Guild must have at least one valid member.",
+                "err_NoGuild": "Error: Guild is not active.",
+                "err_ZeroReward": "Error: Reward must be greater than zero.",
+                "err_NotMember": "Error: You are not a member of this guild.",
+                "err_VaultLocked": "Error: Guild vault is locked due to an active dispute.",
+                "err_LenMismatch": "Error: Array lengths mismatch.",
+                "err_EmptyProp": "Error: Proposal cannot be empty.",
+                "err_BadAmounts": "Error: Amounts must equal the guild vault balance.",
+                "err_NoProposal": "Error: Proposal does not exist.",
+                "err_Executed": "Error: Proposal has already been executed.",
+                "err_Disputed": "Error: Proposal is currently under dispute.",
+                "err_Signed": "Error: You have already signed this proposal.",
+                "err_NotDisputed": "Error: Proposal is not under dispute.",
+                "err_Bad90Split": "Error: Final amounts must equal 90% of the vault.",
+                "err_NotInGuild": "Error: You are not in any guild.",
+                "err_NoVoteRight": "Error: You have no right to vote.",
+                "err_BadPropIdx": "Error: Invalid proposal index.",
+                "err_SelfDeleg": "Error: Self-delegation is disallowed.",
+                "revert_unknown": "Error: Smart contract reverted the transaction. Condition not met.",
+                "err_unknown": "An unknown error occurred: ",
 
                 "guild_vault": "Guild Vault",
                 "dao_premiums": "DAO Premiums",
@@ -3249,6 +3403,12 @@
                 "toast_proposal_signed": "Proposal signed!",
                 "toast_raising_dispute": "Raising Dispute for Proposal",
                 "toast_dispute_raised": "Dispute raised on Proposal!",
+                "leave_guild_title": "Leave Guild",
+                "leave_guild_desc": "Leaving your guild requires a sacrifice. Choose your penalty:",
+                "leave_pay_tokens": "Pay Tokens (-100 SGC)",
+                "leave_pay_xp": "Pay Reputation (-50 XP)",
+                "leave_cancel": "Cancel",
+                "kick_btn": "Kick",
                 "revert_not_student": "One of the members is not a registered student.",
                 "revert_already_in_guild": "A student is already assigned to another guild.",
                 "revert_guild_exists": "A guild with this ID already exists.",
@@ -3376,7 +3536,56 @@
                 "academic_group": "Academic Group"
             },
             "ru": {
+                "err_OnlyGM": "Доступ запрещен: действие доступно только Преподавателю.",
+                "err_AlreadyVoted": "Ошибка: Вы уже проголосовали в этом раунде.",
+                "err_HasRights": "Ошибка: У студента уже есть права голоса.",
+                "err_NickTaken": "Ошибка: Этот никнейм уже занят.",
+                "err_Need0.01OGI": "Ошибка: Требуется ровно 0.01 OGI для комиссии.",
+                "err_MaxStudents": "Ошибка: Достигнут лимит студентов.",
+                "err_NotStudent": "Ошибка: Вы не зарегистрированы как активный студент.",
+                "err_TimeUp": "Ошибка: Время действия кода посещаемости истекло.",
+                "err_BadCode": "Ошибка: Неверный код посещаемости.",
+                "err_Claimed": "Ошибка: Вы уже получили награду по этому коду.",
+                "err_BadItemType": "Ошибка: Неверный тип предмета.",
+                "err_BadRefund": "Ошибка: Процент возврата должен быть от 0 до 100.",
+                "err_BadItemID": "Ошибка: Неверный ID предмета.",
+                "err_Inactive": "Ошибка: Этот предмет в данный момент неактивен.",
+                "err_TxFail": "Транзакция отклонена: проверьте подтверждение токенов (Approve).",
+                "err_NoItem": "Ошибка: У вас нет этого предмета.",
+                "err_NotConsum": "Ошибка: Предмет не является расходником (Consumable).",
+                "err_NotRecycle": "Ошибка: Предмет нельзя переработать.",
+                "err_NotXPItem": "Ошибка: Предмет не является артефактом опыта.",
+                "err_BadGuildID": "Ошибка: Неверный ID гильдии.",
+                "err_BadMembers": "Ошибка: В гильдии должно быть от 1 до 5 участников.",
+                "err_GuildExists": "Ошибка: Гильдия с таким ID уже существует.",
+                "err_InGuild": "Ошибка: Студент уже состоит в гильдии.",
+                "err_NoMembers": "Ошибка: В гильдии должен быть минимум один участник.",
+                "err_NoGuild": "Ошибка: Гильдия неактивна.",
+                "err_ZeroReward": "Ошибка: Награда должна быть больше нуля.",
+                "err_NotMember": "Ошибка: Вы не состоите в этой гильдии.",
+                "err_VaultLocked": "Ошибка: Сейф гильдии заблокирован из-за активного спора.",
+                "err_LenMismatch": "Ошибка: Длины массивов не совпадают.",
+                "err_EmptyProp": "Ошибка: Предложение не может быть пустым.",
+                "err_BadAmounts": "Ошибка: Сумма выплат должна быть равна балансу сейфа.",
+                "err_NoProposal": "Ошибка: Такого предложения не существует.",
+                "err_Executed": "Ошибка: Предложение уже было исполнено.",
+                "err_Disputed": "Ошибка: По данному предложению открыт спор.",
+                "err_Signed": "Ошибка: Вы уже подписали это предложение.",
+                "err_NotDisputed": "Ошибка: Предложение не оспаривается.",
+                "err_Bad90Split": "Ошибка: Итоговые суммы должны составлять 90% от сейфа.",
+                "err_NotInGuild": "Ошибка: Вы не состоите ни в одной гильдии.",
+                "err_NoVoteRight": "Ошибка: У вас нет прав для голосования.",
+                "err_BadPropIdx": "Ошибка: Неверный индекс предложения.",
+                "err_SelfDeleg": "Ошибка: Делегирование самому себе запрещено.",
+                "revert_unknown": "Ошибка: Смарт-контракт отклонил транзакцию. Условие не выполнено.",
+                "err_unknown": "Произошла неизвестная ошибка транзакции: ",
 
+                "leave_guild_title": "Покинуть Гильдию",
+                "leave_guild_desc": "Выход из гильдии требует жертвы. Выберите штраф:",
+                "leave_pay_tokens": "Откупиться токенами (-100 SGC)",
+                "leave_pay_xp": "Заплатить репутацией (-50 XP)",
+                "leave_cancel": "Отмена",
+                "kick_btn": "Исключить",
                 "guild_vault": "Сейф Гильдии",
                 "dao_premiums": "DAO Премии",
                 "guild_label": "Гильдия",
