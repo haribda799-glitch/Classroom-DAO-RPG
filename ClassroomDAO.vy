@@ -489,29 +489,29 @@ def create_guild(guild_id: uint256, members: DynArray[address, 5]):
     assert msg.sender == self.chairperson, "OnlyGM"
     assert guild_id > 0, "BadGuildID"
     assert len(members) > 0 and len(members) <= 5, "BadMembers"
-    assert not self.guilds[guild_id].is_active, "GuildExists"
 
-    # Validate and bind each member in a single pass.
-    # Zero addresses are treated as empty padding and silently skipped.
-    real_member_count: uint256 = 0
+    if not self.guilds[guild_id].is_active:
+        self.guilds[guild_id] = Guild(
+            guild_id=guild_id,
+            total_xp=0,
+            member_count=0,
+            members=[],
+            is_active=True
+        )
+
+    added_count: uint256 = 0
     for m: address in members:
         if m != empty(address):
             assert self.voters[m].weight > 0, "NotStudent"
             assert self.student_to_guild[m] == 0, "InGuild"
             self.student_to_guild[m] = guild_id
-            real_member_count += 1
+            self.guilds[guild_id].members.append(m)
+            self.guilds[guild_id].member_count += 1
+            added_count += 1
 
-    assert real_member_count > 0, "NoMembers"
+    assert added_count > 0, "NoMembers"
 
-    self.guilds[guild_id] = Guild(
-        guild_id=guild_id,
-        total_xp=0,
-        member_count=real_member_count,
-        members=members,
-        is_active=True
-    )
-
-    log GuildCreated(guild_id=guild_id, member_count=real_member_count)
+    log GuildCreated(guild_id=guild_id, member_count=self.guilds[guild_id].member_count)
 
 
 # ── V8: Hybrid Reward System (50/50 Model) ────────────────────────────────────
