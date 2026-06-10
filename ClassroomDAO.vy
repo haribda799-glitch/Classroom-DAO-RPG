@@ -540,31 +540,34 @@ def distribute_guild_reward(guild_id: uint256, total_sgc: uint256, total_xp: uin
     assert total_sgc > 0 or total_xp > 0, "ZeroReward"
 
     guild: Guild = self.guilds[guild_id]
-    member_count: uint256 = guild.member_count
+
+    active_count: uint256 = 0
+    for m: address in guild.members:
+        if m != empty(address) and self.student_to_guild[m] == guild_id:
+            active_count += 1
+            
+    assert active_count > 0, "NoActiveMembers"
 
     # 50/50 split: base guaranteed income + premium KPI pool
     base_share: uint256 = total_sgc // 2
     premium: uint256 = total_sgc - base_share  # Handles odd totals correctly
 
     # Per-member equal shares
-    per_member_sgc: uint256 = base_share // member_count
-    per_member_xp: uint256 = total_xp // member_count
+    per_member_sgc: uint256 = base_share // active_count
+    per_member_xp: uint256 = total_xp // active_count
 
     # Distribute base SGC and XP to each guild member
-    for i: uint256 in range(5):
-        if i >= member_count:
-            break
-        member: address = guild.members[i]
+    for m: address in guild.members:
+        if m != empty(address) and self.student_to_guild[m] == guild_id:
+            # Credit personal Academic XP
+            self.students[m].academicXP += per_member_xp
 
-        # Credit personal Academic XP
-        self.students[member].academicXP += per_member_xp
-
-        # Transfer base SGC share from chairperson wallet
-        if per_member_sgc > 0:
-            sgc_wei: uint256 = per_member_sgc * 10 ** 18
-            extcall ERC20(self.token_address).transferFrom(
-                self.chairperson_wallet, member, sgc_wei
-            )
+            # Transfer base SGC share from chairperson wallet
+            if per_member_sgc > 0:
+                sgc_wei: uint256 = per_member_sgc * 10 ** 18
+                extcall ERC20(self.token_address).transferFrom(
+                    self.chairperson_wallet, m, sgc_wei
+                )
 
     # Deposit premium portion into guild vault for DAO-governed distribution
     self.guild_vaults[guild_id] += premium
