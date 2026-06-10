@@ -848,6 +848,13 @@ def leave_guild(pay_with_tokens: bool):
             self.students[msg.sender].academicXP = 0
 
     # Unbind student from guild and decrement member count
+    for i: uint256 in range(5):
+        if i >= len(self.guilds[guild_id].members):
+            break
+        if self.guilds[guild_id].members[i] == msg.sender:
+            self.guilds[guild_id].members[i] = empty(address)
+            break
+
     self.student_to_guild[msg.sender] = 0
     self.guilds[guild_id].member_count -= 1
 
@@ -868,6 +875,13 @@ def kick_from_guild(student: address):
     assert guild_id > 0, "NotInGuild"
 
     # Unbind student from guild and decrement member count
+    for i: uint256 in range(5):
+        if i >= len(self.guilds[guild_id].members):
+            break
+        if self.guilds[guild_id].members[i] == student:
+            self.guilds[guild_id].members[i] = empty(address)
+            break
+
     self.student_to_guild[student] = 0
     self.guilds[guild_id].member_count -= 1
 
