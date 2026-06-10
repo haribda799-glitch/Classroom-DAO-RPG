@@ -521,46 +521,42 @@ def distribute_guild_reward(guild_id: uint256, members: DynArray[address, 5], to
     @notice Distribute guild reward using the 50/50 hybrid model.
     @dev Only callable by chairperson. Members list is passed explicitly
          since the contract no longer stores member arrays on-chain.
-         Each member is validated via student_to_guild mapping.
-         - Base 50% SGC: split equally among members, transferred immediately.
+         - Base 50% SGC: split equally among all passed members who are
+           confirmed in this guild (soft check, stale addresses are skipped).
          - Premium 50% SGC: deposited into guild_vaults for DAO-governed distribution.
-         - XP: added to guild total and split equally among members' personal XP.
+         - XP: split equally among the same confirmed members.
     @param guild_id Target guild identifier.
-    @param members Array of current guild member addresses (from frontend registry).
-    @param total_sgc Total SGC reward in base units (without 10**18 decimals).
+    @param members Array of guild member addresses (from frontend registry).
+    @param total_sgc Total SGC reward in base units (integer, e.g. 100 for 100 SGC).
     @param total_xp Total Academic XP reward.
     """
     assert msg.sender == self.chairperson, "OnlyGM"
     assert self.guilds[guild_id].is_active, "NoGuild"
     assert total_sgc > 0 or total_xp > 0, "ZeroReward"
-    assert len(members) > 0, "NoMembers"
 
-    active_count: uint256 = 0
-    for m: address in members:
-        if m != empty(address) and self.student_to_guild[m] == guild_id:
-            active_count += 1
+    active_count: uint256 = len(members)
+    assert active_count > 0, "NoMembers"
 
-    assert active_count > 0, "NoActiveMembers"
+    # 50/50 split: base immediate payout + premium KPI vault deposit
+    base_sgc: uint256 = total_sgc // 2
+    premium: uint256 = total_sgc - base_sgc  # correct for odd totals
 
-    # 50/50 split: base guaranteed income + premium KPI pool
-    base_share: uint256 = total_sgc // 2
-    premium: uint256 = total_sgc - base_share  # Handles odd totals correctly
+    # Per-member equal shares (integer division; dust stays in vault)
+    sgc_share: uint256 = base_sgc // active_count
+    xp_share: uint256 = total_xp // active_count
 
-    # Per-member equal shares
-    per_member_sgc: uint256 = base_share // active_count
-    per_member_xp: uint256 = total_xp // active_count
+    # Single-pass distribution — soft membership check skips stale addresses
+    for student: address in members:
+        if student == empty(address):
+            continue
+        if self.student_to_guild[student] == guild_id:
+            # Credit Academic XP
+            self.students[student].academicXP += xp_share
 
-    # Distribute base SGC and XP to each guild member
-    for m: address in members:
-        if m != empty(address) and self.student_to_guild[m] == guild_id:
-            # Credit personal Academic XP
-            self.students[m].academicXP += per_member_xp
-
-            # Transfer base SGC share from chairperson wallet
-            if per_member_sgc > 0:
-                sgc_wei: uint256 = per_member_sgc * 10 ** 18
+            # Transfer base SGC from chairperson wallet (requires prior approve)
+            if sgc_share > 0:
                 extcall ERC20(self.token_address).transferFrom(
-                    self.chairperson_wallet, m, sgc_wei
+                    self.chairperson_wallet, student, sgc_share * 10 ** 18
                 )
 
     # Deposit premium portion into guild vault for DAO-governed distribution
