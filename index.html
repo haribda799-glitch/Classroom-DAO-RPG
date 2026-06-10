@@ -1392,7 +1392,7 @@
             }
         }
 
-        function waitWithTimeout(tx, timeoutMs = 30000) {
+        function waitWithTimeout(tx, timeoutMs = 150000) {
             return Promise.race([
                 tx.wait(),
                 new Promise((_, reject) => setTimeout(() => reject(new Error("TX_TIMEOUT")), timeoutMs))
@@ -1489,23 +1489,23 @@
                 errStr = JSON.stringify(error).toLowerCase();
             } catch (e) { }
 
+            const currentLang = localStorage.getItem('lang') || 'en';
+            const t = translations[currentLang] || translations["en"];
+
             const isGasError =
                 (error && error.code === 'INSUFFICIENT_FUNDS') ||
                 (error && error.message && typeof error.message === 'string' && error.message.toLowerCase().includes('insufficient funds')) ||
                 errStr.includes('insufficient');
 
             if (error?.message === "TX_TIMEOUT") {
-                showToast("Транзакция отправлена, но сеть отвечает слишком долго. Проверьте статус в кошельке.", "warning");
+                showToast(t["err_tx_timeout"] || "Transaction sent, but the network is taking too long to respond. Check wallet status.", "warning");
                 return;
             }
 
             if (isGasError) {
-                showToast("Ошибка: Недостаточно газа (A0GI) для отправки транзакции. Пожалуйста, попросите преподавателя пополнить ваш баланс.", true);
+                showToast(t["err_insufficient_gas"] || "Error: Insufficient gas (A0GI) to send transaction. Please ask the instructor to top up your balance.", true);
                 return;
             }
-
-            const currentLang = localStorage.getItem('lang') || 'en';
-            const t = translations[currentLang] || translations["en"];
 
             let fullErrorStr = "";
             try { fullErrorStr = JSON.stringify(error); } catch (e) { }
@@ -1524,12 +1524,15 @@
             const isRevert = codeStr === 'CALL_EXCEPTION' || message.includes('CALL_EXCEPTION') || reason.includes('transaction failed');
 
             if (isRevert) {
-                const msg = customRevertMsg || t["revert_unknown"] || "Ошибка: Смарт-контракт отклонил транзакцию. Условие не выполнено.";
+                let msg = customRevertMsg || "revert_unknown";
+                if (t[msg]) {
+                    msg = t[msg];
+                }
                 showToast(msg, true);
                 return;
             }
 
-            showToast((t["err_unknown"] || "Произошла ошибка транзакции: ") + (error?.message || error), true);
+            showToast((t["err_unknown"] || "Transaction error occurred: ") + (error?.message || error), true);
         }
 
         async function refreshQuests() {
@@ -2194,6 +2197,15 @@
                     return;
                 }
 
+                // Frontend pre-check: is nickname or address already registered?
+                const isAddressDup = registryData.some(s => s.address.toLowerCase() === address.toLowerCase());
+                const isNickDup = registryData.some(s => s.nickname.toLowerCase() === nickname.toLowerCase());
+                if (isAddressDup || isNickDup) {
+                    setStatus(statusEl, t("err_student_already_registered"), "error");
+                    showToast(t("err_student_already_registered"), "error");
+                    return;
+                }
+
                 setStatus(statusEl, "Preparing summoning ritual (Sending 0.01 OGI)...", "wait");
                 btn.innerText = "Registering...";
                 btn.disabled = true; btn.classList.add("opacity-50");
@@ -2214,7 +2226,7 @@
             } catch (err) {
                 console.error("registerStudent error:", err);
                 setStatus(statusEl, "Ritual failed.", "error");
-                if (typeof handleWeb3Error === 'function') handleWeb3Error(err, "Этот студент уже зарегистрирован!");
+                if (typeof handleWeb3Error === 'function') handleWeb3Error(err, "err_student_already_registered");
             } finally {
                 hideLoader();
                 document.getElementById("reg-nickname").value = "";
@@ -2315,6 +2327,16 @@
                     return;
                 }
 
+                // Frontend pre-check: is nickname or address already registered?
+                const isAddressDup = registryData.some(s => s.address.toLowerCase() === address.toLowerCase());
+                const isNickDup = registryData.some(s => s.nickname.toLowerCase() === nickname.toLowerCase());
+                if (isAddressDup || isNickDup) {
+                    setStatus(statusEl, t("err_student_already_registered"), "error");
+                    showToast(t("err_student_already_registered"), "error");
+                    resetQrScanner();
+                    return;
+                }
+
                 btn.disabled = true;
                 btn.innerText = "Registering...";
                 setStatus(statusEl, "Summoning hero from QR...", "wait");
@@ -2331,7 +2353,7 @@
             } catch (err) {
                 console.error("registerStudentFromQr error:", err);
                 setStatus(statusEl, "QR Summoning failed.", "error");
-                if (typeof handleWeb3Error === 'function') handleWeb3Error(err, "Этот студент уже зарегистрирован!");
+                if (typeof handleWeb3Error === 'function') handleWeb3Error(err, "err_student_already_registered");
             } finally {
                 hideLoader();
                 document.getElementById("qr-nickname").value = "";
@@ -2813,8 +2835,8 @@
                     document.getElementById("voting-status").innerText = "Failed to claim attendance.";
                     document.getElementById("voting-status").className = "mt-6 text-center text-sm font-bold text-rose-500";
 
-                    if (typeof handleWeb3Error === 'function') handleWeb3Error(err, "Транзакция отклонена или код введен неверно.");
-                    else showToast("Транзакция отклонена или код введен неверно.", true);
+                    if (typeof handleWeb3Error === 'function') handleWeb3Error(err, "err_attendance_failed");
+                    else showToast(t("err_attendance_failed"), true);
                 }
             } finally {
                 hideLoader();
@@ -2847,7 +2869,7 @@
                 loadPollTopics();
             } catch (err) {
                 console.error("FULL ERROR OBJECT:", err);
-                if (typeof handleWeb3Error === 'function') handleWeb3Error(err, "Недостаточно SGC или предмет недоступен!");
+                if (typeof handleWeb3Error === 'function') handleWeb3Error(err, "err_buy_failed");
                 else showToast("Error: " + (err.message || err), true);
             } finally {
                 hideLoader();
@@ -3140,7 +3162,7 @@
                 await loadStudentInventory();
             } catch (err) {
                 console.error('activateConsumable error:', err);
-                if (typeof handleWeb3Error === 'function') handleWeb3Error(err, t.err_not_owned || 'Предмет не в вашем инвентаре!');
+                if (typeof handleWeb3Error === 'function') handleWeb3Error(err, t.err_not_owned || 'err_not_owned_fallback');
                 else showToast('Error: ' + (err.message || err), true);
             } finally {
                 hideLoader();
@@ -3164,7 +3186,7 @@
                 await loadStudentInventory();
             } catch (err) {
                 console.error('recycleItem error:', err);
-                if (typeof handleWeb3Error === 'function') handleWeb3Error(err, t.err_not_owned || 'Предмет не в вашем инвентаре!');
+                if (typeof handleWeb3Error === 'function') handleWeb3Error(err, t.err_not_owned || 'err_not_owned_fallback');
                 else showToast('Error: ' + (err.message || err), true);
             } finally {
                 hideLoader();
@@ -3189,7 +3211,7 @@
                 await loadStudentInventory();
             } catch (err) {
                 console.error('transformToXP error:', err);
-                if (typeof handleWeb3Error === 'function') handleWeb3Error(err, t.err_not_owned || 'Предмет не в вашем инвентаре!');
+                if (typeof handleWeb3Error === 'function') handleWeb3Error(err, t.err_not_owned || 'err_not_owned_fallback');
                 else showToast('Error: ' + (err.message || err), true);
             } finally {
                 hideLoader();
@@ -3565,7 +3587,13 @@
                 "guild_pool_loading": "Checking guild membership...",
                 "guild_pool_all_assigned": "All students are already in guilds.",
                 "rank_no_guild": "No Guild",
-                "academic_group": "Academic Group"
+                "academic_group": "Academic Group",
+                "err_student_already_registered": "Error: This student is already registered!",
+                "err_tx_timeout": "Transaction sent, but the network is taking too long to respond. Check your wallet.",
+                "err_insufficient_gas": "Error: Insufficient gas (A0GI) to send transaction. Please ask the instructor to top up your balance.",
+                "err_attendance_failed": "Transaction rejected or invalid code entered.",
+                "err_buy_failed": "Insufficient SGC or item is unavailable!",
+                "err_not_owned_fallback": "Item is not in your inventory!"
             },
             "ru": {
                 "err_OnlyGM": "Доступ запрещен: действие доступно только Преподавателю.",
@@ -3790,7 +3818,13 @@
                 "guild_pool_loading": "Проверяем членство в гильдиях...",
                 "guild_pool_all_assigned": "Все студенты уже состоят в гильдиях.",
                 "rank_no_guild": "Без Гильдии",
-                "academic_group": "Учебная Группа"
+                "academic_group": "Учебная Группа",
+                "err_student_already_registered": "Ошибка: Этот студент уже зарегистрирован!",
+                "err_tx_timeout": "Транзакция отправлена, но сеть отвечает слишком долго. Проверьте статус в кошельке.",
+                "err_insufficient_gas": "Ошибка: Недостаточно газа (A0GI) для отправки транзакции. Пожалуйста, попросите преподавателя пополнить ваш баланс.",
+                "err_attendance_failed": "Транзакция отклонена или код введен неверно.",
+                "err_buy_failed": "Недостаточно SGC или предмет недоступен!",
+                "err_not_owned_fallback": "Предмет не в вашем инвентаре!"
             }
         };
 
@@ -3876,6 +3910,11 @@
                 { match: "Guild with this ID already exists", key: "revert_guild_exists" },
                 { match: "Guild must have at least one real member", key: "revert_guild_no_members" },
                 { match: "Only Game Master can", key: "revert_not_gamemaster" },
+                { match: "OnlyGM", key: "err_OnlyGM" },
+                { match: "NotStudent", key: "err_NotStudent" },
+                { match: "InGuild", key: "revert_already_in_guild" },
+                { match: "NoMembers", key: "revert_guild_no_members" },
+                { match: "GuildExists", key: "revert_guild_exists" },
             ];
 
             for (const { match, key } of revertMap) {
