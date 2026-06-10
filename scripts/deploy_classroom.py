@@ -58,12 +58,12 @@ def main():
     token_contract = boa.load_partial("contracts/Token.vy").at(TOKEN_ADDRESS)
 
     # 3. Выдаём Approve (разрешение) новому ClassroomDAO на снятие SGC
-    APPROVE_AMOUNT = 1_000_000 * 10**18
+    APPROVE_AMOUNT = 1000000 * 10**18
     print(f"\nВыдача разрешения (Approve) контракту ClassroomDAO "
           f"({classroom_contract.address}) на сумму 1,000,000 SGC...")
 
     start_nonce = get_nonce(chairperson.address)
-    token_contract.approve(classroom_contract.address, APPROVE_AMOUNT)
+    token_contract.approve(classroom_contract.address, 1000000 * 10**18)
     wait_for_nonce(chairperson.address, start_nonce)
     print("  ✅ Approve успешно выдан!")
 
