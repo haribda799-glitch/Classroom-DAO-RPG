@@ -8,7 +8,7 @@
 """
 
 interface ERC20:
-    def transferFrom(_from: address, _to: address, _value: uint256) -> bool: nonpayable
+    def transferFrom(_from: address, _to: address, _value: uint256): nonpayable
 
 event Voted:
     voter: indexed(address)
@@ -389,8 +389,7 @@ def buyItem(itemId: uint256):
     assert item.isActive, "Inactive"
 
     price_wei: uint256 = item.price * 10**18
-    success: bool = extcall ERC20(self.token_address).transferFrom(msg.sender, self.chairperson_wallet, price_wei)
-    assert success, "TxFail"
+    extcall ERC20(self.token_address).transferFrom(msg.sender, self.chairperson_wallet, price_wei)
 
     # Track in DynArray (for market logs / display)
     self.student_inventory[msg.sender].append(itemId)
@@ -815,10 +814,9 @@ def leave_guild(pay_with_tokens: bool):
     if pay_with_tokens:
         # Transfer SGC penalty from student → guild vault
         # The student must have called approve(contractAddress, LEAVE_TOKEN_PENALTY) first
-        success: bool = extcall ERC20(self.token_address).transferFrom(
+        extcall ERC20(self.token_address).transferFrom(
             msg.sender, self.chairperson_wallet, LEAVE_TOKEN_PENALTY
         )
-        assert success, "TxFail"
         self.guild_vaults[guild_id] += LEAVE_TOKEN_PENALTY // (10 ** 18)  # SGC base units
     else:
         # Deduct XP penalty, floored to zero
