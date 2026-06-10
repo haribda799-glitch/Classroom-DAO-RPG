@@ -142,7 +142,6 @@ struct Guild:
     guild_id: uint256
     total_xp: uint256
     member_count: uint256
-    members: DynArray[address, 5]
     is_active: bool
 
 struct GuildProposal:
@@ -490,18 +489,11 @@ def create_guild(guild_id: uint256, members: DynArray[address, 5]):
     assert guild_id > 0, "BadGuildID"
     assert len(members) > 0 and len(members) <= 5, "BadMembers"
 
-    if self.guilds[guild_id].is_active:
-        for old_m: address in self.guilds[guild_id].members:
-            if old_m != empty(address):
-                self.student_to_guild[old_m] = 0
-        self.guilds[guild_id].members = []
-        self.guilds[guild_id].member_count = 0
-    else:
+    if not self.guilds[guild_id].is_active:
         self.guilds[guild_id] = Guild(
             guild_id=guild_id,
             total_xp=0,
             member_count=0,
-            members=[],
             is_active=True
         )
 
@@ -509,10 +501,10 @@ def create_guild(guild_id: uint256, members: DynArray[address, 5]):
     for m: address in members:
         if m != empty(address):
             assert self.voters[m].weight > 0, "NotStudent"
-            assert self.student_to_guild[m] == 0, "InGuild"
-            self.student_to_guild[m] = guild_id
-            self.guilds[guild_id].members.append(m)
-            self.guilds[guild_id].member_count += 1
+            if self.student_to_guild[m] != guild_id:
+                assert self.student_to_guild[m] == 0, "InGuild"
+                self.student_to_guild[m] = guild_id
+                self.guilds[guild_id].member_count += 1
             added_count += 1
 
     assert added_count > 0, "NoMembers"
@@ -524,28 +516,30 @@ def create_guild(guild_id: uint256, members: DynArray[address, 5]):
 
 @external
 @nonreentrant
-def distribute_guild_reward(guild_id: uint256, total_sgc: uint256, total_xp: uint256):
+def distribute_guild_reward(guild_id: uint256, members: DynArray[address, 5], total_sgc: uint256, total_xp: uint256):
     """
     @notice Distribute guild reward using the 50/50 hybrid model.
-    @dev Only callable by chairperson.
+    @dev Only callable by chairperson. Members list is passed explicitly
+         since the contract no longer stores member arrays on-chain.
+         Each member is validated via student_to_guild mapping.
          - Base 50% SGC: split equally among members, transferred immediately.
          - Premium 50% SGC: deposited into guild_vaults for DAO-governed distribution.
          - XP: added to guild total and split equally among members' personal XP.
     @param guild_id Target guild identifier.
+    @param members Array of current guild member addresses (from frontend registry).
     @param total_sgc Total SGC reward in base units (without 10**18 decimals).
     @param total_xp Total Academic XP reward.
     """
     assert msg.sender == self.chairperson, "OnlyGM"
     assert self.guilds[guild_id].is_active, "NoGuild"
     assert total_sgc > 0 or total_xp > 0, "ZeroReward"
-
-    guild: Guild = self.guilds[guild_id]
+    assert len(members) > 0, "NoMembers"
 
     active_count: uint256 = 0
-    for m: address in guild.members:
+    for m: address in members:
         if m != empty(address) and self.student_to_guild[m] == guild_id:
             active_count += 1
-            
+
     assert active_count > 0, "NoActiveMembers"
 
     # 50/50 split: base guaranteed income + premium KPI pool
@@ -557,7 +551,7 @@ def distribute_guild_reward(guild_id: uint256, total_sgc: uint256, total_xp: uin
     per_member_xp: uint256 = total_xp // active_count
 
     # Distribute base SGC and XP to each guild member
-    for m: address in guild.members:
+    for m: address in members:
         if m != empty(address) and self.student_to_guild[m] == guild_id:
             # Credit personal Academic XP
             self.students[m].academicXP += per_member_xp
@@ -796,15 +790,6 @@ def batch_import_legacy_xp(
 
 @external
 @view
-def get_guild_members(guild_id: uint256) -> DynArray[address, 5]:
-    """
-    @notice Returns the list of member addresses for a given guild.
-    @param guild_id The guild to query.
-    """
-    return self.guilds[guild_id].members
-
-@external
-@view
 def get_guild_vault_balance(guild_id: uint256) -> uint256:
     """
     @notice Returns the current SGC balance in the guild vault (base units).
@@ -848,13 +833,6 @@ def leave_guild(pay_with_tokens: bool):
             self.students[msg.sender].academicXP = 0
 
     # Unbind student from guild and decrement member count
-    for i: uint256 in range(5):
-        if i >= len(self.guilds[guild_id].members):
-            break
-        if self.guilds[guild_id].members[i] == msg.sender:
-            self.guilds[guild_id].members[i] = empty(address)
-            break
-
     self.student_to_guild[msg.sender] = 0
     self.guilds[guild_id].member_count -= 1
 
@@ -875,13 +853,6 @@ def kick_from_guild(student: address):
     assert guild_id > 0, "NotInGuild"
 
     # Unbind student from guild and decrement member count
-    for i: uint256 in range(5):
-        if i >= len(self.guilds[guild_id].members):
-            break
-        if self.guilds[guild_id].members[i] == student:
-            self.guilds[guild_id].members[i] = empty(address)
-            break
-
     self.student_to_guild[student] = 0
     self.guilds[guild_id].member_count -= 1
 
