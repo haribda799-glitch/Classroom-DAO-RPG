@@ -199,6 +199,7 @@ proposal_signatures: public(HashMap[uint256, HashMap[address, bool]])
 guild_vaults: public(HashMap[uint256, uint256])      # SGC balance on guild vault (base units)
 guild_locked: public(HashMap[uint256, bool])         # Vault lock status (dispute freeze)
 student_to_guild: public(HashMap[address, uint256])  # Student -> Guild binding (0 = unassigned)
+guild_leader: public(HashMap[uint256, address])       # Guild ID -> Leader address (members[0])
 next_proposal_id: public(uint256)
 
 # ── V9: Guild Leave Penalty Constants ──────────────────────────────────────────
@@ -507,6 +508,10 @@ def create_guild(guild_id: uint256, members: DynArray[address, 5]):
             added_count += 1
 
     assert added_count > 0, "NoMembers"
+
+    # Assign Guild Leader: the first non-zero address in the members array
+    if members[0] != empty(address):
+        self.guild_leader[guild_id] = members[0]
 
     log GuildCreated(guild_id=guild_id, member_count=self.guilds[guild_id].member_count)
 
