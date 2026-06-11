@@ -611,49 +611,60 @@
             </div>
             <p class="mt-6 text-center text-sm font-bold" id="voting-status"></p>
 
-            <!-- ── <span data-i18n="dao_premiums">DAO Premiums</span> (Guild Proposals) ───────────────────────── -->
-            <div id="dao-premiums-section" class="hidden mt-12 pt-8 border-t border-indigo-500/30 relative">
+            <!-- ── Student Guild Vault Distribution (Leader Only) ───────────────────────── -->
+            <div id="student-vault-section" class="hidden mt-12 pt-8 border-t border-amber-500/30 relative">
                 <div class="flex items-center justify-between mb-6">
                     <div class="flex items-center gap-3">
-                        <h2 class="text-2xl font-bold text-indigo-400 rpg-title"><span data-i18n="dao_premiums">DAO
-                                Premiums</span></h2>
-                        <span
-                            class="text-xs font-bold px-3 py-1 rounded-full bg-indigo-900/80 border border-indigo-500/50 text-indigo-300 tracking-widest uppercase"><span
-                                data-i18n="guild_label">Guild</span> <span id="dao-premium-guild-id">0</span></span>
+                        <h2 class="text-2xl font-bold text-amber-400 rpg-title flex items-center gap-2">
+                            🏦 <span data-i18n="vault_distribution">Guild Vault Distribution</span>
+                        </h2>
+                        <span class="text-xs font-bold px-3 py-1 rounded-full bg-amber-900/80 border border-amber-500/50 text-amber-300 tracking-widest uppercase">
+                            <span data-i18n="guild_label">Guild</span> <span id="student-vault-guild-id-display">0</span>
+                        </span>
+                        <input type="hidden" id="student-vault-guild-id" value="0" />
                     </div>
-                    <button onclick="refreshGuildProposals()"
-                        class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-800/80 border border-indigo-500/30 text-indigo-400 hover:bg-indigo-600 hover:text-white hover:border-indigo-400 transition-all shadow text-lg"
-                        title="Refresh Proposals">↻</button>
+                    <button onclick="loadStudentVaultAction()"
+                        class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-800/80 border border-amber-500/30 text-amber-400 hover:bg-amber-600 hover:text-white hover:border-amber-400 transition-all shadow text-lg"
+                        title="Refresh Vault">↻</button>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <!-- Create Proposal Form -->
-                    <div
-                        class="lg:col-span-1 bg-slate-900/60 p-5 rounded-2xl border border-indigo-500/30 shadow-[inset_0_0_15px_rgba(0,0,0,0.3)] h-fit">
-                        <h4 class="text-sm font-bold text-indigo-300 uppercase tracking-widest mb-4"><span
-                                data-i18n="create_proposal">Create Proposal</span></h4>
-                        <div class="space-y-3">
-                            <div class="p-3 bg-indigo-950/50 border border-indigo-500/20 rounded-xl mb-4">
-                                <p class="text-xs text-indigo-300/80 mb-2 font-mono"><span
-                                        data-i18n="format_targets_json">Format Targets / Amounts arrays as JSON.</span>
-                                </p>
-                                <textarea id="student-proposal-payload" rows="3"
-                                    class="w-full bg-black/50 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-indigo-500 transition-all font-mono text-xs"
-                                    placeholder='[{"address":"0x...","amount":50}]'></textarea>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Left: Info -->
+                    <div>
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div class="bg-black/40 border border-amber-500/20 rounded-xl px-4 py-3 text-center">
+                                <div class="text-[10px] uppercase tracking-widest text-slate-500 mb-1"><span data-i18n="total_vault_sgc">Total Vault SGC</span></div>
+                                <div class="font-bold text-amber-300 font-mono text-xl" id="student-vault-total-sgc">—</div>
                             </div>
-                            <button onclick="createProposalAction()"
-                                class="w-full py-3 bg-gradient-to-r from-indigo-700 to-blue-700 hover:from-indigo-600 hover:to-blue-600 transition-all rounded-xl font-bold text-white shadow-[0_0_15px_rgba(99,102,241,0.4)] hover:scale-[1.02] uppercase tracking-wider text-xs">
-                                <span data-i18n="submit_to_ai">Submit to AI Oracle</span>
+                            <div class="bg-black/40 border border-indigo-500/20 rounded-xl px-4 py-3 text-center">
+                                <div class="text-[10px] uppercase tracking-widest text-slate-500 mb-1"><span data-i18n="total_vault_xp">Total Vault XP</span></div>
+                                <div class="font-bold text-indigo-300 font-mono text-xl" id="student-vault-total-xp">—</div>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-900/60 border border-amber-500/20 rounded-xl p-4 shadow-[inset_0_0_15px_rgba(0,0,0,0.3)]">
+                            <div class="bg-black/30 border border-slate-700/60 rounded-xl px-4 py-3 mb-4 flex justify-between items-center text-sm">
+                                <span class="text-slate-400 uppercase tracking-widest font-bold"><span data-i18n="left_to_distribute">Left to distribute</span>:</span>
+                                <span class="font-mono font-bold">
+                                    <span id="student-vault-left-sgc" class="text-amber-300">— SGC</span>
+                                    <span class="text-slate-600 mx-1">/</span>
+                                    <span id="student-vault-left-xp" class="text-indigo-300">— XP</span>
+                                </span>
+                            </div>
+
+                            <button id="student-vault-distribute-btn" disabled onclick="distributeStudentVaultAction()"
+                                class="w-full py-3 rounded-xl font-bold uppercase tracking-wider text-sm transition-all
+                                    bg-slate-800 border border-slate-600 text-slate-500 cursor-not-allowed
+                                    disabled:opacity-50">
+                                🏦 <span data-i18n="distribute_vault">Distribute Vault</span>
                             </button>
                         </div>
                     </div>
 
-                    <!-- Proposals List -->
-                    <div class="lg:col-span-2">
-                        <div id="guild-proposals-container"
-                            class="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-                            <div class="text-center text-slate-500 py-8"><span class="italic text-sm"
-                                    data-i18n="no_active_proposals">${t("no_active_proposals")}</span></div>
+                    <!-- Right: Members -->
+                    <div class="bg-slate-900/40 border border-slate-700/50 rounded-xl p-4 max-h-[400px] overflow-y-auto custom-scrollbar">
+                        <div id="student-vault-members-list" class="space-y-3">
+                            <p class="text-xs text-slate-500 italic text-center py-8">Loading vault…</p>
                         </div>
                     </div>
                 </div>
@@ -1184,7 +1195,7 @@
                         <!-- Guild Vault Distribution -->
                         <div>
                             <h4 class="text-sm font-bold text-amber-400 uppercase tracking-widest mb-3 border-b border-amber-500/30 pb-2 flex items-center gap-2">
-                                🏦 <span>Guild Vault Distribution</span>
+                                🏦 <span data-i18n="vault_distribution">Guild Vault Distribution</span>
                             </h4>
 
                             <!-- Load row -->
@@ -1201,11 +1212,11 @@
                             <!-- Info badges -->
                             <div class="grid grid-cols-2 gap-2 mb-4">
                                 <div class="bg-black/40 border border-amber-500/20 rounded-xl px-3 py-2 text-center">
-                                    <div class="text-[10px] uppercase tracking-widest text-slate-500 mb-0.5">Total Vault SGC</div>
+                                    <div class="text-[10px] uppercase tracking-widest text-slate-500 mb-0.5"><span data-i18n="total_vault_sgc">Total Vault SGC</span></div>
                                     <div class="font-bold text-amber-300 font-mono text-base" id="vault-total-sgc">—</div>
                                 </div>
                                 <div class="bg-black/40 border border-indigo-500/20 rounded-xl px-3 py-2 text-center">
-                                    <div class="text-[10px] uppercase tracking-widest text-slate-500 mb-0.5">Total Vault XP</div>
+                                    <div class="text-[10px] uppercase tracking-widest text-slate-500 mb-0.5"><span data-i18n="total_vault_xp">Total Vault XP</span></div>
                                     <div class="font-bold text-indigo-300 font-mono text-base" id="vault-total-xp">—</div>
                                 </div>
                             </div>
@@ -1217,7 +1228,7 @@
 
                             <!-- Remainder calculator -->
                             <div class="bg-black/30 border border-slate-700/60 rounded-xl px-3 py-2 mb-3 flex justify-between items-center text-xs">
-                                <span class="text-slate-400 uppercase tracking-widest font-bold">Left to distribute:</span>
+                                <span class="text-slate-400 uppercase tracking-widest font-bold"><span data-i18n="left_to_distribute">Left to distribute</span>:</span>
                                 <span class="font-mono font-bold">
                                     <span id="vault-left-sgc" class="text-amber-300">— SGC</span>
                                     <span class="text-slate-600 mx-1">/</span>
@@ -1230,7 +1241,7 @@
                                 class="w-full py-3 rounded-xl font-bold uppercase tracking-wider text-sm transition-all
                                     bg-slate-800 border border-slate-600 text-slate-500 cursor-not-allowed
                                     disabled:opacity-50">
-                                🏦 Distribute Vault
+                                🏦 <span data-i18n="distribute_vault">Distribute Vault</span>
                             </button>
                         </div>
                     </div>
@@ -1942,15 +1953,23 @@
                         const guildId = guildIdBN.toNumber();
 
                         const vaultDisplay = document.getElementById("guild-vault-display");
-                        const daoPremiumsSec = document.getElementById("dao-premiums-section");
+                        const studentVaultSec = document.getElementById("student-vault-section");
 
                         if (guildId > 0) {
                             vaultDisplay.classList.remove("hidden");
-                            if (daoPremiumsSec) daoPremiumsSec.classList.remove("hidden");
-
                             document.getElementById("user-guild-id").innerText = `#${guildId}`;
-                            if (document.getElementById("dao-premium-guild-id")) {
-                                document.getElementById("dao-premium-guild-id").innerText = guildId;
+
+                            const leaderAddr = await voterContract.guild_leader(guildId);
+                            if (studentVaultSec) {
+                                if (leaderAddr.toLowerCase() === userAddress.toLowerCase()) {
+                                    studentVaultSec.classList.remove("hidden");
+                                    document.getElementById("student-vault-guild-id-display").innerText = guildId;
+                                    document.getElementById("student-vault-guild-id").value = guildId;
+                                    // Auto-load vault
+                                    setTimeout(() => loadStudentVaultAction(), 500);
+                                } else {
+                                    studentVaultSec.classList.add("hidden");
+                                }
                             }
 
                             const vaultBalBN = await voterContract.guild_vaults(guildId);
@@ -3443,6 +3462,11 @@
 
                 "guild_vault": "Guild Vault",
                 "dao_premiums": "DAO Premiums",
+                "vault_distribution": "Guild Vault Distribution",
+                "total_vault_sgc": "Total Vault SGC",
+                "total_vault_xp": "Total Vault XP",
+                "left_to_distribute": "Left to distribute",
+                "distribute_vault": "Distribute Vault",
                 "guild_label": "Guild",
                 "create_proposal": "Create Proposal",
                 "format_targets_json": "Format Targets / Amounts arrays as JSON.",
@@ -3686,6 +3710,11 @@
                 "kick_btn": "Исключить",
                 "guild_vault": "Сейф Гильдии",
                 "dao_premiums": "DAO Премии",
+                "vault_distribution": "Распределение Казны Гильдии",
+                "total_vault_sgc": "Всего SGC в казне",
+                "total_vault_xp": "Всего XP в казне",
+                "left_to_distribute": "Осталось распределить",
+                "distribute_vault": "Распределить Казну",
                 "guild_label": "Гильдия",
                 "create_proposal": "Создать Предложение",
                 "format_targets_json": "Формат массивов адресов / сумм: JSON.",
@@ -4196,6 +4225,18 @@
                     }
 
                     if (activeMembers.length > 0) {
+                        // Fetch leader address and sort so leader is always at index 0
+                        try {
+                            const leaderAddr = await voterContract.guild_leader(guildId);
+                            activeMembers.sort((a, b) => {
+                                if (a.address.toLowerCase() === leaderAddr.toLowerCase()) return -1;
+                                if (b.address.toLowerCase() === leaderAddr.toLowerCase()) return 1;
+                                return 0;
+                            });
+                        } catch (e) {
+                            console.warn("Failed to fetch guild leader for sorting:", e);
+                        }
+
                         const slots = document.querySelectorAll("#guild-drop-zone .guild-drop-slot");
 
                         activeMembers.forEach((student, i) => {
@@ -4462,137 +4503,146 @@
             }
         }
 
-        async function createProposalAction() {
-            const payloadStr = document.getElementById("student-proposal-payload").value.trim();
-            if (!payloadStr) {
-                showToast(t("toast_payload_req"), "error");
-                return;
-            }
+        async function loadStudentVaultAction() {
+            const guildIdInput = document.getElementById('student-vault-guild-id');
+            if (!guildIdInput) return;
+            const guildId = parseInt(guildIdInput.value);
+            if (isNaN(guildId) || guildId <= 0) return;
 
-            let payload;
-            try {
-                payload = JSON.parse(payloadStr);
-                if (!Array.isArray(payload)) throw new Error("Must be an array");
-            } catch (e) {
-                showToast(t("toast_invalid_json"), "error");
-                return;
-            }
-
-            const targets = [];
-            const amounts = [];
-            const decimals = await tokenContract.decimals();
-
-            for (const item of payload) {
-                if (!item.address || !ethers.utils.isAddress(item.address) || typeof item.amount === 'undefined') {
-                    showToast(t("toast_invalid_item"), "error");
-                    return;
-                }
-                targets.push(item.address);
-                amounts.push(ethers.utils.parseUnits(item.amount.toString(), decimals));
-            }
-
-            const aiProofHash = "0x0000000000000000000000000000000000000000000000000000000000000000";
+            const list = document.getElementById('student-vault-members-list');
+            list.innerHTML = `<p class="text-xs text-amber-400 animate-pulse text-center py-3">Loading vault…</p>`;
+            document.getElementById('student-vault-total-sgc').textContent = '…';
+            document.getElementById('student-vault-total-xp').textContent = '…';
+            document.getElementById('student-vault-left-sgc').textContent = '… SGC';
+            document.getElementById('student-vault-left-xp').textContent = '… XP';
+            const btn = document.getElementById('student-vault-distribute-btn');
+            btn.disabled = true;
+            btn.className = btn.className.replace(/bg-gradient[^'"\s]*/g, '');
 
             try {
-                showLoader(t("toast_submitting"));
-                const tx = await voterContract.create_distribution_proposal(targets, amounts, aiProofHash);
-                showToast(`Tx sent: ${tx.hash.substring(0, 10)}...`, "info");
-                await waitWithTimeout(tx);
-                showToast(t("toast_proposal_submitted"), "success");
-                refreshGuildProposals();
-            } catch (e) {
-                console.error(e);
-                showToast(e.reason || "Failed to submit proposal.", "error");
-            } finally {
-                hideLoader();
-            }
-        }
-
-        async function refreshGuildProposals() {
-            if (!isStudent) return;
-            const container = document.getElementById("guild-proposals-container");
-            if (!container) return;
-
-            try {
-                const guildIdBN = await voterContract.student_to_guild(userAddress);
-                const guildId = guildIdBN.toNumber();
-                if (guildId === 0) return;
-
-                const nextIdBN = await voterContract.next_proposal_id();
-                const nextId = nextIdBN.toNumber();
-
-                let html = "";
+                // Fetch vault SGC balance
+                const vaultRaw = await voterContract.guild_vaults(guildId);
                 const decimals = await tokenContract.decimals();
+                const totalSGC = parseFloat(ethers.utils.formatUnits(vaultRaw, decimals));
 
-                let foundAny = false;
+                // Guild XP
+                const guildInfo = await voterContract.guilds(guildId);
+                const totalXP = guildInfo[1].toNumber();
 
-                // Read backwards to show newest first
-                for (let i = nextId - 1; i >= 0; i--) {
-                    const prop = await voterContract.guild_proposals(i);
-                    if (prop.guild_id.toNumber() === guildId) {
-                        foundAny = true;
+                // Leader is the only one who can distribute anyway, but store data
+                window._studentVaultTotalSGC = totalSGC;
+                window._studentVaultTotalXP = totalXP;
+                window._studentVaultMembers = [];
 
-                        let statusText = t("status_pending");
-                        let statusColor = "text-yellow-400";
-                        if (prop.is_executed) { statusText = t("status_executed"); statusColor = "text-emerald-400"; }
-                        else if (prop.is_disputed) { statusText = t("status_disputed"); statusColor = "text-rose-400"; }
+                document.getElementById('student-vault-total-sgc').textContent = totalSGC.toLocaleString();
+                document.getElementById('student-vault-total-xp').textContent = totalXP.toLocaleString();
 
-                        html += `
-                        <div class="bg-indigo-950/40 p-4 rounded-xl border border-indigo-500/30">
-                            <div class="flex justify-between items-center mb-2">
-                                <h5 class="text-indigo-300 font-bold text-sm">Proposal #${i}</h5>
-                                <span class="text-xs font-bold ${statusColor} uppercase tracking-wider">${statusText}</span>
-                            </div>
-                            <div class="text-xs text-slate-400 mb-3 font-mono">
-                                ${t("approvals_label")} <span class="text-indigo-300">${prop.approvals_count.toString()} / 5</span>
-                            </div>
-                            <div class="flex gap-2">
-                                <button onclick="signProposalAction(${i})" class="flex-1 py-2 bg-indigo-600/20 hover:bg-indigo-500/40 text-indigo-300 rounded-lg text-xs font-bold border border-indigo-500/50 transition-colors uppercase" ${prop.is_executed || prop.is_disputed ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : ''}>${t("btn_sign")}</button>
-                                <button onclick="raiseDisputeAction(${i})" class="flex-1 py-2 bg-rose-600/20 hover:bg-rose-500/40 text-rose-300 rounded-lg text-xs font-bold border border-rose-500/50 transition-colors uppercase" ${prop.is_executed || prop.is_disputed ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : ''}>${t("btn_dispute")}</button>
-                            </div>
-                        </div>`;
+                if (registryData && registryData.length > 0) {
+                    for (const student of registryData) {
+                        try {
+                            const gid = (await voterContract.student_to_guild(student.address)).toNumber();
+                            if (gid === guildId) window._studentVaultMembers.push({ address: student.address, nickname: student.nickname });
+                        } catch { }
                     }
                 }
 
-                if (!foundAny) {
-                    html = `<div class="text-center text-slate-500 py-8"><span class="italic text-sm" data-i18n="no_active_proposals">${t("no_active_proposals")}</span></div>`;
+                if (window._studentVaultMembers.length === 0) {
+                    list.innerHTML = `<p class="text-xs text-slate-500 italic text-center py-3">No members found.</p>`;
+                    _updateStudentVaultCalc();
+                    return;
                 }
 
-                container.innerHTML = html;
+                list.innerHTML = window._studentVaultMembers.map((m, i) => `
+                    <div class="flex items-center gap-2 bg-black/30 border border-slate-700/50 rounded-xl px-3 py-2">
+                        <div class="flex-1 min-w-0">
+                            <div class="font-bold text-slate-200 text-xs truncate">${m.nickname}</div>
+                            <div class="font-mono text-[10px] text-slate-500">${m.address.substring(0,8)}…</div>
+                        </div>
+                        <input type="number" min="0" step="any" placeholder="SGC" id="student-vault-sgc-${i}"
+                            class="w-20 bg-black/50 border border-amber-500/30 focus:border-amber-400 rounded-lg px-2 py-1 text-amber-300 font-mono text-xs focus:outline-none transition-all"
+                            oninput="_updateStudentVaultCalc()" />
+                        <input type="number" min="0" step="1" placeholder="XP" id="student-vault-xp-${i}"
+                            class="w-16 bg-black/50 border border-indigo-500/30 focus:border-indigo-400 rounded-lg px-2 py-1 text-indigo-300 font-mono text-xs focus:outline-none transition-all"
+                            oninput="_updateStudentVaultCalc()" />
+                    </div>
+                `).join('');
+
+                _updateStudentVaultCalc();
+
             } catch (e) {
-                console.error("Failed fetching proposals:", e);
-                container.innerHTML = `<div class="text-center text-rose-500 py-8 text-sm">Error loading proposals.</div>`;
+                console.error(e);
+                list.innerHTML = `<p class="text-xs text-rose-400 text-center py-3">Failed to load vault.</p>`;
             }
         }
 
-        async function signProposalAction(id) {
-            try {
-                showLoader(`${t("toast_signing")} #${id}...`);
-                const tx = await voterContract.sign_proposal(id);
-                showToast(`Tx sent: ${tx.hash.substring(0, 10)}...`, "info");
-                await waitWithTimeout(tx);
-                showToast(`${t("toast_proposal_signed")}`, "success");
-                refreshGuildProposals();
-                fetchUserData();
-            } catch (e) {
-                console.error(e);
-                showToast(e.reason || "Failed to sign proposal.", "error");
-            } finally {
-                hideLoader();
+        function _updateStudentVaultCalc() {
+            if (!window._studentVaultMembers) return;
+            let usedSGC = 0, usedXP = 0;
+            for (let i = 0; i < window._studentVaultMembers.length; i++) {
+                usedSGC += parseFloat(document.getElementById(`student-vault-sgc-${i}`)?.value || 0) || 0;
+                usedXP  += parseInt(document.getElementById(`student-vault-xp-${i}`)?.value  || 0) || 0;
+            }
+
+            const leftSGC = window._studentVaultTotalSGC - usedSGC;
+            const leftXP  = window._studentVaultTotalXP  - usedXP;
+
+            const sgcEl = document.getElementById('student-vault-left-sgc');
+            const xpEl  = document.getElementById('student-vault-left-xp');
+            if (sgcEl) {
+                sgcEl.textContent = leftSGC.toFixed(2) + ' SGC';
+                sgcEl.className = leftSGC < 0 ? 'text-rose-400 font-bold' : leftSGC === 0 ? 'text-emerald-400 font-bold' : 'text-amber-300';
+            }
+            if (xpEl) {
+                xpEl.textContent = leftXP + ' XP';
+                xpEl.className = leftXP < 0 ? 'text-rose-400 font-bold' : leftXP === 0 ? 'text-emerald-400 font-bold' : 'text-indigo-300';
+            }
+
+            const btn = document.getElementById('student-vault-distribute-btn');
+            if (!btn) return;
+            const ready = window._studentVaultMembers.length > 0 && leftSGC === 0 && leftXP === 0;
+            btn.disabled = !ready;
+            if (ready) {
+                btn.className = 'w-full py-3 rounded-xl font-bold uppercase tracking-wider text-sm transition-all ' +
+                    'bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 ' +
+                    'text-black shadow-[0_0_20px_rgba(245,158,11,0.5)] hover:scale-[1.02] cursor-pointer';
+            } else {
+                btn.className = 'w-full py-3 rounded-xl font-bold uppercase tracking-wider text-sm transition-all ' +
+                    'bg-slate-800 border border-slate-600 text-slate-500 cursor-not-allowed disabled:opacity-50';
             }
         }
 
-        async function raiseDisputeAction(id) {
+        async function distributeStudentVaultAction() {
+            const btn = document.getElementById('student-vault-distribute-btn');
+            if (!btn || btn.disabled) return;
+
+            const targets = [];
+            const amountsSGC = [];
+            const amountsXP  = [];
+            const decimals = await tokenContract.decimals();
+            const guildId = parseInt(document.getElementById('student-vault-guild-id').value);
+
+            for (let i = 0; i < window._studentVaultMembers.length; i++) {
+                const sgcVal = parseFloat(document.getElementById(`student-vault-sgc-${i}`).value) || 0;
+                const xpVal  = parseInt(document.getElementById(`student-vault-xp-${i}`).value)  || 0;
+                targets.push(window._studentVaultMembers[i].address);
+                amountsSGC.push(ethers.utils.parseUnits(sgcVal.toString(), decimals));
+                amountsXP.push(xpVal);
+            }
+
             try {
-                showLoader(`${t("toast_raising_dispute")} #${id}...`);
-                const tx = await voterContract.raise_dispute(id);
-                showToast(`Tx sent: ${tx.hash.substring(0, 10)}...`, "info");
+                showLoader(t("toast_distributing") || 'Distributing vault…');
+                const totalSGCWei = amountsSGC.reduce((a, b) => a.add(b), ethers.BigNumber.from(0));
+                const totalXP = amountsXP.reduce((a, b) => a + b, 0);
+                const tx = await voterContract.distribute_guild_reward(
+                    guildId, targets, totalSGCWei, totalXP
+                );
+                showToast(`Tx sent: ${tx.hash.substring(0, 10)}…`, 'info');
                 await waitWithTimeout(tx);
-                showToast(`${t("toast_dispute_raised")}`, "warning");
-                refreshGuildProposals();
+                showToast(t("toast_reward_distributed") || `✅ Vault distributed for Guild #${guildId}!`, 'success');
+                await loadStudentVaultAction();
             } catch (e) {
                 console.error(e);
-                showToast(e.reason || "Failed to raise dispute.", "error");
+                showToast(parseContractError(e), 'error');
             } finally {
                 hideLoader();
             }
