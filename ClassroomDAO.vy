@@ -8,7 +8,7 @@
 """
 
 interface ERC20:
-    def transferFrom(_from: address, _to: address, _value: uint256) -> bool: nonpayable
+    def transferFrom(_from: address, _to: address, _value: uint256): nonpayable
 
 event Voted:
     voter: indexed(address)
@@ -275,8 +275,7 @@ def rewardStudent(addr: address, amount: uint256, reason: String[100]):
     self.students[addr].academicXP += amount
 
     sgc_amount: uint256 = amount * 10**18
-    success: bool = extcall ERC20(self.token_address).transferFrom(self.chairperson_wallet, addr, sgc_amount)
-    assert success, "TxFail"
+    extcall ERC20(self.token_address).transferFrom(self.chairperson_wallet, addr, sgc_amount)
 
     log StudentRewarded(student=addr, amount=amount, sgc_amount=sgc_amount, reason=reason)
 
@@ -293,8 +292,7 @@ def rewardBatch(addrs: DynArray[address, 50], amount: uint256, reason: String[10
     for addr: address in addrs:
         assert self.voters[addr].weight > 0, "NotStudent"
         self.students[addr].academicXP += amount
-        success: bool = extcall ERC20(self.token_address).transferFrom(self.chairperson_wallet, addr, sgc_amount)
-        assert success, "TxFail"
+        extcall ERC20(self.token_address).transferFrom(self.chairperson_wallet, addr, sgc_amount)
         log StudentRewarded(student=addr, amount=amount, sgc_amount=sgc_amount, reason=reason)
 
 # ── Attendance ─────────────────────────────────────────────────────────────────
@@ -328,8 +326,7 @@ def claimAttendance(code: String[32]):
     self.students[msg.sender].academicXP += amount
 
     sgc_amount: uint256 = amount * 10**18
-    success: bool = extcall ERC20(self.token_address).transferFrom(self.chairperson_wallet, msg.sender, sgc_amount)
-    assert success, "TxFail"
+    extcall ERC20(self.token_address).transferFrom(self.chairperson_wallet, msg.sender, sgc_amount)
 
     log AttendanceClaimed(student=msg.sender, xp_rewarded=amount)
     log StudentRewarded(student=msg.sender, amount=amount, sgc_amount=sgc_amount, reason="Attendance")
@@ -392,8 +389,7 @@ def buyItem(itemId: uint256):
     assert item.isActive, "Inactive"
 
     price_wei: uint256 = item.price * 10**18
-    success: bool = extcall ERC20(self.token_address).transferFrom(msg.sender, self.chairperson_wallet, price_wei)
-    assert success, "TxFail"
+    extcall ERC20(self.token_address).transferFrom(msg.sender, self.chairperson_wallet, price_wei)
 
     # Track in DynArray (for market logs / display)
     self.student_inventory[msg.sender].append(itemId)
@@ -451,8 +447,7 @@ def recycle_item(item_id: uint256):
     refund_wei: uint256 = refund_sgc * 10**18
 
     if refund_wei > 0:
-        success: bool = extcall ERC20(self.token_address).transferFrom(self.chairperson_wallet, msg.sender, refund_wei)
-        assert success, "TxFail"
+        extcall ERC20(self.token_address).transferFrom(self.chairperson_wallet, msg.sender, refund_wei)
 
     log ItemRecycled(student=msg.sender, item_id=item_id, sgc_refund=refund_wei)
 
@@ -559,10 +554,9 @@ def distribute_guild_reward(guild_id: uint256, members: DynArray[address, 5], to
 
             # Transfer base SGC from msg.sender (chairperson) directly
             if sgc_share > 0:
-                success: bool = extcall ERC20(self.token_address).transferFrom(
+                extcall ERC20(self.token_address).transferFrom(
                     msg.sender, student, sgc_share * 10 ** 18
                 )
-                assert success, "TxFail"
 
     # Deposit premium portion into guild vault for DAO-governed distribution
     self.guild_vaults[guild_id] += premium
@@ -669,10 +663,9 @@ def sign_proposal(proposal_id: uint256):
                 break
             if proposal.amounts[i] > 0:
                 sgc_wei: uint256 = proposal.amounts[i] * 10 ** 18
-                success: bool = extcall ERC20(self.token_address).transferFrom(
+                extcall ERC20(self.token_address).transferFrom(
                     self.chairperson_wallet, proposal.targets[i], sgc_wei
                 )
-                assert success, "TxFail"
 
         log GuildProposalExecuted(proposal_id=proposal_id)
 
@@ -752,10 +745,9 @@ def resolve_dispute(
             break
         if final_amounts[i] > 0:
             sgc_wei: uint256 = final_amounts[i] * 10 ** 18
-            success: bool = extcall ERC20(self.token_address).transferFrom(
+            extcall ERC20(self.token_address).transferFrom(
                 self.chairperson_wallet, final_targets[i], sgc_wei
             )
-            assert success, "TxFail"
 
     log GuildDisputeResolved(
         proposal_id=proposal_id,
@@ -813,10 +805,9 @@ def leave_guild(pay_with_tokens: bool):
     if pay_with_tokens:
         # Transfer SGC penalty from student → guild vault
         # The student must have called approve(contractAddress, LEAVE_TOKEN_PENALTY) first
-        success: bool = extcall ERC20(self.token_address).transferFrom(
+        extcall ERC20(self.token_address).transferFrom(
             msg.sender, self.chairperson_wallet, LEAVE_TOKEN_PENALTY
         )
-        assert success, "TxFail"
         self.guild_vaults[guild_id] += LEAVE_TOKEN_PENALTY // (10 ** 18)  # SGC base units
     else:
         # Deduct XP penalty, floored to zero
@@ -920,8 +911,7 @@ def vote(proposalIndex: uint256):
     # Reward for the first vote ever
     if not self.has_received_reward[msg.sender]:
         self.has_received_reward[msg.sender] = True
-        success: bool = extcall ERC20(self.token_address).transferFrom(self.chairperson_wallet, msg.sender, self.reward_amount)
-        assert success, "TxFail"
+        extcall ERC20(self.token_address).transferFrom(self.chairperson_wallet, msg.sender, self.reward_amount)
 
 # ── View Functions ─────────────────────────────────────────────────────────────
 
