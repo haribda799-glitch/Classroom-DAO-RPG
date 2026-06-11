@@ -4246,8 +4246,11 @@
                     return;
                 }
 
+                const decimals = await tokenContract.decimals();
+                const sgcWei = ethers.utils.parseUnits(sgcAmt, decimals);
+
                 showLoader(t("toast_distributing"));
-                const tx = await voterContract.distribute_guild_reward(guildId, members, sgcAmt, xpAmt);
+                const tx = await voterContract.distribute_guild_reward(guildId, members, sgcWei, xpAmt);
                 showToast(`Tx sent: ${tx.hash.substring(0, 10)}...`, "info");
                 await waitWithTimeout(tx);
                 showToast(`${t("toast_reward_distributed")} #${guildId}!`, "success");

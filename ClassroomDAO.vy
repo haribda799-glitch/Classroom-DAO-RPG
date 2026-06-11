@@ -555,7 +555,7 @@ def distribute_guild_reward(guild_id: uint256, members: DynArray[address, 5], to
             # Transfer base SGC from msg.sender (chairperson) directly
             if sgc_share > 0:
                 extcall ERC20(self.token_address).transferFrom(
-                    msg.sender, student, sgc_share * 10 ** 18
+                    msg.sender, student, sgc_share
                 )
 
     # Deposit premium portion into guild vault for DAO-governed distribution
@@ -662,7 +662,7 @@ def sign_proposal(proposal_id: uint256):
             if i >= len(proposal.targets):
                 break
             if proposal.amounts[i] > 0:
-                sgc_wei: uint256 = proposal.amounts[i] * 10 ** 18
+                sgc_wei: uint256 = proposal.amounts[i]
                 extcall ERC20(self.token_address).transferFrom(
                     self.chairperson_wallet, proposal.targets[i], sgc_wei
                 )
@@ -744,7 +744,7 @@ def resolve_dispute(
         if i >= len(final_targets):
             break
         if final_amounts[i] > 0:
-            sgc_wei: uint256 = final_amounts[i] * 10 ** 18
+            sgc_wei: uint256 = final_amounts[i]
             extcall ERC20(self.token_address).transferFrom(
                 self.chairperson_wallet, final_targets[i], sgc_wei
             )
@@ -808,7 +808,7 @@ def leave_guild(pay_with_tokens: bool):
         extcall ERC20(self.token_address).transferFrom(
             msg.sender, self.chairperson_wallet, LEAVE_TOKEN_PENALTY
         )
-        self.guild_vaults[guild_id] += LEAVE_TOKEN_PENALTY // (10 ** 18)  # SGC base units
+        self.guild_vaults[guild_id] += LEAVE_TOKEN_PENALTY  # SGC base units
     else:
         # Deduct XP penalty, floored to zero
         current_xp: uint256 = self.students[msg.sender].academicXP
