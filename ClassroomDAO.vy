@@ -198,6 +198,7 @@ guilds: public(HashMap[uint256, Guild])
 guild_proposals: public(HashMap[uint256, GuildProposal])
 proposal_signatures: public(HashMap[uint256, HashMap[address, bool]])
 guild_vaults: public(HashMap[uint256, uint256])      # SGC balance on guild vault (base units)
+guild_vault_xp: public(HashMap[uint256, uint256])    # XP balance on guild vault
 guild_locked: public(HashMap[uint256, bool])         # Vault lock status (dispute freeze)
 student_to_guild: public(HashMap[address, uint256])  # Student -> Guild binding (0 = unassigned)
 guild_leader: public(HashMap[uint256, address])       # Guild ID -> Leader address (members[0])
@@ -546,9 +547,12 @@ def distribute_guild_reward(guild_id: uint256, members: DynArray[address, 5], to
     base_sgc: uint256 = total_sgc // 2
     premium: uint256 = total_sgc - base_sgc  # correct for odd totals
 
+    base_xp: uint256 = total_xp // 2
+    premium_xp: uint256 = total_xp - base_xp
+
     # Per-member equal shares (integer division; dust stays in vault)
     sgc_share: uint256 = base_sgc // active_count
-    xp_share: uint256 = total_xp // active_count
+    xp_share: uint256 = base_xp // active_count
 
     # Single-pass distribution — soft membership check skips stale addresses
     for student: address in members:
@@ -567,6 +571,7 @@ def distribute_guild_reward(guild_id: uint256, members: DynArray[address, 5], to
     # Deposit premium portion into guild vault:
     # 1. Update accounting counter
     self.guild_vaults[guild_id] += premium
+    self.guild_vault_xp[guild_id] += premium_xp
     # 2. Physically move tokens from caller to this contract so the DAO can pay later
     if premium > 0:
         extcall ERC20(self.token_address).transferFrom(msg.sender, self, premium)
@@ -617,9 +622,11 @@ def direct_vault_payout(
         total_xp += x
 
     assert total_sgc <= self.guild_vaults[guild_id], "InsufficientVault"
+    assert total_xp <= self.guild_vault_xp[guild_id], "InsufficientXPVault"
 
     # Effects first (re-entrancy guard + CEI pattern)
     self.guild_vaults[guild_id] -= total_sgc
+    self.guild_vault_xp[guild_id] -= total_xp
 
     # Interactions: pay each member
     for i: uint256 in range(5):
@@ -726,6 +733,7 @@ def sign_proposal(proposal_id: uint256):
         # Effects first: mark executed and clear vault before external calls
         self.guild_proposals[proposal_id].is_executed = True
         self.guild_vaults[guild_id] = 0
+        self.guild_vault_xp[guild_id] = 0
 
         # Interactions: pay recipients from the contract's own token balance
         for i: uint256 in range(5):
@@ -806,6 +814,7 @@ def resolve_dispute(
     # Effects: finalize state before external calls
     self.guild_proposals[proposal_id].is_executed = True
     self.guild_vaults[guild_id] = 0
+    self.guild_vault_xp[guild_id] = 0
     self.guild_locked[guild_id] = False
 
     # Interactions: distribute remaining tokens from the contract's own balance
