@@ -9,6 +9,7 @@
 
 interface ERC20:
     def transferFrom(_from: address, _to: address, _value: uint256): nonpayable
+    def transfer(_to: address, _value: uint256): nonpayable
 
 event Voted:
     voter: indexed(address)
@@ -563,13 +564,77 @@ def distribute_guild_reward(guild_id: uint256, members: DynArray[address, 5], to
                     msg.sender, student, sgc_share
                 )
 
-    # Deposit premium portion into guild vault for DAO-governed distribution
+    # Deposit premium portion into guild vault:
+    # 1. Update accounting counter
     self.guild_vaults[guild_id] += premium
+    # 2. Physically move tokens from caller to this contract so the DAO can pay later
+    if premium > 0:
+        extcall ERC20(self.token_address).transferFrom(msg.sender, self, premium)
 
     # Update guild cumulative XP
     self.guilds[guild_id].total_xp += total_xp
 
     log GuildRewardDistributed(guild_id=guild_id, total_sgc=total_sgc, total_xp=total_xp)
+
+# ── V8: Direct Vault Payout ───────────────────────────────────────────────────
+
+event GuildVaultPayout:
+    guild_id: indexed(uint256)
+    total_sgc: uint256
+    total_xp:  uint256
+
+@external
+@nonreentrant
+def direct_vault_payout(
+    guild_id: uint256,
+    members:   DynArray[address, 5],
+    sgc_amounts: DynArray[uint256, 5],
+    xp_amounts:  DynArray[uint256, 5]
+):
+    """
+    @notice Distribute the guild vault balance directly to members.
+    @dev Callable by chairperson OR guild_leader of the target guild.
+         Tokens are paid from the contract's own balance (previously deposited
+         as the premium portion of distribute_guild_reward).
+         guild_vaults counter is decremented by the total distributed.
+    @param guild_id   Target guild.
+    @param members    Recipient addresses (must be active members).
+    @param sgc_amounts Per-member SGC amounts in Wei.
+    @param xp_amounts  Per-member Academic XP amounts.
+    """
+    assert msg.sender == self.chairperson or msg.sender == self.guild_leader[guild_id], "NotMasterOrLeader"
+    assert self.guilds[guild_id].is_active, "NoGuild"
+    assert not self.guild_locked[guild_id], "VaultLocked"
+    n: uint256 = len(members)
+    assert n > 0 and n == len(sgc_amounts) and n == len(xp_amounts), "LenMismatch"
+
+    # Tally totals and verify vault has enough
+    total_sgc: uint256 = 0
+    total_xp:  uint256 = 0
+    for a: uint256 in sgc_amounts:
+        total_sgc += a
+    for x: uint256 in xp_amounts:
+        total_xp += x
+
+    assert total_sgc <= self.guild_vaults[guild_id], "InsufficientVault"
+
+    # Effects first (re-entrancy guard + CEI pattern)
+    self.guild_vaults[guild_id] -= total_sgc
+
+    # Interactions: pay each member
+    for i: uint256 in range(5):
+        if i >= n:
+            break
+        student: address = members[i]
+        if student == empty(address):
+            continue
+        assert self.student_to_guild[student] == guild_id, "NotMember"
+        if xp_amounts[i] > 0:
+            self.students[student].academicXP += xp_amounts[i]
+        if sgc_amounts[i] > 0:
+            extcall ERC20(self.token_address).transfer(student, sgc_amounts[i])
+
+    log GuildVaultPayout(guild_id=guild_id, total_sgc=total_sgc, total_xp=total_xp)
 
 
 # ── V8: Internal DAO & 0G Storage Integration ─────────────────────────────────
@@ -662,14 +727,13 @@ def sign_proposal(proposal_id: uint256):
         self.guild_proposals[proposal_id].is_executed = True
         self.guild_vaults[guild_id] = 0
 
-        # Interactions: distribute tokens to targets
+        # Interactions: pay recipients from the contract's own token balance
         for i: uint256 in range(5):
             if i >= len(proposal.targets):
                 break
             if proposal.amounts[i] > 0:
-                sgc_wei: uint256 = proposal.amounts[i]
-                extcall ERC20(self.token_address).transferFrom(
-                    self.chairperson_wallet, proposal.targets[i], sgc_wei
+                extcall ERC20(self.token_address).transfer(
+                    proposal.targets[i], proposal.amounts[i]
                 )
 
         log GuildProposalExecuted(proposal_id=proposal_id)
@@ -744,14 +808,13 @@ def resolve_dispute(
     self.guild_vaults[guild_id] = 0
     self.guild_locked[guild_id] = False
 
-    # Interactions: distribute remaining tokens per arbitration decision
+    # Interactions: distribute remaining tokens from the contract's own balance
     for i: uint256 in range(5):
         if i >= len(final_targets):
             break
         if final_amounts[i] > 0:
-            sgc_wei: uint256 = final_amounts[i]
-            extcall ERC20(self.token_address).transferFrom(
-                self.chairperson_wallet, final_targets[i], sgc_wei
+            extcall ERC20(self.token_address).transfer(
+                final_targets[i], final_amounts[i]
             )
 
     log GuildDisputeResolved(
