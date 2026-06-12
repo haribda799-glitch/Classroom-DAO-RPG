@@ -613,23 +613,36 @@
 
             <!-- ── Student Guild Vault Distribution (Leader Only) ───────────────────────── -->
             <div id="student-vault-section" class="hidden mt-12 pt-8 border-t border-amber-500/30 relative">
-                <div class="flex items-center justify-between mb-6">
+
+                <!-- Header -->
+                <div class="flex justify-between items-center w-full mb-6">
+                    <!-- Left: icon + title -->
+                    <h2 class="text-xl font-bold text-slate-100 rpg-title flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/>
+                        </svg>
+                        <span data-i18n="vault_distribution">Guild Vault Distribution</span>
+                    </h2>
+                    <!-- Right: guild badge + refresh -->
                     <div class="flex items-center gap-3">
-                        <h2 class="text-2xl font-bold text-amber-400 rpg-title flex items-center gap-2">
-                            🏦 <span data-i18n="vault_distribution">Guild Vault Distribution</span>
-                        </h2>
-                        <span class="text-xs font-bold px-3 py-1 rounded-full bg-amber-900/80 border border-amber-500/50 text-amber-300 tracking-widest uppercase">
-                            <span data-i18n="guild_label">Guild</span> <span id="student-vault-guild-id-display">0</span>
+                        <span class="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full bg-slate-800 border border-amber-500/40 text-amber-300 tracking-widest uppercase">
+                            <span data-i18n="guild_label">Guild</span>&nbsp;<span id="student-vault-guild-id-display">0</span> 👑
                         </span>
                         <input type="hidden" id="student-vault-guild-id" value="0" />
+                        <button id="student-vault-refresh-btn"
+                            onclick="loadStudentVaultAction()"
+                            title="Refresh Vault"
+                            class="p-2 bg-slate-800 hover:bg-slate-700 border border-cyan-700 rounded-lg text-cyan-400 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
+                                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                            </svg>
+                        </button>
                     </div>
-                    <button onclick="loadStudentVaultAction()"
-                        class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-800/80 border border-amber-500/30 text-amber-400 hover:bg-amber-600 hover:text-white hover:border-amber-400 transition-all shadow text-lg"
-                        title="Refresh Vault">↻</button>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <!-- Left: Info -->
+                    <!-- Left: Info + distribute -->
                     <div>
                         <div class="grid grid-cols-2 gap-4 mb-4">
                             <div class="bg-black/40 border border-amber-500/20 rounded-xl px-4 py-3 text-center">
@@ -644,7 +657,7 @@
 
                         <div class="bg-slate-900/60 border border-amber-500/20 rounded-xl p-4 shadow-[inset_0_0_15px_rgba(0,0,0,0.3)]">
                             <div class="bg-black/30 border border-slate-700/60 rounded-xl px-4 py-3 mb-4 flex justify-between items-center text-sm">
-                                <span class="text-slate-400 uppercase tracking-widest font-bold"><span data-i18n="left_to_distribute">Left to distribute</span>:</span>
+                                <span class="text-slate-400 uppercase tracking-widest font-bold text-xs"><span data-i18n="left_to_distribute">Left to distribute</span>:</span>
                                 <span class="font-mono font-bold">
                                     <span id="student-vault-left-sgc" class="text-amber-300">— SGC</span>
                                     <span class="text-slate-600 mx-1">/</span>
@@ -661,10 +674,10 @@
                         </div>
                     </div>
 
-                    <!-- Right: Members -->
+                    <!-- Right: Member allocation rows -->
                     <div class="bg-slate-900/40 border border-slate-700/50 rounded-xl p-4 max-h-[400px] overflow-y-auto custom-scrollbar">
                         <div id="student-vault-members-list" class="space-y-3">
-                            <p class="text-xs text-slate-500 italic text-center py-8">Loading vault…</p>
+                            <p class="text-xs text-slate-500 italic text-center py-8">Загрузка казны…</p>
                         </div>
                     </div>
                 </div>
@@ -1965,8 +1978,8 @@
                                     studentVaultSec.classList.remove("hidden");
                                     document.getElementById("student-vault-guild-id-display").innerText = guildId;
                                     document.getElementById("student-vault-guild-id").value = guildId;
-                                    // Auto-load vault
-                                    setTimeout(() => loadStudentVaultAction(), 500);
+                                    // Auto-load: fetch directly, registryData may not be ready yet
+                                    loadStudentVaultAction(guildId);
                                 } else {
                                     studentVaultSec.classList.add("hidden");
                                 }
@@ -4503,11 +4516,19 @@
             }
         }
 
-        async function loadStudentVaultAction() {
-            const guildIdInput = document.getElementById('student-vault-guild-id');
-            if (!guildIdInput) return;
-            const guildId = parseInt(guildIdInput.value);
+        async function loadStudentVaultAction(explicitGuildId) {
+            // Accept either a directly passed guildId or read from the hidden input
+            let guildId = typeof explicitGuildId === 'number' ? explicitGuildId : NaN;
+            if (isNaN(guildId)) {
+                const guildIdInput = document.getElementById('student-vault-guild-id');
+                if (!guildIdInput) return;
+                guildId = parseInt(guildIdInput.value);
+            }
             if (isNaN(guildId) || guildId <= 0) return;
+
+            // Keep the hidden input in sync so the refresh button always uses the right ID
+            const hiddenInput = document.getElementById('student-vault-guild-id');
+            if (hiddenInput) hiddenInput.value = guildId;
 
             const list = document.getElementById('student-vault-members-list');
             list.innerHTML = `<p class="text-xs text-amber-400 animate-pulse text-center py-3">Loading vault…</p>`;
@@ -4525,11 +4546,10 @@
                 const decimals = await tokenContract.decimals();
                 const totalSGC = parseFloat(ethers.utils.formatUnits(vaultRaw, decimals));
 
-                // Guild XP
+                // Guild XP from on-chain guild struct
                 const guildInfo = await voterContract.guilds(guildId);
                 const totalXP = guildInfo[1].toNumber();
 
-                // Leader is the only one who can distribute anyway, but store data
                 window._studentVaultTotalSGC = totalSGC;
                 window._studentVaultTotalXP = totalXP;
                 window._studentVaultMembers = [];
@@ -4537,17 +4557,22 @@
                 document.getElementById('student-vault-total-sgc').textContent = totalSGC.toLocaleString();
                 document.getElementById('student-vault-total-xp').textContent = totalXP.toLocaleString();
 
-                if (registryData && registryData.length > 0) {
-                    for (const student of registryData) {
-                        try {
-                            const gid = (await voterContract.student_to_guild(student.address)).toNumber();
-                            if (gid === guildId) window._studentVaultMembers.push({ address: student.address, nickname: student.nickname });
-                        } catch { }
-                    }
+                // ── Enumerate members directly from the chain ──────────────────
+                // Do NOT rely on registryData – it may not be populated yet.
+                const studentCount = (await voterContract.get_student_count()).toNumber();
+                for (let i = 0; i < studentCount; i++) {
+                    try {
+                        const addr = await voterContract.student_addresses(i);
+                        const gid  = (await voterContract.student_to_guild(addr)).toNumber();
+                        if (gid === guildId) {
+                            const sData = await voterContract.students(addr);
+                            window._studentVaultMembers.push({ address: addr, nickname: sData[0] || addr.substring(0, 8) });
+                        }
+                    } catch { }
                 }
 
                 if (window._studentVaultMembers.length === 0) {
-                    list.innerHTML = `<p class="text-xs text-slate-500 italic text-center py-3">No members found.</p>`;
+                    list.innerHTML = `<p class="text-xs text-slate-500 italic text-center py-3">No members found for Guild #${guildId}.</p>`;
                     _updateStudentVaultCalc();
                     return;
                 }
@@ -4556,7 +4581,7 @@
                     <div class="flex items-center gap-2 bg-black/30 border border-slate-700/50 rounded-xl px-3 py-2">
                         <div class="flex-1 min-w-0">
                             <div class="font-bold text-slate-200 text-xs truncate">${m.nickname}</div>
-                            <div class="font-mono text-[10px] text-slate-500">${m.address.substring(0,8)}…</div>
+                            <div class="font-mono text-[10px] text-slate-500">${m.address.substring(0,10)}…</div>
                         </div>
                         <input type="number" min="0" step="any" placeholder="SGC" id="student-vault-sgc-${i}"
                             class="w-20 bg-black/50 border border-amber-500/30 focus:border-amber-400 rounded-lg px-2 py-1 text-amber-300 font-mono text-xs focus:outline-none transition-all"
