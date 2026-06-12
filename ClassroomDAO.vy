@@ -523,18 +523,18 @@ def create_guild(guild_id: uint256, members: DynArray[address, 5]):
 def distribute_guild_reward(guild_id: uint256, members: DynArray[address, 5], total_sgc: uint256, total_xp: uint256):
     """
     @notice Distribute guild reward using the 50/50 hybrid model.
-    @dev Only callable by chairperson. Members list is passed explicitly
-         since the contract no longer stores member arrays on-chain.
+    @dev Callable by chairperson (Game Master) OR the elected guild_leader of the target guild.
+         Members list is passed explicitly since the contract no longer stores member arrays on-chain.
          - Base 50% SGC: split equally among all passed members who are
            confirmed in this guild (soft check, stale addresses are skipped).
          - Premium 50% SGC: deposited into guild_vaults for DAO-governed distribution.
          - XP: split equally among the same confirmed members.
     @param guild_id Target guild identifier.
     @param members Array of guild member addresses (from frontend registry).
-    @param total_sgc Total SGC reward in base units (integer, e.g. 100 for 100 SGC).
+    @param total_sgc Total SGC reward in base units (Wei).
     @param total_xp Total Academic XP reward.
     """
-    assert msg.sender == self.chairperson, "OnlyGM"
+    assert msg.sender == self.chairperson or msg.sender == self.guild_leader[guild_id], "NotMasterOrLeader"
     assert self.guilds[guild_id].is_active, "NoGuild"
     assert total_sgc > 0 or total_xp > 0, "ZeroReward"
 
@@ -557,7 +557,7 @@ def distribute_guild_reward(guild_id: uint256, members: DynArray[address, 5], to
             # Credit Academic XP
             self.students[student].academicXP += xp_share
 
-            # Transfer base SGC from msg.sender (chairperson) directly
+            # Transfer base SGC from the caller (chairperson or guild leader) directly
             if sgc_share > 0:
                 extcall ERC20(self.token_address).transferFrom(
                     msg.sender, student, sgc_share

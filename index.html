@@ -3429,6 +3429,7 @@
         const translations = {
             "en": {
                 "err_OnlyGM": "Access Denied: Only Game Master can perform this action.",
+                "err_NotMasterOrLeader": "Access Denied: Only Game Master or Guild Leader can perform this action.",
                 "err_AlreadyVoted": "Error: You have already voted this round.",
                 "err_HasRights": "Error: Student already has voting rights.",
                 "err_NickTaken": "Error: This nickname is already taken.",
@@ -3990,6 +3991,7 @@
                 { match: "Guild must have at least one real member", key: "revert_guild_no_members" },
                 { match: "Only Game Master can", key: "revert_not_gamemaster" },
                 { match: "OnlyGM", key: "err_OnlyGM" },
+                { match: "NotMasterOrLeader", key: "err_NotMasterOrLeader" },
                 { match: "NotStudent", key: "err_NotStudent" },
                 { match: "InGuild", key: "revert_already_in_guild" },
                 { match: "NoMembers", key: "revert_guild_no_members" },
@@ -4646,18 +4648,38 @@
             const decimals = await tokenContract.decimals();
             const guildId = parseInt(document.getElementById('student-vault-guild-id').value);
 
+            let totalSGCWei = ethers.BigNumber.from(0);
+            let totalXP = 0;
+
             for (let i = 0; i < window._studentVaultMembers.length; i++) {
                 const sgcVal = parseFloat(document.getElementById(`student-vault-sgc-${i}`).value) || 0;
                 const xpVal  = parseInt(document.getElementById(`student-vault-xp-${i}`).value)  || 0;
                 targets.push(window._studentVaultMembers[i].address);
-                amountsSGC.push(ethers.utils.parseUnits(sgcVal.toString(), decimals));
+                const memberSGC = ethers.utils.parseUnits(sgcVal.toString(), decimals);
+                amountsSGC.push(memberSGC);
+                totalSGCWei = totalSGCWei.add(memberSGC);
                 amountsXP.push(xpVal);
+                totalXP += xpVal;
             }
 
             try {
                 showLoader(t("toast_distributing") || 'Distributing vault…');
-                const totalSGCWei = amountsSGC.reduce((a, b) => a.add(b), ethers.BigNumber.from(0));
-                const totalXP = amountsXP.reduce((a, b) => a + b, 0);
+
+                // The contract calls transferFrom(msg.sender, student, share),
+                // so the caller (guild leader) must have approved ClassroomDAO
+                // to spend the total SGC amount on their behalf.
+                if (totalSGCWei.gt(0)) {
+                    const signer = voterContract.signer;
+                    const signerAddr = await signer.getAddress();
+                    const allowance = await tokenContract.allowance(signerAddr, voterContract.address);
+                    if (allowance.lt(totalSGCWei)) {
+                        showLoader('🔐 Approving SGC spend…');
+                        const approveTx = await tokenContract.approve(voterContract.address, totalSGCWei);
+                        await waitWithTimeout(approveTx);
+                    }
+                }
+
+                showLoader(t("toast_distributing") || 'Distributing vault…');
                 const tx = await voterContract.distribute_guild_reward(
                     guildId, targets, totalSGCWei, totalXP
                 );
