@@ -618,24 +618,31 @@
                 <div class="flex justify-between items-center w-full mb-6">
                     <!-- Left: icon + title -->
                     <h2 class="text-xl font-bold text-slate-100 rpg-title flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-amber-400" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round">
+                            <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+                            <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
+                            <line x1="12" y1="12" x2="12" y2="16" />
+                            <line x1="10" y1="14" x2="14" y2="14" />
                         </svg>
                         <span data-i18n="vault_distribution">Guild Vault Distribution</span>
                     </h2>
                     <!-- Right: guild badge + refresh -->
                     <div class="flex items-center gap-3">
-                        <span class="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full bg-slate-800 border border-amber-500/40 text-amber-300 tracking-widest uppercase">
-                            <span data-i18n="guild_label">Guild</span>&nbsp;<span id="student-vault-guild-id-display">0</span> 👑
+                        <span
+                            class="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full bg-slate-800 border border-amber-500/40 text-amber-300 tracking-widest uppercase">
+                            <span data-i18n="guild_label">Guild</span>&nbsp;<span
+                                id="student-vault-guild-id-display">0</span> 👑
                         </span>
                         <input type="hidden" id="student-vault-guild-id" value="0" />
-                        <button id="student-vault-refresh-btn"
-                            onclick="loadStudentVaultAction()"
-                            title="Refresh Vault"
+                        <button id="student-vault-refresh-btn" onclick="loadStudentVaultAction()" title="Refresh Vault"
                             class="p-2 bg-slate-800 hover:bg-slate-700 border border-cyan-700 rounded-lg text-cyan-400 transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
-                                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="23 4 23 10 17 10" />
+                                <polyline points="1 20 1 14 7 14" />
+                                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
                             </svg>
                         </button>
                     </div>
@@ -646,18 +653,25 @@
                     <div>
                         <div class="grid grid-cols-2 gap-4 mb-4">
                             <div class="bg-black/40 border border-amber-500/20 rounded-xl px-4 py-3 text-center">
-                                <div class="text-[10px] uppercase tracking-widest text-slate-500 mb-1"><span data-i18n="total_vault_sgc">Total Vault SGC</span></div>
-                                <div class="font-bold text-amber-300 font-mono text-xl" id="student-vault-total-sgc">—</div>
+                                <div class="text-[10px] uppercase tracking-widest text-slate-500 mb-1"><span
+                                        data-i18n="total_vault_sgc">Total Vault SGC</span></div>
+                                <div class="font-bold text-amber-300 font-mono text-xl" id="student-vault-total-sgc">—
+                                </div>
                             </div>
                             <div class="bg-black/40 border border-indigo-500/20 rounded-xl px-4 py-3 text-center">
-                                <div class="text-[10px] uppercase tracking-widest text-slate-500 mb-1"><span data-i18n="total_vault_xp">Total Vault XP</span></div>
-                                <div class="font-bold text-indigo-300 font-mono text-xl" id="student-vault-total-xp">—</div>
+                                <div class="text-[10px] uppercase tracking-widest text-slate-500 mb-1"><span
+                                        data-i18n="total_vault_xp">Total Vault XP</span></div>
+                                <div class="font-bold text-indigo-300 font-mono text-xl" id="student-vault-total-xp">—
+                                </div>
                             </div>
                         </div>
 
-                        <div class="bg-slate-900/60 border border-amber-500/20 rounded-xl p-4 shadow-[inset_0_0_15px_rgba(0,0,0,0.3)]">
-                            <div class="bg-black/30 border border-slate-700/60 rounded-xl px-4 py-3 mb-4 flex justify-between items-center text-sm">
-                                <span class="text-slate-400 uppercase tracking-widest font-bold text-xs"><span data-i18n="left_to_distribute">Left to distribute</span>:</span>
+                        <div
+                            class="bg-slate-900/60 border border-amber-500/20 rounded-xl p-4 shadow-[inset_0_0_15px_rgba(0,0,0,0.3)]">
+                            <div
+                                class="bg-black/30 border border-slate-700/60 rounded-xl px-4 py-3 mb-4 flex justify-between items-center text-sm">
+                                <span class="text-slate-400 uppercase tracking-widest font-bold text-xs"><span
+                                        data-i18n="left_to_distribute">Left to distribute</span>:</span>
                                 <span class="font-mono font-bold">
                                     <span id="student-vault-left-sgc" class="text-amber-300">— SGC</span>
                                     <span class="text-slate-600 mx-1">/</span>
@@ -675,7 +689,8 @@
                     </div>
 
                     <!-- Right: Member allocation rows -->
-                    <div class="bg-slate-900/40 border border-slate-700/50 rounded-xl p-4 max-h-[400px] overflow-y-auto custom-scrollbar">
+                    <div
+                        class="bg-slate-900/40 border border-slate-700/50 rounded-xl p-4 max-h-[400px] overflow-y-auto custom-scrollbar">
                         <div id="student-vault-members-list" class="space-y-3">
                             <p class="text-xs text-slate-500 italic text-center py-8">Загрузка казны…</p>
                         </div>
@@ -1207,7 +1222,8 @@
 
                         <!-- Guild Vault Distribution -->
                         <div>
-                            <h4 class="text-sm font-bold text-amber-400 uppercase tracking-widest mb-3 border-b border-amber-500/30 pb-2 flex items-center gap-2">
+                            <h4
+                                class="text-sm font-bold text-amber-400 uppercase tracking-widest mb-3 border-b border-amber-500/30 pb-2 flex items-center gap-2">
                                 🏦 <span data-i18n="vault_distribution">Guild Vault Distribution</span>
                             </h4>
 
@@ -1225,23 +1241,30 @@
                             <!-- Info badges -->
                             <div class="grid grid-cols-2 gap-2 mb-4">
                                 <div class="bg-black/40 border border-amber-500/20 rounded-xl px-3 py-2 text-center">
-                                    <div class="text-[10px] uppercase tracking-widest text-slate-500 mb-0.5"><span data-i18n="total_vault_sgc">Total Vault SGC</span></div>
-                                    <div class="font-bold text-amber-300 font-mono text-base" id="vault-total-sgc">—</div>
+                                    <div class="text-[10px] uppercase tracking-widest text-slate-500 mb-0.5"><span
+                                            data-i18n="total_vault_sgc">Total Vault SGC</span></div>
+                                    <div class="font-bold text-amber-300 font-mono text-base" id="vault-total-sgc">—
+                                    </div>
                                 </div>
                                 <div class="bg-black/40 border border-indigo-500/20 rounded-xl px-3 py-2 text-center">
-                                    <div class="text-[10px] uppercase tracking-widest text-slate-500 mb-0.5"><span data-i18n="total_vault_xp">Total Vault XP</span></div>
-                                    <div class="font-bold text-indigo-300 font-mono text-base" id="vault-total-xp">—</div>
+                                    <div class="text-[10px] uppercase tracking-widest text-slate-500 mb-0.5"><span
+                                            data-i18n="total_vault_xp">Total Vault XP</span></div>
+                                    <div class="font-bold text-indigo-300 font-mono text-base" id="vault-total-xp">—
+                                    </div>
                                 </div>
                             </div>
 
                             <!-- Student allocation rows -->
                             <div id="vault-members-list" class="space-y-2 mb-4">
-                                <p class="text-xs text-slate-600 italic text-center py-3">Load a guild to see members</p>
+                                <p class="text-xs text-slate-600 italic text-center py-3">Load a guild to see members
+                                </p>
                             </div>
 
                             <!-- Remainder calculator -->
-                            <div class="bg-black/30 border border-slate-700/60 rounded-xl px-3 py-2 mb-3 flex justify-between items-center text-xs">
-                                <span class="text-slate-400 uppercase tracking-widest font-bold"><span data-i18n="left_to_distribute">Left to distribute</span>:</span>
+                            <div
+                                class="bg-black/30 border border-slate-700/60 rounded-xl px-3 py-2 mb-3 flex justify-between items-center text-xs">
+                                <span class="text-slate-400 uppercase tracking-widest font-bold"><span
+                                        data-i18n="left_to_distribute">Left to distribute</span>:</span>
                                 <span class="font-mono font-bold">
                                     <span id="vault-left-sgc" class="text-amber-300">— SGC</span>
                                     <span class="text-slate-600 mx-1">/</span>
@@ -1250,8 +1273,7 @@
                             </div>
 
                             <!-- Distribute button — disabled by default -->
-                            <button id="vault-distribute-btn" disabled onclick="distributeVaultAction()"
-                                class="w-full py-3 rounded-xl font-bold uppercase tracking-wider text-sm transition-all
+                            <button id="vault-distribute-btn" disabled onclick="distributeVaultAction()" class="w-full py-3 rounded-xl font-bold uppercase tracking-wider text-sm transition-all
                                     bg-slate-800 border border-slate-600 text-slate-500 cursor-not-allowed
                                     disabled:opacity-50">
                                 🏦 <span data-i18n="distribute_vault">Distribute Vault</span>
@@ -1405,7 +1427,7 @@
         const CHAIN_ID_HEX = "0x" + CHAIN_ID.toString(16);
 
         // Update these if you deploy new contracts
-        const VOTER_ADDRESS = "0xE4b91e7261D4701aB86a8456dFe0Fd638e06b572";
+        const VOTER_ADDRESS = "0x999594a9F02C978bE414d25f2e3C84Cabe87a4Bc";
         const TOKEN_ADDRESS = "0x1731F7F26F6ff2B79A9a5f9C86B6Fec319B7e6E2";
         const ADMIN_ADDRESS = "0xbdCAb5CF57680818B833CFCAaE751416cA7809d7".toLowerCase();
 
@@ -4422,7 +4444,7 @@
                     <div class="flex items-center gap-2 bg-black/30 border border-slate-700/50 rounded-xl px-3 py-2">
                         <div class="flex-1 min-w-0">
                             <div class="font-bold text-slate-200 text-xs truncate">${m.nickname}</div>
-                            <div class="font-mono text-[10px] text-slate-500">${m.address.substring(0,8)}…</div>
+                            <div class="font-mono text-[10px] text-slate-500">${m.address.substring(0, 8)}…</div>
                         </div>
                         <input type="number" min="0" step="any" placeholder="SGC" id="vault-sgc-${i}"
                             class="w-20 bg-black/50 border border-amber-500/30 focus:border-amber-400 rounded-lg px-2 py-1 text-amber-300 font-mono text-xs focus:outline-none transition-all"
@@ -4446,14 +4468,14 @@
             let usedSGC = 0, usedXP = 0;
             for (let i = 0; i < _vaultMembers.length; i++) {
                 usedSGC += parseFloat(document.getElementById(`vault-sgc-${i}`)?.value || 0) || 0;
-                usedXP  += parseInt(document.getElementById(`vault-xp-${i}`)?.value  || 0) || 0;
+                usedXP += parseInt(document.getElementById(`vault-xp-${i}`)?.value || 0) || 0;
             }
 
             const leftSGC = _vaultTotalSGC - usedSGC;
-            const leftXP  = _vaultTotalXP  - usedXP;
+            const leftXP = _vaultTotalXP - usedXP;
 
             const sgcEl = document.getElementById('vault-left-sgc');
-            const xpEl  = document.getElementById('vault-left-xp');
+            const xpEl = document.getElementById('vault-left-xp');
             if (sgcEl) {
                 sgcEl.textContent = leftSGC.toFixed(2) + ' SGC';
                 sgcEl.className = leftSGC < 0 ? 'text-rose-400 font-bold' : leftSGC === 0 ? 'text-emerald-400 font-bold' : 'text-amber-300';
@@ -4484,12 +4506,12 @@
 
             const targets = [];
             const amountsSGC = [];
-            const amountsXP  = [];
+            const amountsXP = [];
             const decimals = await tokenContract.decimals();
 
             for (let i = 0; i < _vaultMembers.length; i++) {
                 const sgcVal = parseFloat(document.getElementById(`vault-sgc-${i}`).value) || 0;
-                const xpVal  = parseInt(document.getElementById(`vault-xp-${i}`).value)  || 0;
+                const xpVal = parseInt(document.getElementById(`vault-xp-${i}`).value) || 0;
                 targets.push(_vaultMembers[i].address);
                 amountsSGC.push(ethers.utils.parseUnits(sgcVal.toString(), decimals));
                 amountsXP.push(xpVal);
@@ -4565,7 +4587,7 @@
                 for (let i = 0; i < studentCount; i++) {
                     try {
                         const addr = await voterContract.student_addresses(i);
-                        const gid  = (await voterContract.student_to_guild(addr)).toNumber();
+                        const gid = (await voterContract.student_to_guild(addr)).toNumber();
                         if (gid === guildId) {
                             const sData = await voterContract.students(addr);
                             window._studentVaultMembers.push({ address: addr, nickname: sData[0] || addr.substring(0, 8) });
@@ -4583,7 +4605,7 @@
                     <div class="flex items-center gap-2 bg-black/30 border border-slate-700/50 rounded-xl px-3 py-2">
                         <div class="flex-1 min-w-0">
                             <div class="font-bold text-slate-200 text-xs truncate">${m.nickname}</div>
-                            <div class="font-mono text-[10px] text-slate-500">${m.address.substring(0,10)}…</div>
+                            <div class="font-mono text-[10px] text-slate-500">${m.address.substring(0, 10)}…</div>
                         </div>
                         <input type="number" min="0" step="any" placeholder="SGC" id="student-vault-sgc-${i}"
                             class="w-20 bg-black/50 border border-amber-500/30 focus:border-amber-400 rounded-lg px-2 py-1 text-amber-300 font-mono text-xs focus:outline-none transition-all"
@@ -4607,14 +4629,14 @@
             let usedSGC = 0, usedXP = 0;
             for (let i = 0; i < window._studentVaultMembers.length; i++) {
                 usedSGC += parseFloat(document.getElementById(`student-vault-sgc-${i}`)?.value || 0) || 0;
-                usedXP  += parseInt(document.getElementById(`student-vault-xp-${i}`)?.value  || 0) || 0;
+                usedXP += parseInt(document.getElementById(`student-vault-xp-${i}`)?.value || 0) || 0;
             }
 
             const leftSGC = window._studentVaultTotalSGC - usedSGC;
-            const leftXP  = window._studentVaultTotalXP  - usedXP;
+            const leftXP = window._studentVaultTotalXP - usedXP;
 
             const sgcEl = document.getElementById('student-vault-left-sgc');
-            const xpEl  = document.getElementById('student-vault-left-xp');
+            const xpEl = document.getElementById('student-vault-left-xp');
             if (sgcEl) {
                 sgcEl.textContent = leftSGC.toFixed(2) + ' SGC';
                 sgcEl.className = leftSGC < 0 ? 'text-rose-400 font-bold' : leftSGC === 0 ? 'text-emerald-400 font-bold' : 'text-amber-300';
@@ -4644,7 +4666,7 @@
 
             const targets = [];
             const amountsSGC = [];
-            const amountsXP  = [];
+            const amountsXP = [];
             const decimals = await tokenContract.decimals();
             const guildId = parseInt(document.getElementById('student-vault-guild-id').value);
 
@@ -4653,7 +4675,7 @@
 
             for (let i = 0; i < window._studentVaultMembers.length; i++) {
                 const sgcVal = parseFloat(document.getElementById(`student-vault-sgc-${i}`).value) || 0;
-                const xpVal  = parseInt(document.getElementById(`student-vault-xp-${i}`).value)  || 0;
+                const xpVal = parseInt(document.getElementById(`student-vault-xp-${i}`).value) || 0;
                 targets.push(window._studentVaultMembers[i].address);
                 const memberSGC = ethers.utils.parseUnits(sgcVal.toString(), decimals);
                 amountsSGC.push(memberSGC);
