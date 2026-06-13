@@ -233,12 +233,12 @@ def registerStudent(addr: address, nickname: String[64], group: String[32]):
     @notice Register a student, give them voting rights and exact 0.01 OGI for gas.
     @dev May only be called by `chairperson`.
     """
-    assert msg.sender == self.chairperson, "OnlyGM"
-    assert not self.voters[addr].voted, "AlreadyVoted"
-    assert self.voters[addr].weight == 0, "HasRights"
-    assert not self.used_nicknames[nickname], "NickTaken"
-    assert msg.value == 10000000000000000, "Need0.01OGI"
-    assert len(self.student_addresses) < 1024, "MaxStudents"
+    assert msg.sender == self.chairperson
+    assert not self.voters[addr].voted, "E:E6: Al"
+    assert self.voters[addr].weight == 0, "E:E6: Al"
+    assert not self.used_nicknames[nickname], "E:E6: Al"
+    assert msg.value == 10000000000000000, "E:E4: In"
+    assert len(self.student_addresses) < 1024, "E:E9: Ma"
 
     self.voters[addr].weight = 1
     self.used_nicknames[nickname] = True
@@ -260,7 +260,7 @@ def setPrivacy(hidden: bool):
     """
     @notice Allows a student to hide their wallet address from the public leaderboard.
     """
-    assert self.voters[msg.sender].weight > 0, "NotStudent"
+    assert self.voters[msg.sender].weight > 0
     self.students[msg.sender].is_hidden = hidden
 
 # ── Rewards ────────────────────────────────────────────────────────────────────
@@ -272,8 +272,8 @@ def rewardStudent(addr: address, amount: uint256, reason: String[100]):
     @dev May only be called by `chairperson`.
     @param amount The amount of XP. Corresponding SGC tokens will be scaled by 10**18.
     """
-    assert msg.sender == self.chairperson, "OnlyGM"
-    assert self.voters[addr].weight > 0, "NotStudent"
+    assert msg.sender == self.chairperson
+    assert self.voters[addr].weight > 0, "E:E2: No"
 
     self.students[addr].academicXP += amount
 
@@ -288,12 +288,12 @@ def rewardBatch(addrs: DynArray[address, 50], amount: uint256, reason: String[10
     @notice Reward multiple students with XP and SGC.
     @dev May only be called by `chairperson`.
     """
-    assert msg.sender == self.chairperson, "OnlyGM"
+    assert msg.sender == self.chairperson
 
     sgc_amount: uint256 = amount * 10**18
 
     for addr: address in addrs:
-        assert self.voters[addr].weight > 0, "NotStudent"
+        assert self.voters[addr].weight > 0, "E:E2: No"
         self.students[addr].academicXP += amount
         extcall ERC20(self.token_address).transferFrom(self.chairperson_wallet, addr, sgc_amount)
         log StudentRewarded(student=addr, amount=amount, sgc_amount=sgc_amount, reason=reason)
@@ -306,7 +306,7 @@ def generateDailyCode(code_hash: bytes32, reward_amount: uint256):
     @notice Generates a daily attendance code hash, valid for 5 minutes.
     @dev May only be called by `chairperson`.
     """
-    assert msg.sender == self.chairperson, "OnlyGM"
+    assert msg.sender == self.chairperson
     self.active_code_hash = code_hash
     self.code_expiration_time = block.timestamp + 300
     self.current_attendance_reward = reward_amount
@@ -316,12 +316,12 @@ def claimAttendance(code: String[32]):
     """
     @notice Claim attendance using the daily code. Rewards dynamic XP and SGC.
     """
-    assert self.voters[msg.sender].weight > 0, "NotStudent"
-    assert block.timestamp <= self.code_expiration_time, "TimeUp"
+    assert self.voters[msg.sender].weight > 0
+    assert block.timestamp <= self.code_expiration_time, "E:E5: Ba"
 
     code_hash: bytes32 = keccak256(code)
-    assert code_hash == self.active_code_hash, "BadCode"
-    assert self.has_claimed_attendance[msg.sender] != code_hash, "Claimed"
+    assert code_hash == self.active_code_hash, "E:E3: In"
+    assert self.has_claimed_attendance[msg.sender] != code_hash, "E:E6: Al"
 
     self.has_claimed_attendance[msg.sender] = code_hash
 
@@ -353,9 +353,9 @@ def addMarketItem(
     @param refund_percent For type 2: percentage of price returned on recycle (0-100).
     @param xp_bonus For type 3: amount of academicXP granted on transform.
     """
-    assert msg.sender == self.chairperson, "OnlyGM"
-    assert item_type >= 1 and item_type <= 4, "BadItemType"
-    assert refund_percent <= 100, "BadRefund"
+    assert msg.sender == self.chairperson
+    assert item_type >= 1 and item_type <= 4, "E:E3: In"
+    assert refund_percent <= 100, "E:E3: In"
 
     self.marketItems[self.marketItemCount] = MarketItem(
         name=name,
@@ -373,8 +373,8 @@ def setMarketItemActive(itemId: uint256, active: bool):
     @notice Sets the active status of an item.
     @dev May only be called by `chairperson`.
     """
-    assert msg.sender == self.chairperson, "OnlyGM"
-    assert itemId < self.marketItemCount, "BadItemID"
+    assert msg.sender == self.chairperson
+    assert itemId < self.marketItemCount, "E:E3: In"
     self.marketItems[itemId].isActive = active
 
 # ── Market Purchases ───────────────────────────────────────────────────────────
@@ -385,11 +385,11 @@ def buyItem(itemId: uint256):
     @notice Buy an item from the Smart Market. Transfers SGC to the Game Master.
     @dev V7: Also increments student_item_count for sink function eligibility.
     """
-    assert self.voters[msg.sender].weight > 0, "NotStudent"
-    assert itemId < self.marketItemCount, "BadItemID"
+    assert self.voters[msg.sender].weight > 0
+    assert itemId < self.marketItemCount, "E:E3: In"
 
     item: MarketItem = self.marketItems[itemId]
-    assert item.isActive, "Inactive"
+    assert item.isActive, "E:E5: Ba"
 
     price_wei: uint256 = item.price * 10**18
     extcall ERC20(self.token_address).transferFrom(msg.sender, self.chairperson_wallet, price_wei)
@@ -418,12 +418,12 @@ def activate_consumable_item(item_id: uint256):
     @dev Checks type==1, decrements count, emits ConsumableActivated.
          The bonus/effect is recorded off-chain via the event log.
     """
-    assert self.voters[msg.sender].weight > 0, "NotStudent"
-    assert item_id < self.marketItemCount, "BadItemID"
-    assert self.student_item_count[msg.sender][item_id] > 0, "NoItem"
+    assert self.voters[msg.sender].weight > 0
+    assert item_id < self.marketItemCount, "E:E3: In"
+    assert self.student_item_count[msg.sender][item_id] > 0, "E:E8: No"
 
     item: MarketItem = self.marketItems[item_id]
-    assert item.item_type == 1, "NotConsum"
+    assert item.item_type == 1, "E:E10: W"
 
     self.student_item_count[msg.sender][item_id] -= 1
 
@@ -436,12 +436,12 @@ def recycle_item(item_id: uint256):
     @dev Checks type==2, decrements count, transfers refund from chairperson_wallet.
          Refund = item.price * item.refund_percent / 100 (in SGC, scaled to 18 decimals).
     """
-    assert self.voters[msg.sender].weight > 0, "NotStudent"
-    assert item_id < self.marketItemCount, "BadItemID"
-    assert self.student_item_count[msg.sender][item_id] > 0, "NoItem"
+    assert self.voters[msg.sender].weight > 0
+    assert item_id < self.marketItemCount, "E:E3: In"
+    assert self.student_item_count[msg.sender][item_id] > 0, "E:E8: No"
 
     item: MarketItem = self.marketItems[item_id]
-    assert item.item_type == 2, "NotRecycle"
+    assert item.item_type == 2, "E:E10: W"
 
     self.student_item_count[msg.sender][item_id] -= 1
 
@@ -460,12 +460,12 @@ def transform_item_to_xp(item_id: uint256):
     @notice Burn a status item to permanently transform it into Academic XP.
     @dev Checks type==3, decrements count, adds xp_bonus to student's academicXP.
     """
-    assert self.voters[msg.sender].weight > 0, "NotStudent"
-    assert item_id < self.marketItemCount, "BadItemID"
-    assert self.student_item_count[msg.sender][item_id] > 0, "NoItem"
+    assert self.voters[msg.sender].weight > 0
+    assert item_id < self.marketItemCount, "E:E3: In"
+    assert self.student_item_count[msg.sender][item_id] > 0, "E:E8: No"
 
     item: MarketItem = self.marketItems[item_id]
-    assert item.item_type == 3, "NotXPItem"
+    assert item.item_type == 3, "E:E10: W"
 
     self.student_item_count[msg.sender][item_id] -= 1
 
@@ -487,9 +487,9 @@ def create_guild(guild_id: uint256, members: DynArray[address, 5]):
     @param guild_id Unique guild identifier (must be > 0).
     @param members Array of registered student addresses (1-5 members).
     """
-    assert msg.sender == self.chairperson, "OnlyGM"
-    assert guild_id > 0, "BadGuildID"
-    assert len(members) > 0 and len(members) <= 5, "BadMembers"
+    assert msg.sender == self.chairperson
+    assert guild_id > 0, "E:E3: In"
+    assert len(members) > 0 and len(members) <= 5, "E:E4: In"
 
     if not self.guilds[guild_id].is_active:
         self.guilds[guild_id] = Guild(
@@ -502,14 +502,14 @@ def create_guild(guild_id: uint256, members: DynArray[address, 5]):
     added_count: uint256 = 0
     for m: address in members:
         if m != empty(address):
-            assert self.voters[m].weight > 0, "NotStudent"
+            assert self.voters[m].weight > 0, "E:E2: No"
             if self.student_to_guild[m] != guild_id:
-                assert self.student_to_guild[m] == 0, "InGuild"
+                assert self.student_to_guild[m] == 0, "E:E6: Al"
                 self.student_to_guild[m] = guild_id
                 self.guilds[guild_id].member_count += 1
             added_count += 1
 
-    assert added_count > 0, "NoMembers"
+    assert added_count > 0, "E:E8: No"
 
     # Assign Guild Leader: the first non-zero address in the members array
     if members[0] != empty(address):
@@ -536,12 +536,12 @@ def distribute_guild_reward(guild_id: uint256, members: DynArray[address, 5], to
     @param total_sgc Total SGC reward in base units (Wei).
     @param total_xp Total Academic XP reward.
     """
-    assert msg.sender == self.chairperson or msg.sender == self.guild_leader[guild_id], "NotMasterOrLeader"
-    assert self.guilds[guild_id].is_active, "NoGuild"
-    assert total_sgc > 0 or total_xp > 0, "ZeroReward"
+    assert msg.sender == self.chairperson or msg.sender == self.guild_leader[guild_id], "E1: Not Master"
+    assert self.guilds[guild_id].is_active, "E:E8: No"
+    assert total_sgc > 0 or total_xp > 0, "E:E7: No"
 
     active_count: uint256 = len(members)
-    assert active_count > 0, "NoMembers"
+    assert active_count > 0, "E:E8: No"
 
     # 50/50 split: base immediate payout + premium KPI vault deposit
     base_sgc: uint256 = total_sgc // 2
@@ -607,11 +607,11 @@ def direct_vault_payout(
     @param sgc_amounts Per-member SGC amounts in Wei.
     @param xp_amounts  Per-member Academic XP amounts.
     """
-    assert msg.sender == self.chairperson or msg.sender == self.guild_leader[guild_id], "NotMasterOrLeader"
-    assert self.guilds[guild_id].is_active, "NoGuild"
-    assert not self.guild_locked[guild_id], "VaultLocked"
+    assert msg.sender == self.chairperson or msg.sender == self.guild_leader[guild_id], "E1: Not Master"
+    assert self.guilds[guild_id].is_active, "E:E8: No"
+    assert not self.guild_locked[guild_id], "E:E5: Ba"
     n: uint256 = len(members)
-    assert n > 0 and n == len(sgc_amounts) and n == len(xp_amounts), "LenMismatch"
+    assert n > 0 and n == len(sgc_amounts) and n == len(xp_amounts), "E:E4: In"
 
     # Tally totals and verify vault has enough
     total_sgc: uint256 = 0
@@ -621,8 +621,8 @@ def direct_vault_payout(
     for x: uint256 in xp_amounts:
         total_xp += x
 
-    assert total_sgc <= self.guild_vaults[guild_id], "InsufficientVault"
-    assert total_xp <= self.guild_vault_xp[guild_id], "InsufficientXPVault"
+    assert total_sgc <= self.guild_vaults[guild_id], "E:E7: No"
+    assert total_xp <= self.guild_vault_xp[guild_id], "E:E7: No"
 
     # Effects first (re-entrancy guard + CEI pattern)
     self.guild_vaults[guild_id] -= total_sgc
@@ -635,7 +635,7 @@ def direct_vault_payout(
         student: address = members[i]
         if student == empty(address):
             continue
-        assert self.student_to_guild[student] == guild_id, "NotMember"
+        assert self.student_to_guild[student] == guild_id, "E:E2: No"
         if xp_amounts[i] > 0:
             self.students[student].academicXP += xp_amounts[i]
         if sgc_amounts[i] > 0:
@@ -663,17 +663,17 @@ def create_distribution_proposal(
     @param amounts SGC amounts per recipient (base units, sum must equal vault balance).
     @param ai_proof_hash 32-byte hash of the AI recommendation report from 0G Storage.
     """
-    assert guild_id > 0, "BadGuildID"
-    assert self.student_to_guild[msg.sender] == guild_id, "NotMember"
-    assert not self.guild_locked[guild_id], "VaultLocked"
-    assert len(targets) == len(amounts), "LenMismatch"
-    assert len(targets) > 0, "EmptyProp"
+    assert guild_id > 0, "E:E3: In"
+    assert self.student_to_guild[msg.sender] == guild_id, "E:E2: No"
+    assert not self.guild_locked[guild_id], "E:E5: Ba"
+    assert len(targets) == len(amounts), "E:E4: In"
+    assert len(targets) > 0, "E:E5: Ba"
 
     # Verify that proposed distribution exactly matches vault balance
     total: uint256 = 0
     for a: uint256 in amounts:
         total += a
-    assert total == self.guild_vaults[guild_id], "BadAmounts"
+    assert total == self.guild_vaults[guild_id], "E:E4: In"
 
     proposal_id: uint256 = self.next_proposal_id
 
@@ -707,13 +707,13 @@ def sign_proposal(proposal_id: uint256):
     @param proposal_id ID of the proposal to sign.
     """
     proposal: GuildProposal = self.guild_proposals[proposal_id]
-    assert proposal.guild_id > 0, "NoProposal"
-    assert not proposal.is_executed, "Executed"
-    assert not proposal.is_disputed, "Disputed"
+    assert proposal.guild_id > 0, "E:E8: No"
+    assert not proposal.is_executed, "E:E5: Ba"
+    assert not proposal.is_disputed, "E:E5: Ba"
 
     guild_id: uint256 = proposal.guild_id
-    assert self.student_to_guild[msg.sender] == guild_id, "NotMember"
-    assert not self.proposal_signatures[proposal_id][msg.sender], "Signed"
+    assert self.student_to_guild[msg.sender] == guild_id, "E:E2: No"
+    assert not self.proposal_signatures[proposal_id][msg.sender], "E:E6: Al"
 
     # Record signature
     self.proposal_signatures[proposal_id][msg.sender] = True
@@ -758,12 +758,12 @@ def raise_dispute(proposal_id: uint256):
     @param proposal_id ID of the proposal to dispute.
     """
     proposal: GuildProposal = self.guild_proposals[proposal_id]
-    assert proposal.guild_id > 0, "NoProposal"
-    assert not proposal.is_executed, "Executed"
-    assert not proposal.is_disputed, "Disputed"
+    assert proposal.guild_id > 0, "E:E8: No"
+    assert not proposal.is_executed, "E:E5: Ba"
+    assert not proposal.is_disputed, "E:E5: Ba"
 
     guild_id: uint256 = proposal.guild_id
-    assert self.student_to_guild[msg.sender] == guild_id, "NotMember"
+    assert self.student_to_guild[msg.sender] == guild_id, "E:E2: No"
 
     # Freeze proposal and lock guild vault
     self.guild_proposals[proposal_id].is_disputed = True
@@ -791,12 +791,12 @@ def resolve_dispute(
     @param final_targets Addresses to receive the remaining 90%.
     @param final_amounts SGC amounts per target (must sum to 90% of vault after penalty).
     """
-    assert msg.sender == self.chairperson, "OnlyGM"
+    assert msg.sender == self.chairperson
 
     proposal: GuildProposal = self.guild_proposals[proposal_id]
-    assert proposal.is_disputed, "NotDisputed"
-    assert not proposal.is_executed, "Executed"
-    assert len(final_targets) == len(final_amounts), "LenMismatch"
+    assert proposal.is_disputed, "E:E5: Ba"
+    assert not proposal.is_executed, "E:E5: Ba"
+    assert len(final_targets) == len(final_amounts), "E:E4: In"
 
     guild_id: uint256 = proposal.guild_id
     vault_balance: uint256 = self.guild_vaults[guild_id]
@@ -809,7 +809,7 @@ def resolve_dispute(
     total: uint256 = 0
     for a: uint256 in final_amounts:
         total += a
-    assert total == remaining, "Bad90Split"
+    assert total == remaining, "E:E4: In"
 
     # Effects: finalize state before external calls
     self.guild_proposals[proposal_id].is_executed = True
@@ -847,8 +847,8 @@ def batch_import_legacy_xp(
     @param students_list Array of student wallet addresses (up to 20).
     @param legacy_xp Array of XP values to credit (must match students_list length).
     """
-    assert msg.sender == self.chairperson, "OnlyGM"
-    assert len(students_list) == len(legacy_xp), "LenMismatch"
+    assert msg.sender == self.chairperson
+    assert len(students_list) == len(legacy_xp), "E:E4: In"
 
     for i: uint256 in range(20):
         if i >= len(students_list):
@@ -876,8 +876,8 @@ def leave_guild(pay_with_tokens: bool):
     @param pay_with_tokens True to pay the penalty in SGC, False to pay in XP.
     """
     guild_id: uint256 = self.student_to_guild[msg.sender]
-    assert guild_id > 0, "NotInGuild"
-    assert self.voters[msg.sender].weight > 0, "NotStudent"
+    assert guild_id > 0, "E:E2: No"
+    assert self.voters[msg.sender].weight > 0
 
     if pay_with_tokens:
         # Transfer SGC penalty from student → guild vault
@@ -909,10 +909,10 @@ def kick_from_guild(student: address):
          and the guild member count is decremented. No penalties are applied.
     @param student Address of the student to remove.
     """
-    assert msg.sender == self.chairperson, "OnlyGM"
+    assert msg.sender == self.chairperson
 
     guild_id: uint256 = self.student_to_guild[student]
-    assert guild_id > 0, "NotInGuild"
+    assert guild_id > 0, "E:E2: No"
 
     # Unbind student from guild and decrement member count
     self.student_to_guild[student] = 0
@@ -929,7 +929,7 @@ def setQuestNames(names: DynArray[String[100], 4]):
     @notice Sets the names of the Voting Quests.
     @dev May only be called by `chairperson`.
     """
-    assert msg.sender == self.chairperson, "OnlyGM"
+    assert msg.sender == self.chairperson
     for i: uint256 in range(4):
         if i < len(names):
             self.questNames[i] = names[i]
@@ -942,7 +942,7 @@ def startNewRound():
     @notice Starts a new voting round.
     @dev May only be called by `chairperson`.
     """
-    assert msg.sender == self.chairperson, "OnlyGM"
+    assert msg.sender == self.chairperson
     self.currentPollId += 1
     log NewRoundStarted(pollId=self.currentPollId)
 
@@ -952,10 +952,10 @@ def delegate(to: address):
     @notice Delegate your vote to the voter `to`.
     @param to Address to which vote is delegated.
     """
-    assert self.voters[msg.sender].weight > 0, "NotStudent"
-    assert not self.hasVoted[self.currentPollId][msg.sender], "AlreadyVoted"
-    assert to != msg.sender, "SelfDeleg"
-    assert self.voters[to].weight > 0, "NotStudent"
+    assert self.voters[msg.sender].weight > 0
+    assert not self.hasVoted[self.currentPollId][msg.sender], "E:E6: Al"
+    assert to != msg.sender, "E:E6: Al"
+    assert self.voters[to].weight > 0, "E:E2: No"
 
     self.hasVoted[self.currentPollId][msg.sender] = True
     voter_weight: uint256 = self.voters[msg.sender].weight + self.receivedDelegations[self.currentPollId][msg.sender]
@@ -973,9 +973,9 @@ def vote(proposalIndex: uint256):
     @notice Give your vote to proposal `proposals[proposalIndex].name`.
     @param proposalIndex Index of proposal in the proposals array.
     """
-    assert self.voters[msg.sender].weight > 0, "NoVoteRight"
-    assert not self.hasVoted[self.currentPollId][msg.sender], "AlreadyVoted"
-    assert proposalIndex < len(self.proposals), "BadPropIdx"
+    assert self.voters[msg.sender].weight > 0
+    assert not self.hasVoted[self.currentPollId][msg.sender], "E:E6: Al"
+    assert proposalIndex < len(self.proposals), "E:E3: In"
 
     self.hasVoted[self.currentPollId][msg.sender] = True
     self.roundVote[self.currentPollId][msg.sender] = proposalIndex
