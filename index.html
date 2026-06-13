@@ -12,7 +12,7 @@
     <script src="https://cdn.jsdelivr.net/gh/ethereum/blockies/blockies.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <link
-        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&amp;family=Rajdhani:wght@400;500;600;700&amp;display=swap"
+        href="https://fonts.googleapis.com/css2?family=Jura:wght@500;700&subset=cyrillic&amp;family=Rajdhani:wght@400;500;600;700&amp;display=swap"
         rel="stylesheet" />
     <style>
         body {
@@ -30,7 +30,7 @@
         h2,
         h3,
         .rpg-title {
-            font-family: 'Cinzel', serif;
+            font-family: 'Jura', serif;
         }
 
         .glass-panel {
@@ -505,7 +505,7 @@
                 </div>
             </div>
             <div class="flex items-center gap-3">
-                <span class="text-xs text-slate-400">Hide Wallet from Leaderboard</span>
+                <span class="text-xs text-slate-400" data-i18n="i18n_hide_wallet">Hide Wallet from Leaderboard</span>
                 <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
                     <input
                         class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer z-10 transition-transform duration-200"
@@ -636,15 +636,7 @@
                                 id="student-vault-guild-id-display">0</span> 👑
                         </span>
                         <input type="hidden" id="student-vault-guild-id" value="0" />
-                        <button id="student-vault-refresh-btn" onclick="loadStudentVaultAction()" title="Refresh Vault"
-                            class="p-2 bg-slate-800 hover:bg-slate-700 border border-cyan-700 rounded-lg text-cyan-400 transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none"
-                                stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="23 4 23 10 17 10" />
-                                <polyline points="1 20 1 14 7 14" />
-                                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
-                            </svg>
-                        </button>
+                        <button id="student-vault-refresh-btn" onclick="loadStudentVaultAction()" title="Refresh Vault" class="rounded-lg p-2 bg-slate-800 text-cyan-400">↻</button>
                     </div>
                 </div>
 
@@ -735,14 +727,7 @@
             </div>
             <div class="mt-4 flex justify-between items-center text-sm font-semibold text-slate-500">
                 <span id="total-students">Total Heroes: 0</span>
-                <button class="hover:text-emerald-400 transition-colors flex items-center gap-1"
-                    onclick="fetchLeaderboard()">
-                    <svg fill="none" height="14" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="14">
-                        <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"></path>
-                        <path d="M21 3v5h-5"></path>
-                    </svg><span data-i18n="i18n_27">
-                        Refresh
-                    </span></button>
+                <button class="rounded-lg p-2 bg-slate-800 text-cyan-400" onclick="fetchLeaderboard()">↻</button>
             </div>
         </div>
         <!-- Tab 3: Admin Panel (Game Master) -->
@@ -1664,7 +1649,7 @@
                     await handleConnection(accounts[0]);
                 }
             } else {
-                showToast("MetaMask is not installed. Please install it to use this DApp.", true);
+                showToast(t("toast_no_metamask") || "MetaMask is not installed. Please install it to use this DApp.", true);
             }
         }
 
@@ -1699,12 +1684,12 @@
         }
 
         async function setupNetwork() {
-            if (!window.ethereum) return showToast("MetaMask not found!", true);
+            if (!window.ethereum) return showToast(t("toast_no_metamask_short") || "MetaMask not found!", true);
             await switchNetwork();
         }
 
         async function addToken() {
-            if (!window.ethereum) return showToast("MetaMask not found!", true);
+            if (!window.ethereum) return showToast(t("toast_no_metamask_short") || "MetaMask not found!", true);
             try {
                 await window.ethereum.request({
                     method: 'wallet_watchAsset',
@@ -1749,7 +1734,7 @@
             const network = await provider.getNetwork();
             if (network.chainId !== CHAIN_ID) {
                 if (network.chainId === 16600) {
-                    showToast("Вы в старой сети! Нажмите 'Setup Network', чтобы переключиться на актуальную версию 0G Galileo.", true);
+                    showToast(t("toast_wrong_network") || "Вы в старой сети! Нажмите 'Setup Network', чтобы переключиться на актуальную версию 0G Galileo.", true);
                 }
                 await switchNetwork();
                 return;
@@ -1997,8 +1982,16 @@
                             const leaderAddr = await voterContract.guild_leader(guildId);
                             if (studentVaultSec) {
                                 if (leaderAddr.toLowerCase() === userAddress.toLowerCase()) {
+                                    
                                     studentVaultSec.classList.remove("hidden");
                                     document.getElementById("student-vault-guild-id-display").innerText = guildId;
+                                    
+                                    const badgeHtml = '<span class="ml-2 px-2 py-0.5 rounded text-xs bg-amber-500/20 text-amber-400 font-bold border border-amber-500/30" data-i18n="guild_leader_badge">👑 Guild Leader</span>';
+                                    const profileHeader = document.getElementById("user-nickname");
+                                    if (profileHeader && !profileHeader.parentElement.innerHTML.includes("guild_leader_badge")) {
+                                        profileHeader.insertAdjacentHTML('afterend', badgeHtml);
+                                    }
+
                                     document.getElementById("student-vault-guild-id").value = guildId;
                                     // Auto-load: fetch directly, registryData may not be ready yet
                                     loadStudentVaultAction(guildId);
@@ -2223,7 +2216,7 @@
                 hideLoader();
                 statusEl.innerText = newState ? "Address Hidden" : "Address Visible";
                 statusEl.className = "text-xs font-bold text-emerald-400";
-                showToast("Настройки приватности обновлены!", false);
+                showToast(t("toast_privacy_updated") || "Настройки приватности обновлены!", false);
                 setTimeout(() => statusEl.classList.add("hidden"), 3000);
             } catch (err) {
                 console.error(err);
@@ -2537,7 +2530,7 @@
         }
 
         async function exportRegistryCSV() {
-            if (registryData.length === 0) return showToast("Registry empty", true);
+            if (registryData.length === 0) return showToast(t("toast_registry_empty") || "Registry empty", true);
 
             // Build rows: XP is already loaded in registryData from the chain.
             // Level uses the existing getLevel() formula (Math.floor(xp / 100) + 1).
@@ -2594,7 +2587,7 @@
                 setStatus(statusEl, `Sending loot... Tx: ${tx.hash.substring(0, 10)}...`, "wait");
                 await waitWithTimeout(tx);
                 setStatus(statusEl, `Loot successfully bestowed! 🎉`, "success");
-                showToast("Награда успешно начислена!", false);
+                showToast(t("toast_reward_success") || "Награда успешно начислена!", false);
 
                 // Clear reward inputs only on successful transaction
                 document.getElementById("reward-address").value = '';
@@ -2605,7 +2598,7 @@
                 console.error(err);
                 if (tx && tx.hash) {
                     setStatus(statusEl, `Loot might be bestowed (Mobile RPC issue)! Tx: ${tx.hash.substring(0, 10)}...`, "success");
-                    showToast("Транзакция отправлена, но возможно прервана. Проверьте через пару минут.", false);
+                    showToast(t("toast_tx_sent") || "Транзакция отправлена, но возможно прервана. Проверьте через пару минут.", false);
                 } else {
                     setStatus(statusEl, "Bestowal failed. Did you approve SGC allowance?", "error");
                     if (typeof handleWeb3Error === 'function') handleWeb3Error(err);
@@ -2625,7 +2618,7 @@
                     console.error("User rejected connection", err);
                 }
             } else {
-                showToast("MetaMask not found!", true);
+                showToast(t("toast_no_metamask_short") || "MetaMask not found!", true);
             }
         });
 
@@ -2699,7 +2692,7 @@
 
         async function rewardStudentCustom() {
             const amountStr = document.getElementById("reward-custom-amount").value.trim();
-            if (!amountStr) return showToast("Enter custom amount", true);
+            if (!amountStr) return showToast(t("toast_enter_amount") || "Enter custom amount", true);
             await rewardStudent(parseInt(amountStr));
         }
 
@@ -2709,8 +2702,8 @@
             const reason = document.getElementById("reward-reason").value.trim();
             const statusEl = document.getElementById("admin-status");
 
-            if (!groupName) return showToast("Enter Target Group ID", true);
-            if (!amountStr) return showToast("Enter Custom Amount", true);
+            if (!groupName) return showToast(t("toast_enter_group") || "Enter Target Group ID", true);
+            if (!amountStr) return showToast(t("toast_enter_amount") || "Enter Custom Amount", true);
 
             const amount = parseInt(amountStr);
 
@@ -2743,7 +2736,7 @@
                 await waitWithTimeout(tx);
                 hideLoader();
                 setStatus(statusEl, `Group loot bestowed! 🎉`, "success");
-                showToast("Групповая награда успешно начислена!", false);
+                showToast(t("toast_group_reward_success") || "Групповая награда успешно начислена!", false);
 
                 // Clear reward inputs only on successful transaction
                 document.getElementById("reward-address").value = '';
@@ -2754,7 +2747,7 @@
                 console.error(err);
                 if (tx && tx.hash) {
                     setStatus(statusEl, `Group loot might be bestowed (Mobile RPC issue)! Tx: ${tx.hash.substring(0, 10)}...`, "success");
-                    showToast("Транзакция отправлена, но возможно прервана. Проверьте через пару минут.", false);
+                    showToast(t("toast_tx_sent") || "Транзакция отправлена, но возможно прервана. Проверьте через пару минут.", false);
                 } else {
                     setStatus(statusEl, "Group bestowal failed.", "error");
                     if (typeof handleWeb3Error === 'function') handleWeb3Error(err);
@@ -2777,7 +2770,7 @@
                 parsedReward = parseInt(rewardVal, 10);
             }
             if (isNaN(parsedReward) || parsedReward < 1 || parsedReward > 50) {
-                showToast("Сумма должна быть от 1 до 50 SGC", true);
+                showToast(t("toast_invalid_amount") || "Сумма должна быть от 1 до 50 SGC", true);
                 return;
             }
             attendanceRewardAmount = parsedReward;
@@ -2796,7 +2789,7 @@
                 hideLoader();
 
                 document.getElementById("daily-code-display").innerText = code;
-                showToast("Код успешно сгенерирован!", false);
+                showToast(t("toast_code_generated") || "Код успешно сгенерирован!", false);
 
                 let timeLeft = 25;
                 clearInterval(countdownInterval);
@@ -2913,7 +2906,7 @@
                     studentTimerEl.classList.add("hidden");
                 }
 
-                showToast("Посещаемость подтверждена! Награда начислена.", false);
+                showToast(t("toast_attendance_claimed") || "Посещаемость подтверждена! Награда начислена.", false);
                 await fetchUserData();
                 loadPollTopics();
             } catch (err) {
@@ -2921,7 +2914,7 @@
                 if (tx && tx.hash) {
                     document.getElementById("voting-status").innerText = `Sent but interrupted (Mobile RPC issue). Tx: ${tx.hash.substring(0, 10)}...`;
                     document.getElementById("voting-status").className = "mt-6 text-center text-sm font-bold text-sky-400";
-                    showToast("Транзакция отправлена, но возможно прервана. Проверьте через пару минут.", false);
+                    showToast(t("toast_tx_sent") || "Транзакция отправлена, но возможно прервана. Проверьте через пару минут.", false);
                 } else {
                     document.getElementById("voting-status").innerText = "Failed to claim attendance.";
                     document.getElementById("voting-status").className = "mt-6 text-center text-sm font-bold text-rose-500";
@@ -2955,7 +2948,7 @@
                 await waitWithTimeout(tx); // Wait for purchase to be mined
                 hideLoader();
                 hideLoader();
-                showToast("Покупка успешно совершена!", false);
+                showToast(t("toast_purchase_success") || "Покупка успешно совершена!", false);
                 await fetchUserData();
                 loadPollTopics();
             } catch (err) {
@@ -3006,7 +2999,7 @@
                 hideLoader();
 
                 if (btn) btn.innerText = "Confirmed! Reloading...";
-                showToast("Названия квестов обновлены!", false);
+                showToast(t("toast_quests_updated") || "Названия квестов обновлены!", false);
                 setTimeout(() => window.location.reload(), 2000);
             } catch (err) {
                 console.error("FULL ERROR OBJECT:", err);
@@ -3039,7 +3032,7 @@
                 await waitWithTimeout(tx);
                 hideLoader();
 
-                showToast("Новый раунд успешно начат!", false);
+                showToast(t("toast_round_started") || "Новый раунд успешно начат!", false);
                 setTimeout(() => window.location.reload(), 2000);
             } catch (err) {
                 console.error("startNewRound error:", err);
@@ -3198,9 +3191,9 @@
             const refundPct = parseInt(document.getElementById("market-item-refund").value || "0");
             const xpBonus = parseInt(document.getElementById("market-item-xp").value || "0");
 
-            if (!name || !price) return showToast("Enter item name and price.", true);
+            if (!name || !price) return showToast(t("toast_enter_name_price") || "Enter item name and price.", true);
             if (itemType === 2 && (isNaN(refundPct) || refundPct < 0 || refundPct > 100)) {
-                return showToast("Refund % must be 0–100.", true);
+                return showToast(t("toast_invalid_refund") || "Refund % must be 0–100.", true);
             }
 
             const btn = document.querySelector('button[onclick="addMarketItem()"]');
@@ -3583,6 +3576,32 @@
                 "i18n_9": "Gold Stash (SGC)",
                 "i18n_10": "Updating privacy...",
                 "i18n_11": "Claim Attendance",
+                "i18n_hide_wallet": "Скрыть кошелек из рейтинга",
+                "i18n_gold_stash": "Золотой запас (SGC)",
+                "guild_leader_badge": "👑 Лидер Гильдии",
+                "i18n_hide_wallet": "Hide Wallet from Leaderboard",
+                "i18n_gold_stash": "Gold Stash (SGC)",
+                "guild_leader_badge": "👑 Guild Leader",
+                "toast_tx_success": "Transaction successful!",
+                "toast_no_metamask": "MetaMask is not installed. Please install it to use this DApp.",
+                "toast_no_metamask_short": "MetaMask not found!",
+                "toast_registry_empty": "Registry empty",
+                "toast_reward_success": "Награда успешно начислена!",
+                "toast_tx_sent": "Транзакция отправлена, но возможно прервана. Проверьте через пару минут.",
+                "toast_invalid_amount": "Сумма должна быть от 1 до 50 SGC",
+                "toast_code_generated": "Код успешно сгенерирован!",
+                "toast_attendance_claimed": "Посещаемость подтверждена! Награда начислена.",
+                "toast_purchase_success": "Покупка успешно совершена!",
+                "toast_quests_updated": "Названия квестов обновлены!",
+                "toast_round_started": "Новый раунд успешно начат!",
+                "toast_enter_name_price": "Enter item name and price.",
+                "toast_invalid_refund": "Refund % must be 0–100.",
+                "toast_privacy_updated": "Настройки приватности обновлены!",
+                "toast_enter_amount": "Enter custom amount",
+                "toast_enter_group": "Enter Target Group ID",
+                "toast_enter_amount": "Enter Custom Amount",
+                "toast_group_reward_success": "Групповая награда успешно начислена!",
+                "toast_wrong_network": "Вы в старой сети! Нажмите 'Setup Network', чтобы переключиться на актуальную версию 0G Galileo.",
                 "i18n_12": "Enter the Beacon Code provided by the Game Master.",
                 "i18n_13": "Осталось времени: 25 сек",
                 "i18n_14": "Claim",
@@ -3799,7 +3818,7 @@
                 "revert_already_in_guild": "Студент уже состоит в другой гильдии.",
                 "revert_guild_exists": "Гильдия с таким ID уже существует.",
                 "revert_guild_no_members": "В гильдии должен быть хотя бы один реальный участник.",
-                "revert_not_gamemaster": "Только Гейм-Мастер может выполнить это действие.",
+                "revert_not_gamemaster": "Только Мастер может выполнить это действие.",
                 "revert_generic": "Транзакция отклонена смарт-контрактом.",
                 "guild_free_students": "Свободные Студенты",
                 "guild_new_guild": "Новая Гильдия",
@@ -3819,9 +3838,32 @@
                 "i18n_9": "Gold Stash (SGC)",
                 "i18n_10": "Обновление приватности...",
                 "i18n_11": "Подтвердить Присутствие",
-                "i18n_12": "Введите Код Маяка от Гейм Мастера.",
+                "i18n_hide_wallet": "Скрыть кошелек из рейтинга",
+                "i18n_gold_stash": "Золотой запас (SGC)",
+                "guild_leader_badge": "👑 Лидер Гильдии",
+                "toast_tx_success": "Транзакция успешна!",
+                "toast_no_metamask": "MetaMask не установлен. Пожалуйста, установите его.",
+                "toast_no_metamask_short": "MetaMask не найден!",
+                "toast_registry_empty": "Реестр пуст",
+                "toast_reward_success": "Награда успешно начислена!",
+                "toast_tx_sent": "Транзакция отправлена, проверьте статус через пару минут.",
+                "toast_invalid_amount": "Сумма должна быть от 1 до 50 SGC",
+                "toast_code_generated": "Код успешно сгенерирован!",
+                "toast_attendance_claimed": "Посещаемость подтверждена! Награда начислена.",
+                "toast_purchase_success": "Покупка успешно совершена!",
+                "toast_quests_updated": "Названия квестов обновлены!",
+                "toast_round_started": "Новый раунд успешно начат!",
+                "toast_enter_name_price": "Введите название и цену.",
+                "toast_invalid_refund": "Процент возврата должен быть от 0 до 100.",
+                "toast_privacy_updated": "Настройки приватности обновлены!",
+                "toast_enter_amount": "Введите сумму",
+                "toast_enter_group": "Введите ID группы",
+                "toast_enter_amount": "Введите сумму",
+                "toast_group_reward_success": "Групповая награда успешно начислена!",
+                "toast_wrong_network": "Неверная сеть! Переключитесь на 0G Galileo.",
+                "i18n_12": "Введите Код Маяка от Мастера.",
                 "i18n_13": "Осталось времени: 25 сек",
-                "i18n_14": "Заявить",
+                "i18n_14": "Подтвердить",
                 "no_artifacts": "У вас пока нет купленных артефактов.",
                 "i18n_17": "Активные Квесты (Голосование)",
                 "i18n_18": "Отдайте свой голос, чтобы определить будущее королевства.",
@@ -3834,7 +3876,7 @@
                 "i18n_25": "Всего XP",
                 "i18n_26": "Загрузка легенд...",
                 "i18n_27": "Обновить",
-                "i18n_28": "Владения Гейм Мастера",
+                "i18n_28": "Владения Мастера",
                 "i18n_29": "Призывайте новых героев и даруйте легендарные награды.",
                 "i18n_30": "QR Сканер — Зачисление Студента",
                 "i18n_31": "Запустить Камеру",
