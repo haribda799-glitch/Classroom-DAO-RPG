@@ -1383,6 +1383,7 @@
     <script>
         const CHAIN_ID = 16602;
         const CHAIN_ID_HEX = "0x" + CHAIN_ID.toString(16);
+        const MIN_XP_FOR_ARTIFACTS = 450; // Настраивается преподавателем
 
         // Update these if you deploy new contracts
         const VOTER_ADDRESS = "0x28e666b0B17c8F32E9b9863310715335cE5F27f3";
@@ -1851,6 +1852,13 @@
                     }
                 }));
 
+                // Fetch student XP for locking logic
+                let studentXP = 0;
+                try {
+                    const sData = await readOnlyVoterContract.students(userAddress);
+                    studentXP = sData[2].toNumber();
+                } catch(e) {}
+
                 const currentLang = localStorage.getItem('lang') || 'en';
                 const t = translations[currentLang];
 
@@ -1872,15 +1880,20 @@
                     // Action button based on item_type
                     let actionBtn = '';
                     if (!isConsumed) {
+                        const isLocked = studentXP < MIN_XP_FOR_ARTIFACTS;
+                        
                         if (item.item_type === 1) {
-                            const label = t.btn_activate || 'Активировать 🔥';
-                            actionBtn = `<button onclick="activateConsumable(${parsedId}, this)" class="mt-3 w-full py-2 bg-orange-600/20 hover:bg-orange-500/40 transition-all rounded-xl font-bold border border-orange-500/40 text-orange-300 hover:text-white text-sm uppercase tracking-wider">${label}</button>`;
+                            const label = isLocked ? (t.btn_locked || `🔒 Requires %s XP`).replace('%s', MIN_XP_FOR_ARTIFACTS) : (t.btn_activate || 'Активировать 🔥');
+                            const lockedClasses = isLocked ? "opacity-50 cursor-not-allowed bg-gray-600 pointer-events-none border-gray-500 text-gray-300" : "bg-orange-600/20 hover:bg-orange-500/40 border-orange-500/40 text-orange-300 hover:text-white";
+                            actionBtn = `<button onclick="activateConsumable(${parsedId}, this)" class="mt-3 w-full py-2 transition-all rounded-xl font-bold border text-sm uppercase tracking-wider ${lockedClasses}">${label}</button>`;
                         } else if (item.item_type === 2) {
-                            const label = (t.btn_recycle || 'Сдать в утиль (%s%) 🔄').replace('%s', item.refund_percent);
-                            actionBtn = `<button onclick="recycleItem(${parsedId}, ${item.refund_percent}, this)" class="mt-3 w-full py-2 bg-sky-600/20 hover:bg-sky-500/40 transition-all rounded-xl font-bold border border-sky-500/40 text-sky-300 hover:text-white text-sm uppercase tracking-wider">${label}</button>`;
+                            const label = isLocked ? (t.btn_locked || `🔒 Requires %s XP`).replace('%s', MIN_XP_FOR_ARTIFACTS) : (t.btn_recycle || 'Сдать в утиль (%s%) 🔄').replace('%s', item.refund_percent);
+                            const lockedClasses = isLocked ? "opacity-50 cursor-not-allowed bg-gray-600 pointer-events-none border-gray-500 text-gray-300" : "bg-sky-600/20 hover:bg-sky-500/40 border-sky-500/40 text-sky-300 hover:text-white";
+                            actionBtn = `<button onclick="recycleItem(${parsedId}, ${item.refund_percent}, this)" class="mt-3 w-full py-2 transition-all rounded-xl font-bold border text-sm uppercase tracking-wider ${lockedClasses}">${label}</button>`;
                         } else if (item.item_type === 3) {
-                            const label = (t.btn_transform || 'Выпить эликсир (+%s XP) 🧪').replace('%s', item.xp_bonus);
-                            actionBtn = `<button onclick="transformToXP(${parsedId}, ${item.xp_bonus}, this)" class="mt-3 w-full py-2 bg-emerald-600/20 hover:bg-emerald-500/40 transition-all rounded-xl font-bold border border-emerald-500/40 text-emerald-300 hover:text-white text-sm uppercase tracking-wider">${label}</button>`;
+                            const label = isLocked ? (t.btn_locked || `🔒 Requires %s XP`).replace('%s', MIN_XP_FOR_ARTIFACTS) : (t.btn_transform || 'Выпить эликсир (+%s XP) 🧪').replace('%s', item.xp_bonus);
+                            const lockedClasses = isLocked ? "opacity-50 cursor-not-allowed bg-gray-600 pointer-events-none border-gray-500 text-gray-300" : "bg-emerald-600/20 hover:bg-emerald-500/40 border-emerald-500/40 text-emerald-300 hover:text-white";
+                            actionBtn = `<button onclick="transformToXP(${parsedId}, ${item.xp_bonus}, this)" class="mt-3 w-full py-2 transition-all rounded-xl font-bold border text-sm uppercase tracking-wider ${lockedClasses}">${label}</button>`;
                         }
                     }
 
@@ -3586,6 +3599,7 @@
                 "guild_save_btn": "SAVE COMPOSITION",
                 "item_consumed": "CONSUMED",
                 "no_quests": "No quests available.",
+                "btn_locked": "🔒 Requires %s XP",
 
                 "i18n_1": "html",
                 "i18n_2": "Classroom DAO V4 | RPG Edition",
@@ -3866,6 +3880,7 @@
                 "guild_save_btn": "СОХРАНИТЬ СОСТАВ",
                 "item_consumed": "ИСПОЛЬЗОВАНО",
                 "no_quests": "Нет доступных квестов.",
+                "btn_locked": "🔒 Требуется %s XP",
                 "i18n_1": "html",
                 "i18n_2": "Classroom DAO V4 | RPG Edition",
                 "i18n_3": "CLASSROOM DAO",
