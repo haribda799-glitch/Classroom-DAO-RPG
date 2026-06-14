@@ -2217,7 +2217,9 @@
                 setStatus(statusEl, `Casting spell... Tx: ${tx.hash.substring(0, 10)}...`, "wait");
                 await waitWithTimeout(tx);
                 hideLoader();
-                setStatus(statusEl, `Quest Completed! Vote cast successfully! 🎉`, "success");
+                const currentLang = localStorage.getItem('lang') || 'en';
+                const successMsg = translations[currentLang]?.vote_success_message || `Quest Completed! Vote cast successfully! 🎉`;
+                setStatus(statusEl, successMsg, "success");
                 showToast("toast_vote_success", false);
                 await fetchProposals();
                 await fetchUserData();
@@ -3636,6 +3638,7 @@
                 "no_quests": "No quests available.",
                 "btn_locked": "🔒 Requires %s XP",
                 "voted_btn": "VOTED",
+                "vote_success_message": "Quest Completed! Vote cast successfully! 🎉",
 
                 "i18n_1": "html",
                 "i18n_2": "Classroom DAO V4 | RPG Edition",
@@ -3918,6 +3921,7 @@
                 "no_quests": "Нет доступных квестов.",
                 "btn_locked": "🔒 Требуется %s XP",
                 "voted_btn": "ПРОГОЛОСОВАЛ",
+                "vote_success_message": "Квест завершен! Голос успешно учтен! 🎉",
                 "i18n_1": "html",
                 "i18n_2": "Classroom DAO V4 | RPG Edition",
                 "i18n_3": "CLASSROOM DAO",
