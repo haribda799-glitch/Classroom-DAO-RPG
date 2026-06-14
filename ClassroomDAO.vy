@@ -975,7 +975,7 @@ def vote(proposalIndex: uint256):
     """
     assert self.voters[msg.sender].weight > 0
     assert not self.hasVoted[self.currentPollId][msg.sender], "E:E6: Al"
-    assert proposalIndex < len(self.proposals), "E:E3: In"
+    assert proposalIndex < 4, "E:E3: In"
 
     self.hasVoted[self.currentPollId][msg.sender] = True
     self.roundVote[self.currentPollId][msg.sender] = proposalIndex
