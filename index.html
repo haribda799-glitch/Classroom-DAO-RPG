@@ -1192,13 +1192,8 @@
 
                             <!-- Load row -->
                             <div class="flex gap-2 mb-4">
-                                <input id="vault-guild-id" type="number" min="1"
-                                    class="flex-1 bg-black/50 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-amber-500 transition-all font-mono text-sm"
-                                    placeholder="Guild ID" />
-                                <button onclick="loadVaultAction()"
-                                    class="px-4 py-2 bg-amber-600/20 border border-amber-500/50 text-amber-300 hover:bg-amber-500 hover:text-black font-bold rounded-xl text-sm transition-all uppercase tracking-wider whitespace-nowrap">
-                                    Load Vault
-                                </button>
+                                <input id="vault-guild-id" type="number" min="1" class="flex-1 bg-black/50 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-amber-500 transition-all font-mono text-sm" placeholder="Guild ID" data-i18n-ph="guild_id_placeholder" />
+                                <button onclick="loadVaultAction()" class="px-4 py-2 bg-amber-600/20 border border-amber-500/50 text-amber-300 hover:bg-amber-500 hover:text-black font-bold rounded-xl text-sm transition-all uppercase tracking-wider whitespace-nowrap" data-i18n="load_vault">LOAD VAULT</button>
                             </div>
 
                             <!-- Info badges -->
@@ -1219,8 +1214,7 @@
 
                             <!-- Student allocation rows -->
                             <div id="vault-members-list" class="space-y-2 mb-4">
-                                <p class="text-xs text-slate-600 italic text-center py-3">Load a guild to see members
-                                </p>
+                                <p class="text-xs text-slate-600 italic text-center py-3" data-i18n="load_guild_hint">Load a guild to see members</p>
                             </div>
 
                             <!-- Remainder calculator -->
@@ -3525,6 +3519,9 @@
                 "i18n_custom_reward": "Custom Reward",
                 "i18n_manual_allocation": "MANUAL ALLOCATION",
                 "err_distribute_failed": "Failed to distribute reward.",
+                "load_vault": "LOAD VAULT",
+                "guild_id_placeholder": "Guild ID",
+                "load_guild_hint": "Load a guild to see members",
                 "i18n_12": "Enter the Beacon Code provided by the Game Master.",
                 "i18n_13": "Осталось времени: 25 сек",
                 "i18n_14": "Claim",
@@ -3791,6 +3788,9 @@
                 "i18n_custom_reward": "ОСОБАЯ НАГРАДА",
                 "i18n_manual_allocation": "РУЧНОЕ НАЧИСЛЕНИЕ",
                 "err_distribute_failed": "Не удалось распределить награду.",
+                "load_vault": "ЗАГРУЗИТЬ",
+                "guild_id_placeholder": "ID Гильдии",
+                "load_guild_hint": "Загрузите гильдию, чтобы увидеть участников",
                 "i18n_12": "Введите Код Маяка от Мастера.",
                 "i18n_13": "Осталось времени: 25 сек",
                 "i18n_14": "Подтвердить",
