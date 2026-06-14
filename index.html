@@ -636,7 +636,8 @@
                                 id="student-vault-guild-id-display">0</span> 👑
                         </span>
                         <input type="hidden" id="student-vault-guild-id" value="0" />
-                        <button id="student-vault-refresh-btn" onclick="loadStudentVaultAction()" title="Refresh Vault" class="w-9 h-9 flex flex-shrink-0 items-center justify-center rounded-lg bg-transparent border border-cyan-700 text-cyan-400 hover:bg-slate-800 transition-colors">↻</button>
+                        <button id="student-vault-refresh-btn" onclick="loadStudentVaultAction()" title="Refresh Vault"
+                            class="w-9 h-9 flex flex-shrink-0 items-center justify-center rounded-lg bg-transparent border border-cyan-700 text-cyan-400 hover:bg-slate-800 transition-colors">↻</button>
                     </div>
                 </div>
 
@@ -727,7 +728,9 @@
             </div>
             <div class="mt-4 flex justify-between items-center text-sm font-semibold text-slate-500">
                 <span id="total-students">Total Heroes: 0</span>
-                <button class="w-9 h-9 flex flex-shrink-0 items-center justify-center rounded-lg bg-transparent border border-cyan-700 text-cyan-400 hover:bg-slate-800 transition-colors" onclick="fetchLeaderboard()">↻</button>
+                <button
+                    class="w-9 h-9 flex flex-shrink-0 items-center justify-center rounded-lg bg-transparent border border-cyan-700 text-cyan-400 hover:bg-slate-800 transition-colors"
+                    onclick="fetchLeaderboard()">↻</button>
             </div>
         </div>
         <!-- Tab 3: Admin Panel (Game Master) -->
@@ -897,26 +900,40 @@
                                 onclick="rewardStudent(50)">
                                 <span class="text-purple-400 group-hover:text-purple-300 text-lg transition-colors">+50
                                     XP</span>
-                                <span class="text-[10px] text-slate-500 group-hover:text-purple-200 uppercase tracking-widest mt-1" style="font-family: \'Jura\', sans-serif;" data-i18n="i18n_minor_quest">Minor Quest</span>
+                                <span
+                                    class="text-[10px] text-slate-500 group-hover:text-purple-200 uppercase tracking-widest mt-1"
+                                    style="font-family: \'Jura\', sans-serif;" data-i18n="i18n_minor_quest">Minor
+                                    Quest</span>
                             </button>
                             <button
                                 class="py-4 bg-slate-800 hover:bg-purple-900/50 transition-colors rounded-xl font-bold border border-slate-700 hover:border-purple-500 flex flex-col items-center justify-center group shadow-lg"
                                 onclick="rewardStudent(100)">
                                 <span class="text-purple-400 group-hover:text-purple-300 text-lg transition-colors">+100
                                     XP</span>
-                                <span class="text-[10px] text-slate-500 group-hover:text-purple-200 uppercase tracking-widest mt-1" style="font-family: \'Jura\', sans-serif;" data-i18n="i18n_major_quest">Major Quest</span>
+                                <span
+                                    class="text-[10px] text-slate-500 group-hover:text-purple-200 uppercase tracking-widest mt-1"
+                                    style="font-family: \'Jura\', sans-serif;" data-i18n="i18n_major_quest">Major
+                                    Quest</span>
                             </button>
                             <button
                                 class="col-span-2 py-4 bg-gradient-to-r from-purple-700 to-indigo-700 hover:from-purple-600 hover:to-indigo-600 transition-all rounded-xl font-bold shadow-[0_0_15px_rgba(168,85,247,0.4)] flex flex-col items-center justify-center hover:scale-[1.02]"
                                 onclick="rewardStudent(200)">
                                 <span class="text-white text-xl">+200 XP &amp; SGC</span>
-                                <span class="text-[10px] text-purple-200 uppercase tracking-widest mt-1 font-medium" style="font-family: \'Jura\', sans-serif;" data-i18n="i18n_epic_raid">Epic Boss Raid</span>
+                                <span class="text-[10px] text-purple-200 uppercase tracking-widest mt-1 font-medium"
+                                    style="font-family: \'Jura\', sans-serif;" data-i18n="i18n_epic_raid">Epic Boss
+                                    Raid</span>
                             </button>
-                            <button class="col-span-2 w-full py-4 mt-2 bg-slate-800 hover:bg-purple-900/50 transition-colors rounded-xl font-bold border border-slate-700 hover:border-purple-500 flex flex-col items-center justify-center group shadow-lg" onclick="rewardStudentCustom()">
-                                <span class="text-purple-400 group-hover:text-purple-300 text-lg transition-colors" data-i18n="i18n_custom_reward">Custom Reward</span>
-                                <span class="text-[10px] text-slate-500 group-hover:text-purple-200 uppercase tracking-widest mt-1" style="font-family: 'Jura', sans-serif;" data-i18n="i18n_manual_allocation">MANUAL ALLOCATION</span>
+                            <button
+                                class="col-span-2 w-full py-4 mt-2 bg-slate-800 hover:bg-purple-900/50 transition-colors rounded-xl font-bold border border-slate-700 hover:border-purple-500 flex flex-col items-center justify-center group shadow-lg"
+                                onclick="rewardStudentCustom()">
+                                <span class="text-purple-400 group-hover:text-purple-300 text-lg transition-colors"
+                                    data-i18n="i18n_custom_reward">Custom Reward</span>
+                                <span
+                                    class="text-[10px] text-slate-500 group-hover:text-purple-200 uppercase tracking-widest mt-1"
+                                    style="font-family: 'Jura', sans-serif;" data-i18n="i18n_manual_allocation">MANUAL
+                                    ALLOCATION</span>
                             </button>
-                            
+
                         </div>
                     </div>
                 </div>
@@ -971,7 +988,8 @@
                         </thead>
                         <tbody class="divide-y divide-slate-700/50" id="market-logs-container">
                             <tr>
-                                <td class="px-4 py-4 text-center" colspan="6"><span data-i18n="i18n_56">Loading logs...</span></td>
+                                <td class="px-4 py-4 text-center" colspan="6"><span data-i18n="i18n_56">Loading
+                                        logs...</span></td>
                             </tr>
                         </tbody>
                     </table>
@@ -1193,8 +1211,12 @@
 
                             <!-- Load row -->
                             <div class="flex gap-2 mb-4">
-                                <input id="vault-guild-id" type="number" min="1" class="flex-1 bg-black/50 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-amber-500 transition-all font-mono text-sm" placeholder="Guild ID" data-i18n-ph="guild_id_placeholder" />
-                                <button onclick="loadVaultAction()" class="px-4 py-2 bg-amber-600/20 border border-amber-500/50 text-amber-300 hover:bg-amber-500 hover:text-black font-bold rounded-xl text-sm transition-all uppercase tracking-wider whitespace-nowrap" data-i18n="load_vault">LOAD VAULT</button>
+                                <input id="vault-guild-id" type="number" min="1"
+                                    class="flex-1 bg-black/50 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-amber-500 transition-all font-mono text-sm"
+                                    placeholder="Guild ID" data-i18n-ph="guild_id_placeholder" />
+                                <button onclick="loadVaultAction()"
+                                    class="px-4 py-2 bg-amber-600/20 border border-amber-500/50 text-amber-300 hover:bg-amber-500 hover:text-black font-bold rounded-xl text-sm transition-all uppercase tracking-wider whitespace-nowrap"
+                                    data-i18n="load_vault">LOAD VAULT</button>
                             </div>
 
                             <!-- Info badges -->
@@ -1215,7 +1237,8 @@
 
                             <!-- Student allocation rows -->
                             <div id="vault-members-list" class="space-y-2 mb-4">
-                                <p class="text-xs text-slate-600 italic text-center py-3" data-i18n="load_guild_hint">Load a guild to see members</p>
+                                <p class="text-xs text-slate-600 italic text-center py-3" data-i18n="load_guild_hint">
+                                    Load a guild to see members</p>
                             </div>
 
                             <!-- Remainder calculator -->
@@ -1386,7 +1409,7 @@
         const MIN_XP_FOR_ARTIFACTS = 450; // Настраивается преподавателем
 
         // Update these if you deploy new contracts
-        const VOTER_ADDRESS = "0x28e666b0B17c8F32E9b9863310715335cE5F27f3";
+        const VOTER_ADDRESS = "0x0d6d258B1F65293cB3D677855553A6c19D3C22F6";
         const TOKEN_ADDRESS = "0x1731F7F26F6ff2B79A9a5f9C86B6Fec319B7e6E2";
         const ADMIN_ADDRESS = "0xbdCAb5CF57680818B833CFCAaE751416cA7809d7".toLowerCase();
 
@@ -1857,7 +1880,7 @@
                 try {
                     const sData = await readOnlyVoterContract.students(userAddress);
                     studentXP = sData[2].toNumber();
-                } catch(e) {}
+                } catch (e) { }
 
                 const currentLang = localStorage.getItem('lang') || 'en';
                 const t = translations[currentLang];
@@ -1881,7 +1904,7 @@
                     let actionBtn = '';
                     if (!isConsumed) {
                         const isLocked = studentXP < MIN_XP_FOR_ARTIFACTS;
-                        
+
                         if (item.item_type === 1) {
                             const label = isLocked ? (t.btn_locked || `🔒 Requires %s XP`).replace('%s', MIN_XP_FOR_ARTIFACTS) : (t.btn_activate || 'Активировать 🔥');
                             const lockedClasses = isLocked ? "opacity-50 cursor-not-allowed bg-gray-600 pointer-events-none border-gray-500 text-gray-300" : "bg-orange-600/20 hover:bg-orange-500/40 border-orange-500/40 text-orange-300 hover:text-white";
@@ -1897,12 +1920,12 @@
                         }
                     }
 
-                    const cardClasses = isConsumed 
-                        ? "bg-slate-800/80 p-4 rounded-xl border border-slate-500/20 transition-all flex flex-col justify-between group shadow-lg grayscale opacity-50 relative overflow-hidden" 
+                    const cardClasses = isConsumed
+                        ? "bg-slate-800/80 p-4 rounded-xl border border-slate-500/20 transition-all flex flex-col justify-between group shadow-lg grayscale opacity-50 relative overflow-hidden"
                         : "bg-slate-800/80 p-4 rounded-xl border border-pink-500/20 hover:border-pink-500/50 transition-all flex flex-col justify-between group shadow-lg relative overflow-hidden";
 
-                    const consumedBadge = isConsumed 
-                        ? `<div class="absolute inset-0 flex items-center justify-center pointer-events-none z-10"><span class="text-rose-500 border-4 border-rose-500 rounded-lg px-4 py-1 text-xl font-black uppercase tracking-widest transform -rotate-12 bg-slate-900/80 backdrop-blur-sm shadow-[0_0_15px_rgba(244,63,94,0.5)]" data-i18n="item_consumed">${t.item_consumed || "ИСПОЛЬЗОВАНО"}</span></div>` 
+                    const consumedBadge = isConsumed
+                        ? `<div class="absolute inset-0 flex items-center justify-center pointer-events-none z-10"><span class="text-rose-500 border-4 border-rose-500 rounded-lg px-4 py-1 text-xl font-black uppercase tracking-widest transform -rotate-12 bg-slate-900/80 backdrop-blur-sm shadow-[0_0_15px_rgba(244,63,94,0.5)]" data-i18n="item_consumed">${t.item_consumed || "ИСПОЛЬЗОВАНО"}</span></div>`
                         : "";
 
                     return `
@@ -1983,10 +2006,10 @@
                             const leaderAddr = await voterContract.guild_leader(guildId);
                             if (studentVaultSec) {
                                 if (leaderAddr.toLowerCase() === userAddress.toLowerCase()) {
-                                    
+
                                     studentVaultSec.classList.remove("hidden");
                                     document.getElementById("student-vault-guild-id-display").innerText = guildId;
-                                    
+
                                     const badgeHtml = '<span class="ml-2 px-2 py-0.5 rounded text-xs bg-amber-500/20 text-amber-400 font-bold border border-amber-500/30" data-i18n="guild_leader_badge">👑 Guild Leader</span>';
                                     const profileHeader = document.getElementById("user-nickname");
                                     if (profileHeader && !profileHeader.parentElement.innerHTML.includes("guild_leader_badge")) {
@@ -2042,7 +2065,7 @@
                 if (userAddress && readOnlyVoterContract) {
                     try {
                         userHasVoted = await readOnlyVoterContract.hasVoted(currentPollId, userAddress);
-                    } catch(e) {
+                    } catch (e) {
                         console.error("Error checking hasVoted", e);
                     }
                 }
@@ -2080,9 +2103,9 @@
                         </div>
                         <div class="mt-5 flex justify-end">
                             ${userHasVoted
-                                ? `<button disabled class="px-6 py-3 bg-slate-800 text-slate-500 rounded-xl font-bold border border-slate-700 cursor-not-allowed uppercase tracking-wider text-sm" data-i18n="voted_btn">${t.voted_btn || 'VOTED'}</button>`
-                                : `<button onclick="voteFor(${p.index}, this)" class="px-6 py-3 bg-slate-800 hover:bg-sky-600 hover:text-white transition-all rounded-xl font-bold border border-slate-600 hover:border-sky-400 shadow-lg hover:shadow-[0_0_15px_rgba(14,165,233,0.5)] text-sky-300 uppercase tracking-wider text-sm" data-i18n="vote_btn">${t.vote_btn || 'VOTE'}</button>`
-                            }
+                        ? `<button disabled class="px-6 py-3 bg-slate-800 text-slate-500 rounded-xl font-bold border border-slate-700 cursor-not-allowed uppercase tracking-wider text-sm" data-i18n="voted_btn">${t.voted_btn || 'VOTED'}</button>`
+                        : `<button onclick="voteFor(${p.index}, this)" class="px-6 py-3 bg-slate-800 hover:bg-sky-600 hover:text-white transition-all rounded-xl font-bold border border-slate-600 hover:border-sky-400 shadow-lg hover:shadow-[0_0_15px_rgba(14,165,233,0.5)] text-sky-300 uppercase tracking-wider text-sm" data-i18n="vote_btn">${t.vote_btn || 'VOTE'}</button>`
+                    }
                         </div>
                     </div>
                 `).join('');
@@ -2602,7 +2625,7 @@
 
                 // Clear reward inputs only on successful transaction
                 document.getElementById("reward-address").value = '';
-                                document.getElementById("reward-custom-amount").value = '';
+                document.getElementById("reward-custom-amount").value = '';
                 document.getElementById("reward-reason").value = '';
             } catch (err) {
                 console.error(err);
@@ -2706,7 +2729,7 @@
             await rewardStudent(parseInt(amountStr));
         }
 
-        
+
         // Market logic
 
         let attendanceRewardAmount = 10;
@@ -3095,7 +3118,7 @@
                         try {
                             const b = await READ_ONLY_PROVIDER.getBlock(blockNum);
                             blockMap[blockNum] = b.timestamp;
-                        } catch(e) {
+                        } catch (e) {
                             blockMap[blockNum] = Math.floor(Date.now() / 1000);
                         }
                     }
@@ -3108,7 +3131,7 @@
                         try {
                             const item = await readOnlyVoterContract.marketItems(id);
                             marketItemNames[id] = item.name || `Item #${id}`;
-                        } catch(e) {
+                        } catch (e) {
                             marketItemNames[id] = `Item #${id}`;
                         }
                     }
@@ -3146,7 +3169,7 @@
                             const studentData = await readOnlyVoterContract.students(log.student);
                             nickname = studentData.nickname || 'Unknown';
                             studentsCache[studentAddr] = nickname;
-                        } catch(e) {
+                        } catch (e) {
                             nickname = 'Unknown';
                         }
                     }
@@ -3157,8 +3180,8 @@
                     const shortAddr = log.student.substring(0, 6) + "..." + log.student.substring(38);
                     const dateStr = new Date(log.timestamp * 1000).toLocaleString();
                     const actionLabel = log.action === 'Buy' ? (t.action_buy || 'Buy') : (t.action_used || 'Used');
-                    const actionColor = log.action === 'Buy' 
-                        ? 'text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30 font-bold' 
+                    const actionColor = log.action === 'Buy'
+                        ? 'text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30 font-bold'
                         : 'text-orange-400 bg-orange-500/10 px-2 py-0.5 rounded border border-orange-500/30 font-bold';
 
                     return `
