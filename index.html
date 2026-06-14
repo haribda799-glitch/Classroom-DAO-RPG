@@ -3524,6 +3524,7 @@
                 "i18n_epic_raid": "Epic Boss Raid",
                 "i18n_custom_reward": "Custom Reward",
                 "i18n_manual_allocation": "MANUAL ALLOCATION",
+                "err_distribute_failed": "Failed to distribute reward.",
                 "i18n_12": "Enter the Beacon Code provided by the Game Master.",
                 "i18n_13": "Осталось времени: 25 сек",
                 "i18n_14": "Claim",
@@ -3789,6 +3790,7 @@
                 "i18n_epic_raid": "ЭПИЧЕСКИЙ РЕЙД",
                 "i18n_custom_reward": "ОСОБАЯ НАГРАДА",
                 "i18n_manual_allocation": "РУЧНОЕ НАЧИСЛЕНИЕ",
+                "err_distribute_failed": "Не удалось распределить награду.",
                 "i18n_12": "Введите Код Маяка от Мастера.",
                 "i18n_13": "Осталось времени: 25 сек",
                 "i18n_14": "Подтвердить",
@@ -4345,10 +4347,13 @@
                 showToast(`Tx sent: ${tx.hash.substring(0, 10)}...`, "info");
                 await waitWithTimeout(tx);
                 showToast(`${t("toast_reward_distributed")} #${guildId}!`, "success");
-                document.getElementById("guild-id-dist-input").value = "";
+                const guildInput = document.getElementById('admin-dist-guild-id');
+                if (guildInput) {
+                    guildInput.value = '';
+                }
             } catch (e) {
                 console.error(e);
-                showToast(e.reason || "Failed to distribute reward.", "error");
+                showToast(e.reason || t("err_distribute_failed") || "Failed to distribute reward.", "error");
             } finally {
                 hideLoader();
             }
