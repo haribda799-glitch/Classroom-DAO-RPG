@@ -2026,24 +2026,22 @@
                 await loadQuestNamesFromChain();
 
                 const proposalsList = [];
-                for (let i = 0; i < 10; i++) {
+                for (let i = 0; i < 4; i++) {
                     try {
-                        const p = await voterContract.proposals(i);
-                        // questNames from blockchain take priority over the proposal's on-chain name field
-                        let displayName = (chainQuestNames[i] && chainQuestNames[i].trim() !== "")
-                            ? chainQuestNames[i]
-                            : ((p[0] && p[0].trim() !== "") ? p[0].trim() : `Quest ${i + 1}`);
+                        let displayName = chainQuestNames[i];
                         // Read votes from the round-aware pollVotes mapping
                         const votesBN = await voterContract.pollVotes(currentPollId, i);
                         const votes = votesBN.toString();
                         proposalsList.push({ index: i, name: displayName, votes });
                     } catch (e) {
-                        break;
+                        console.error("Error fetching votes for index", i, e);
                     }
                 }
 
                 if (proposalsList.length === 0) {
-                    container.innerHTML = '<div class="col-span-full text-center text-slate-500 py-8 text-lg font-bold">No quests available.</div>';
+                    const currentLang = localStorage.getItem('lang') || 'en';
+                    const noQuestsText = translations[currentLang]?.no_quests || 'No quests available.';
+                    container.innerHTML = `<div class="col-span-full text-center text-slate-500 py-8 text-lg font-bold" data-i18n="no_quests">${noQuestsText}</div>`;
                     return;
                 }
 
@@ -3587,6 +3585,7 @@
                 "guild_leader": "Guild Leader",
                 "guild_save_btn": "SAVE COMPOSITION",
                 "item_consumed": "CONSUMED",
+                "no_quests": "No quests available.",
 
                 "i18n_1": "html",
                 "i18n_2": "Classroom DAO V4 | RPG Edition",
@@ -3866,6 +3865,7 @@
                 "guild_leader": "Лидер Гильдии",
                 "guild_save_btn": "СОХРАНИТЬ СОСТАВ",
                 "item_consumed": "ИСПОЛЬЗОВАНО",
+                "no_quests": "Нет доступных квестов.",
                 "i18n_1": "html",
                 "i18n_2": "Classroom DAO V4 | RPG Edition",
                 "i18n_3": "CLASSROOM DAO",
