@@ -3474,6 +3474,8 @@
                 "guild_load_hint": "Load registry to see students",
                 "guild_slot_full_single": "This slot is already filled. Drop onto an empty slot.",
                 "toast_student_registered": "Student successfully registered!",
+                "guild_leader": "Guild Leader",
+                "guild_save_btn": "SAVE COMPOSITION",
 
                 "i18n_1": "html",
                 "i18n_2": "Classroom DAO V4 | RPG Edition",
@@ -3746,6 +3748,8 @@
                 "guild_load_hint": "Загрузите реестр, чтобы увидеть студентов",
                 "guild_slot_full_single": "Этот слот уже занят. Перетащите в пустой.",
                 "toast_student_registered": "Студент успешно зарегистрирован!",
+                "guild_leader": "Лидер Гильдии",
+                "guild_save_btn": "СОХРАНИТЬ СОСТАВ",
 
                 "i18n_1": "html",
                 "i18n_2": "Classroom DAO V4 | RPG Edition",
@@ -4026,9 +4030,9 @@
             if (index === 0) {
                 // Slot 0 = Guild Leader: gold ring + crown label
                 slot.style.cssText = "border: 2px solid #f59e0b; box-shadow: 0 0 10px rgba(245,158,11,0.35); border-radius: 12px;";
-                slot.innerHTML = `<span class="slot-hint" style="color:#f59e0b; font-weight:700;">👑 ${t("guild_leader") || "Guild Leader"}</span>`;
+                slot.innerHTML = `<span class="slot-hint" style="color:#f59e0b; font-weight:700;">👑 <span data-i18n="guild_leader">${t("guild_leader") || "Guild Leader"}</span></span>`;
             } else {
-                slot.innerHTML = `<span class="slot-hint">— ${t("guild_slot_empty")} ${index + 1} —</span>`;
+                slot.innerHTML = `<span class="slot-hint">— <span data-i18n="guild_slot_empty">${t("guild_slot_empty") || "Slot"}</span> ${index + 1} —</span>`;
             }
             slot.addEventListener("dragover", e => { e.preventDefault(); slot.classList.add("drag-over"); });
             slot.addEventListener("dragleave", () => slot.classList.remove("drag-over"));
