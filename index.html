@@ -2038,6 +2038,15 @@
                 // Refresh the cache in case it changed since init
                 await loadQuestNamesFromChain();
 
+                let userHasVoted = false;
+                if (userAddress && readOnlyVoterContract) {
+                    try {
+                        userHasVoted = await readOnlyVoterContract.hasVoted(currentPollId, userAddress);
+                    } catch(e) {
+                        console.error("Error checking hasVoted", e);
+                    }
+                }
+
                 const proposalsList = [];
                 for (let i = 0; i < 4; i++) {
                     try {
@@ -2070,7 +2079,10 @@
                             </div>
                         </div>
                         <div class="mt-5 flex justify-end">
-                            <button onclick="voteFor(${p.index}, this)" class="px-6 py-3 bg-slate-800 hover:bg-sky-600 hover:text-white transition-all rounded-xl font-bold border border-slate-600 hover:border-sky-400 shadow-lg hover:shadow-[0_0_15px_rgba(14,165,233,0.5)] text-sky-300 uppercase tracking-wider text-sm" data-i18n="vote_btn">${t('vote_btn')}</button>
+                            ${userHasVoted
+                                ? `<button disabled class="px-6 py-3 bg-slate-800 text-slate-500 rounded-xl font-bold border border-slate-700 cursor-not-allowed uppercase tracking-wider text-sm" data-i18n="voted_btn">${t.voted_btn || 'VOTED'}</button>`
+                                : `<button onclick="voteFor(${p.index}, this)" class="px-6 py-3 bg-slate-800 hover:bg-sky-600 hover:text-white transition-all rounded-xl font-bold border border-slate-600 hover:border-sky-400 shadow-lg hover:shadow-[0_0_15px_rgba(14,165,233,0.5)] text-sky-300 uppercase tracking-wider text-sm" data-i18n="vote_btn">${t.vote_btn || 'VOTE'}</button>`
+                            }
                         </div>
                     </div>
                 `).join('');
@@ -3600,6 +3612,7 @@
                 "item_consumed": "CONSUMED",
                 "no_quests": "No quests available.",
                 "btn_locked": "🔒 Requires %s XP",
+                "voted_btn": "VOTED",
 
                 "i18n_1": "html",
                 "i18n_2": "Classroom DAO V4 | RPG Edition",
@@ -3881,6 +3894,7 @@
                 "item_consumed": "ИСПОЛЬЗОВАНО",
                 "no_quests": "Нет доступных квестов.",
                 "btn_locked": "🔒 Требуется %s XP",
+                "voted_btn": "ПРОГОЛОСОВАЛ",
                 "i18n_1": "html",
                 "i18n_2": "Classroom DAO V4 | RPG Edition",
                 "i18n_3": "CLASSROOM DAO",
