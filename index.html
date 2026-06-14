@@ -962,6 +962,8 @@
                         <thead class="text-xs text-amber-500 uppercase bg-slate-800/80 sticky top-0">
                             <tr>
                                 <th class="px-4 py-3"><span data-i18n="i18n_52">Student</span></th>
+                                <th class="px-4 py-3"><span data-i18n="wallet_addr">Wallet</span></th>
+                                <th class="px-4 py-3"><span data-i18n="action_col">Action</span></th>
                                 <th class="px-4 py-3"><span data-i18n="i18n_53">Item</span></th>
                                 <th class="px-4 py-3"><span data-i18n="i18n_54">Price</span></th>
                                 <th class="px-4 py-3"><span data-i18n="i18n_55">Date</span></th>
@@ -969,8 +971,7 @@
                         </thead>
                         <tbody class="divide-y divide-slate-700/50" id="market-logs-container">
                             <tr>
-                                <td class="px-4 py-4 text-center" colspan="4"><span data-i18n="i18n_56">Loading
-                                        logs...</span></td>
+                                <td class="px-4 py-4 text-center" colspan="6"><span data-i18n="i18n_56">Loading logs...</span></td>
                             </tr>
                         </tbody>
                     </table>
@@ -1838,15 +1839,18 @@
                     return;
                 }
 
-                // Build a map: itemId -> quantity (sum up duplicates in inventory array)
+                // Fetch actual balances using student_item_count
                 const quantityMap = {};
-                inventoryIds.forEach(id => {
-                    const n = typeof id.toNumber === 'function' ? id.toNumber() : Number(id);
-                    quantityMap[n] = (quantityMap[n] || 0) + 1;
-                });
-
-                // Deduplicate — render one card per unique item
                 const uniqueIds = [...new Set(inventoryIds.map(id => typeof id.toNumber === 'function' ? id.toNumber() : Number(id)))];
+                await Promise.all(uniqueIds.map(async parsedId => {
+                    try {
+                        const count = await readOnlyVoterContract.student_item_count(userAddress, parsedId);
+                        quantityMap[parsedId] = typeof count.toNumber === 'function' ? count.toNumber() : Number(count);
+                    } catch (err) {
+                        quantityMap[parsedId] = 0;
+                    }
+                }));
+
                 const currentLang = localStorage.getItem('lang') || 'en';
                 const t = translations[currentLang];
 
@@ -1854,6 +1858,7 @@
                     const item = marketItems.find(i => i.id === parsedId);
                     if (!item) return '';
                     const qty = quantityMap[parsedId] || 0;
+                    const isConsumed = qty === 0;
 
                     // Item type badge
                     const typeMeta = {
@@ -1866,20 +1871,31 @@
 
                     // Action button based on item_type
                     let actionBtn = '';
-                    if (item.item_type === 1) {
-                        const label = t.btn_activate || 'Активировать 🔥';
-                        actionBtn = `<button onclick="activateConsumable(${parsedId}, this)" class="mt-3 w-full py-2 bg-orange-600/20 hover:bg-orange-500/40 transition-all rounded-xl font-bold border border-orange-500/40 text-orange-300 hover:text-white text-sm uppercase tracking-wider">${label}</button>`;
-                    } else if (item.item_type === 2) {
-                        const label = (t.btn_recycle || 'Сдать в утиль (%s%) 🔄').replace('%s', item.refund_percent);
-                        actionBtn = `<button onclick="recycleItem(${parsedId}, ${item.refund_percent}, this)" class="mt-3 w-full py-2 bg-sky-600/20 hover:bg-sky-500/40 transition-all rounded-xl font-bold border border-sky-500/40 text-sky-300 hover:text-white text-sm uppercase tracking-wider">${label}</button>`;
-                    } else if (item.item_type === 3) {
-                        const label = (t.btn_transform || 'Выпить эликсир (+%s XP) 🧪').replace('%s', item.xp_bonus);
-                        actionBtn = `<button onclick="transformToXP(${parsedId}, ${item.xp_bonus}, this)" class="mt-3 w-full py-2 bg-emerald-600/20 hover:bg-emerald-500/40 transition-all rounded-xl font-bold border border-emerald-500/40 text-emerald-300 hover:text-white text-sm uppercase tracking-wider">${label}</button>`;
+                    if (!isConsumed) {
+                        if (item.item_type === 1) {
+                            const label = t.btn_activate || 'Активировать 🔥';
+                            actionBtn = `<button onclick="activateConsumable(${parsedId}, this)" class="mt-3 w-full py-2 bg-orange-600/20 hover:bg-orange-500/40 transition-all rounded-xl font-bold border border-orange-500/40 text-orange-300 hover:text-white text-sm uppercase tracking-wider">${label}</button>`;
+                        } else if (item.item_type === 2) {
+                            const label = (t.btn_recycle || 'Сдать в утиль (%s%) 🔄').replace('%s', item.refund_percent);
+                            actionBtn = `<button onclick="recycleItem(${parsedId}, ${item.refund_percent}, this)" class="mt-3 w-full py-2 bg-sky-600/20 hover:bg-sky-500/40 transition-all rounded-xl font-bold border border-sky-500/40 text-sky-300 hover:text-white text-sm uppercase tracking-wider">${label}</button>`;
+                        } else if (item.item_type === 3) {
+                            const label = (t.btn_transform || 'Выпить эликсир (+%s XP) 🧪').replace('%s', item.xp_bonus);
+                            actionBtn = `<button onclick="transformToXP(${parsedId}, ${item.xp_bonus}, this)" class="mt-3 w-full py-2 bg-emerald-600/20 hover:bg-emerald-500/40 transition-all rounded-xl font-bold border border-emerald-500/40 text-emerald-300 hover:text-white text-sm uppercase tracking-wider">${label}</button>`;
+                        }
                     }
 
+                    const cardClasses = isConsumed 
+                        ? "bg-slate-800/80 p-4 rounded-xl border border-slate-500/20 transition-all flex flex-col justify-between group shadow-lg grayscale opacity-50 relative overflow-hidden" 
+                        : "bg-slate-800/80 p-4 rounded-xl border border-pink-500/20 hover:border-pink-500/50 transition-all flex flex-col justify-between group shadow-lg relative overflow-hidden";
+
+                    const consumedBadge = isConsumed 
+                        ? `<div class="absolute inset-0 flex items-center justify-center pointer-events-none z-10"><span class="text-rose-500 border-4 border-rose-500 rounded-lg px-4 py-1 text-xl font-black uppercase tracking-widest transform -rotate-12 bg-slate-900/80 backdrop-blur-sm shadow-[0_0_15px_rgba(244,63,94,0.5)]" data-i18n="item_consumed">${t.item_consumed || "ИСПОЛЬЗОВАНО"}</span></div>` 
+                        : "";
+
                     return `
-                        <div class="bg-slate-800/80 p-4 rounded-xl border border-pink-500/20 hover:border-pink-500/50 transition-all flex flex-col justify-between group shadow-lg">
-                            <div>
+                        <div class="${cardClasses}">
+                            ${consumedBadge}
+                            <div class="relative z-0">
                                 <div class="flex items-start justify-between mb-2">
                                     <h3 class="text-lg font-bold text-white group-hover:text-pink-400 transition-colors">${item.name}</h3>
                                     <span class="ml-2 shrink-0 text-xs font-bold px-2 py-0.5 rounded-full border ${meta.color}">${meta.label}</span>
@@ -1889,7 +1905,7 @@
                                     <span class="text-xs text-slate-400 bg-slate-700/60 px-2 py-1 rounded-lg border border-slate-600/40">×${qty}</span>
                                 </div>
                             </div>
-                            ${actionBtn}
+                            ${actionBtn ? `<div class="relative z-0">${actionBtn}</div>` : ''}
                         </div>
                     `;
                 }).join('');
@@ -3021,25 +3037,119 @@
                 const container = document.getElementById('market-logs-container');
                 if (!container) return;
 
-                if (logs.length === 0) {
-                    const lg = localStorage.getItem("lang") || "en";
-                    container.innerHTML = `<tr><td colspan="4" class="px-4 py-4 text-center" data-i18n="no_purchases">${translations[lg].no_purchases}</td></tr>`;
+                const currentLang = localStorage.getItem('lang') || 'en';
+                const t = translations[currentLang];
+
+                // Fetch usage events
+                const activatedFilter = readOnlyVoterContract.filters.ConsumableActivated();
+                const recycledFilter = readOnlyVoterContract.filters.ItemRecycled();
+                const transformedFilter = readOnlyVoterContract.filters.ItemTransformedToXP();
+
+                const [activatedEvts, recycledEvts, transformedEvts] = await Promise.all([
+                    readOnlyVoterContract.queryFilter(activatedFilter).catch(() => []),
+                    readOnlyVoterContract.queryFilter(recycledFilter).catch(() => []),
+                    readOnlyVoterContract.queryFilter(transformedFilter).catch(() => [])
+                ]);
+
+                const allEvents = [...activatedEvts, ...recycledEvts, ...transformedEvts];
+
+                if (logs.length === 0 && allEvents.length === 0) {
+                    container.innerHTML = `<tr><td colspan="6" class="px-4 py-4 text-center" data-i18n="no_purchases">${t.no_purchases || "No logs"}</td></tr>`;
                     return;
                 }
 
-                // Render in reverse chronological order
-                container.innerHTML = [...logs].reverse().map(log => {
+                let unifiedLogs = logs.map(l => ({
+                    student: l.student,
+                    item_name: l.item_name,
+                    price: l.price.toString() + ' SGC',
+                    action: 'Buy',
+                    timestamp: typeof l.timestamp.toNumber === 'function' ? l.timestamp.toNumber() : Number(l.timestamp)
+                }));
+
+                const blockMap = {};
+                const getBlockTime = async (blockNum) => {
+                    if (!blockMap[blockNum]) {
+                        try {
+                            const b = await READ_ONLY_PROVIDER.getBlock(blockNum);
+                            blockMap[blockNum] = b.timestamp;
+                        } catch(e) {
+                            blockMap[blockNum] = Math.floor(Date.now() / 1000);
+                        }
+                    }
+                    return blockMap[blockNum];
+                };
+
+                const marketItemNames = {};
+                const getItemName = async (id) => {
+                    if (!marketItemNames[id]) {
+                        try {
+                            const item = await readOnlyVoterContract.marketItems(id);
+                            marketItemNames[id] = item.name || `Item #${id}`;
+                        } catch(e) {
+                            marketItemNames[id] = `Item #${id}`;
+                        }
+                    }
+                    return marketItemNames[id];
+                };
+
+                for (let evt of allEvents) {
+                    const student = evt.args.student;
+                    const itemIdStr = evt.args.item_id.toString();
+                    const itemName = await getItemName(itemIdStr);
+                    const ts = await getBlockTime(evt.blockNumber);
+                    unifiedLogs.push({
+                        student: student,
+                        item_name: itemName,
+                        price: '—',
+                        action: 'Used',
+                        timestamp: ts
+                    });
+                }
+
+                // Sort descending
+                unifiedLogs.sort((a, b) => b.timestamp - a.timestamp);
+
+                // Fetch nicknames
+                const studentsCache = {};
+                if (typeof registryData !== 'undefined') {
+                    registryData.forEach(r => studentsCache[r.address.toLowerCase()] = r.nickname);
+                }
+
+                const enrichedLogs = await Promise.all(unifiedLogs.map(async log => {
+                    const studentAddr = log.student.toLowerCase();
+                    let nickname = studentsCache[studentAddr];
+                    if (!nickname) {
+                        try {
+                            const studentData = await readOnlyVoterContract.students(log.student);
+                            nickname = studentData.nickname || 'Unknown';
+                            studentsCache[studentAddr] = nickname;
+                        } catch(e) {
+                            nickname = 'Unknown';
+                        }
+                    }
+                    return { ...log, nickname };
+                }));
+
+                container.innerHTML = enrichedLogs.map(log => {
                     const shortAddr = log.student.substring(0, 6) + "..." + log.student.substring(38);
-                    const dateStr = new Date(log.timestamp.toNumber() * 1000).toLocaleString();
+                    const dateStr = new Date(log.timestamp * 1000).toLocaleString();
+                    const actionLabel = log.action === 'Buy' ? (t.action_buy || 'Buy') : (t.action_used || 'Used');
+                    const actionColor = log.action === 'Buy' 
+                        ? 'text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30 font-bold' 
+                        : 'text-orange-400 bg-orange-500/10 px-2 py-0.5 rounded border border-orange-500/30 font-bold';
+
                     return `
                         <tr class="bg-slate-900/50 hover:bg-slate-800/50 transition-colors">
+                            <td class="px-4 py-3 font-bold text-white whitespace-nowrap">${log.nickname}</td>
                             <td class="px-4 py-3 font-medium text-amber-300" title="${log.student}">${shortAddr}</td>
+                            <td class="px-4 py-3 text-xs"><span class="${actionColor}">${actionLabel}</span></td>
                             <td class="px-4 py-3 text-white">${log.item_name}</td>
-                            <td class="px-4 py-3 text-pink-400">${log.price.toString()}</td>
+                            <td class="px-4 py-3 text-pink-400">${log.price}</td>
                             <td class="px-4 py-3 text-slate-400 text-xs">${dateStr}</td>
                         </tr>
                     `;
                 }).join('');
+
             } catch (err) {
                 console.error("Error loading market logs:", err);
             }
@@ -3476,6 +3586,7 @@
                 "toast_student_registered": "Student successfully registered!",
                 "guild_leader": "Guild Leader",
                 "guild_save_btn": "SAVE COMPOSITION",
+                "item_consumed": "CONSUMED",
 
                 "i18n_1": "html",
                 "i18n_2": "Classroom DAO V4 | RPG Edition",
@@ -3564,6 +3675,10 @@
                 "i18n_50": "Осталось времени: 25 сек",
                 "i18n_51": "Market Logs",
                 "i18n_52": "Student",
+                "wallet_addr": "Wallet",
+                "action_col": "Action",
+                "action_buy": "Buy",
+                "action_used": "Used",
                 "i18n_53": "Item",
                 "i18n_54": "Price",
                 "i18n_55": "Date",
@@ -3750,7 +3865,7 @@
                 "toast_student_registered": "Студент успешно зарегистрирован!",
                 "guild_leader": "Лидер Гильдии",
                 "guild_save_btn": "СОХРАНИТЬ СОСТАВ",
-
+                "item_consumed": "ИСПОЛЬЗОВАНО",
                 "i18n_1": "html",
                 "i18n_2": "Classroom DAO V4 | RPG Edition",
                 "i18n_3": "CLASSROOM DAO",
@@ -3835,6 +3950,10 @@
                 "i18n_50": "Осталось времени: 25 сек",
                 "i18n_51": "Логи Магазина",
                 "i18n_52": "Студент",
+                "wallet_addr": "Кошелек",
+                "action_col": "Действие",
+                "action_buy": "Покупка",
+                "action_used": "Использовано",
                 "i18n_53": "Предмет",
                 "i18n_54": "Цена",
                 "i18n_55": "Дата",
