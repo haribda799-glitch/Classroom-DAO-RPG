@@ -872,16 +872,7 @@
                                 class="w-full bg-black/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-purple-500 focus:shadow-[0_0_10px_rgba(168,85,247,0.3)] transition-all font-mono text-sm"
                                 id="reward-address" placeholder="0x..." type="text" />
                         </div>
-                        <div class="grid grid-cols-2 gap-4 mt-4 items-end">
-                            <div>
-                                <label
-                                    class="block text-xs uppercase tracking-widest text-slate-500 mb-1 font-bold"><span
-                                        data-i18n="i18n_44">Target
-                                        Group ID (Optional)</span></label>
-                                <input
-                                    class="w-full bg-black/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-purple-500 transition-all font-semibold"
-                                    id="reward-group" placeholder="e.g. 101" type="number" />
-                            </div>
+                        <div class="grid grid-cols-1 gap-4 mt-4 items-end">
                             <div>
                                 <label
                                     class="block text-xs uppercase tracking-widest text-slate-500 mb-1 font-bold"><span
@@ -934,11 +925,7 @@
                                     class="text-purple-400 group-hover:text-purple-300 text-lg transition-colors">Custom
                                     Reward</span>
                             </button>
-                            <button
-                                class="py-4 bg-gradient-to-r from-blue-700 to-cyan-700 hover:from-blue-600 hover:to-cyan-600 transition-all rounded-xl font-bold shadow-[0_0_15px_rgba(6,182,212,0.4)] flex flex-col items-center justify-center hover:scale-[1.02]"
-                                onclick="rewardGroupCustom()">
-                                <span class="text-white text-lg">Reward Group</span>
-                            </button>
+                            
                         </div>
                     </div>
                 </div>
@@ -2587,12 +2574,11 @@
                 setStatus(statusEl, `Sending loot... Tx: ${tx.hash.substring(0, 10)}...`, "wait");
                 await waitWithTimeout(tx);
                 setStatus(statusEl, `Loot successfully bestowed! 🎉`, "success");
-                showToast(t("toast_reward_success") || "Награда успешно начислена!", false);
+                showToast(t("reward_granted_success"), "success");
 
                 // Clear reward inputs only on successful transaction
                 document.getElementById("reward-address").value = '';
-                document.getElementById("reward-group").value = '';
-                document.getElementById("reward-custom-amount").value = '';
+                                document.getElementById("reward-custom-amount").value = '';
                 document.getElementById("reward-reason").value = '';
             } catch (err) {
                 console.error(err);
@@ -2696,68 +2682,7 @@
             await rewardStudent(parseInt(amountStr));
         }
 
-        async function rewardGroupCustom() {
-            const groupName = document.getElementById("reward-group").value.trim();
-            const amountStr = document.getElementById("reward-custom-amount").value.trim();
-            const reason = document.getElementById("reward-reason").value.trim();
-            const statusEl = document.getElementById("admin-status");
-
-            if (!groupName) return showToast(t("toast_enter_group") || "Enter Target Group ID", true);
-            if (!amountStr) return showToast(t("toast_enter_amount") || "Enter Custom Amount", true);
-
-            const amount = parseInt(amountStr);
-
-            let tx;
-            try {
-                showLoader();
-                setStatus(statusEl, `Finding members of group ${groupName}...`, "wait");
-
-                let countRes = await voterContract.get_student_count();
-                let count = countRes.toNumber();
-                let targetAddresses = [];
-
-                for (let i = 0; i < count; i++) {
-                    const sAddr = await voterContract.student_addresses(i);
-                    const sData = await voterContract.students(sAddr);
-                    if (sData[1] === groupName) targetAddresses.push(sAddr);
-                }
-
-                if (targetAddresses.length === 0) {
-                    setStatus(statusEl, `No students found in group ${groupName}`, "error");
-                    return;
-                }
-
-                setStatus(statusEl, `Bestowing +${amount} XP to ${targetAddresses.length} students...`, "wait");
-
-                const overrides = await getGasOverrides("0");
-                tx = await voterContract.rewardBatch(targetAddresses, amount, reason, overrides);
-                setStatus(statusEl, `Sending group loot... Tx: ${tx.hash.substring(0, 10)}...`, "wait");
-
-                await waitWithTimeout(tx);
-                hideLoader();
-                setStatus(statusEl, `Group loot bestowed! 🎉`, "success");
-                showToast(t("toast_group_reward_success") || "Групповая награда успешно начислена!", false);
-
-                // Clear reward inputs only on successful transaction
-                document.getElementById("reward-address").value = '';
-                document.getElementById("reward-group").value = '';
-                document.getElementById("reward-custom-amount").value = '';
-                document.getElementById("reward-reason").value = '';
-            } catch (err) {
-                console.error(err);
-                if (tx && tx.hash) {
-                    setStatus(statusEl, `Group loot might be bestowed (Mobile RPC issue)! Tx: ${tx.hash.substring(0, 10)}...`, "success");
-                    showToast(t("toast_tx_sent") || "Транзакция отправлена, но возможно прервана. Проверьте через пару минут.", false);
-                } else {
-                    setStatus(statusEl, "Group bestowal failed.", "error");
-                    if (typeof handleWeb3Error === 'function') handleWeb3Error(err);
-                    else showToast("Error: " + (err.message || err), true);
-                }
-            } finally {
-                hideLoader();
-            }
-        }
-
+        
         // Market logic
 
         let attendanceRewardAmount = 10;
@@ -3586,6 +3511,7 @@
                 "toast_no_metamask": "MetaMask is not installed. Please install it to use this DApp.",
                 "toast_no_metamask_short": "MetaMask not found!",
                 "toast_registry_empty": "Registry empty",
+                "reward_granted_success": "Reward successfully granted!",
                 "toast_reward_success": "Награда успешно начислена!",
                 "toast_tx_sent": "Транзакция отправлена, но возможно прервана. Проверьте через пару минут.",
                 "toast_invalid_amount": "Сумма должна быть от 1 до 50 SGC",
@@ -3845,6 +3771,7 @@
                 "toast_no_metamask": "MetaMask не установлен. Пожалуйста, установите его.",
                 "toast_no_metamask_short": "MetaMask не найден!",
                 "toast_registry_empty": "Реестр пуст",
+                "reward_granted_success": "Награда успешно начислена!",
                 "toast_reward_success": "Награда успешно начислена!",
                 "toast_tx_sent": "Транзакция отправлена, проверьте статус через пару минут.",
                 "toast_invalid_amount": "Сумма должна быть от 1 до 50 SGC",
@@ -4417,6 +4344,7 @@
                 showToast(`Tx sent: ${tx.hash.substring(0, 10)}...`, "info");
                 await waitWithTimeout(tx);
                 showToast(`${t("toast_reward_distributed")} #${guildId}!`, "success");
+                document.getElementById("guild-id-dist-input").value = "";
             } catch (e) {
                 console.error(e);
                 showToast(e.reason || "Failed to distribute reward.", "error");
