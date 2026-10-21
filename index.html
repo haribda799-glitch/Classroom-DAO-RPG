@@ -578,7 +578,7 @@
         <button
             class="tab-btn hidden flex-1 px-1 sm:px-4 py-3 text-xs sm:text-lg font-semibold text-amber-500 hover:text-amber-400 transition-colors uppercase tracking-wider rounded-t-lg truncate text-center"
             id="tab-admin" onclick="switchTab('admin')">
-            <span class="sm:hidden">⚙️ Admin</span>
+            <span class="sm:hidden" data-i18n="menu_gm_tools">⚙️ Admin</span>
             <span class="hidden sm:inline" data-i18n="menu_gm_tools">⚙️ GM Tools</span>
         </button>
     </div>
@@ -683,7 +683,7 @@
                     <div
                         class="bg-slate-900/40 border border-slate-700/50 rounded-xl p-4 max-h-[400px] overflow-y-auto custom-scrollbar">
                         <div id="student-vault-members-list" class="space-y-3">
-                            <p class="text-xs text-slate-500 italic text-center py-8">Загрузка казны…</p>
+                            <p class="text-xs text-slate-500 italic text-center py-8" data-i18n="load_guild_hint">Загрузка казны…</p>
                         </div>
                     </div>
                 </div>
@@ -1611,6 +1611,7 @@
             });
             document.getElementById('tab-' + tabId).classList.add('active');
             document.getElementById('content-' + tabId).classList.add('active');
+            try { sessionStorage.setItem('activeTab', tabId); } catch (e) { }
 
             if (tabId === 'market' || tabId === 'admin') { renderMarketItems(); }
 
@@ -1803,8 +1804,17 @@
             await fetchUserData();
             if (isStudent) loadStudentInventory();
             loadPollTopics();
-            if (userAddress === ADMIN_ADDRESS) loadMarketLogs();
+            if (isAdmin) loadMarketLogs();
             await fetchProposals();
+
+            try {
+                const savedTab = sessionStorage.getItem('activeTab');
+                if (savedTab && ['voting', 'leaderboard', 'market', 'admin'].includes(savedTab)) {
+                    if (savedTab !== 'admin' || isAdmin) {
+                        switchTab(savedTab);
+                    }
+                }
+            } catch (e) { }
         }
 
         function disconnect() {
@@ -2008,9 +2018,9 @@
                                     studentVaultSec.classList.remove("hidden");
                                     document.getElementById("student-vault-guild-id-display").innerText = guildId;
 
-                                    const badgeHtml = '<span class="ml-2 px-2 py-0.5 rounded text-xs bg-amber-500/20 text-amber-400 font-bold border border-amber-500/30" data-i18n="guild_leader_badge">👑 Guild Leader</span>';
+                                    const badgeHtml = `<span class="ml-2 px-2 py-0.5 rounded text-xs bg-amber-500/20 text-amber-400 font-bold border border-amber-500/30" data-i18n="guild_leader_badge">${t("guild_leader_badge")}</span>`;
                                     const profileHeader = document.getElementById("user-nickname");
-                                    if (profileHeader && !profileHeader.parentElement.innerHTML.includes("guild_leader_badge")) {
+                                    if (profileHeader && !profileHeader.parentElement.querySelector('[data-i18n="guild_leader_badge"]')) {
                                         profileHeader.insertAdjacentHTML('afterend', badgeHtml);
                                     }
 
@@ -2019,18 +2029,19 @@
                                     loadStudentVaultAction(guildId);
                                 } else {
                                     studentVaultSec.classList.add("hidden");
+                                    const oldBadge = document.querySelector('[data-i18n="guild_leader_badge"]');
+                                    if (oldBadge) oldBadge.remove();
                                 }
                             }
 
                             const vaultBalBN = await voterContract.guild_vaults(guildId);
                             const vaultBalStr = ethers.utils.formatUnits(vaultBalBN, decimals);
                             document.getElementById("guild-vault-balance").innerText = `${parseFloat(vaultBalStr).toFixed(2)} SGC`;
-
-                            // Load proposals for this guild
-                            refreshGuildProposals();
                         } else {
                             vaultDisplay.classList.add("hidden");
-                            if (daoPremiumsSec) daoPremiumsSec.classList.add("hidden");
+                            if (studentVaultSec) studentVaultSec.classList.add("hidden");
+                            const oldBadge = document.querySelector('[data-i18n="guild_leader_badge"]');
+                            if (oldBadge) oldBadge.remove();
                         }
                     } catch (e) {
                         console.error("Guild fetch error:", e);
@@ -2045,6 +2056,12 @@
                     document.getElementById("user-xp-text").innerText = "0 / 100 XP";
                     document.getElementById("user-xp-bar").style.width = "0%";
                     document.getElementById("privacy-toggle").checked = false;
+                    const vaultDisplay = document.getElementById("guild-vault-display");
+                    if (vaultDisplay) vaultDisplay.classList.add("hidden");
+                    const studentVaultSec = document.getElementById("student-vault-section");
+                    if (studentVaultSec) studentVaultSec.classList.add("hidden");
+                    const oldBadge = document.querySelector('[data-i18n="guild_leader_badge"]');
+                    if (oldBadge) oldBadge.remove();
                 }
             } catch (err) {
                 console.error("Error fetching user data:", err);
@@ -2221,9 +2238,13 @@
                 const successMsg = translations[currentLang]?.vote_success_message || `Quest Completed! Vote cast successfully! 🎉`;
                 setStatus(statusEl, successMsg, "success");
                 showToast("toast_vote_success", false);
-                await fetchProposals();
-                await fetchUserData();
-                loadPollTopics();
+                try {
+                    await fetchProposals();
+                    await fetchUserData();
+                    await loadPollTopics();
+                } catch (uiErr) {
+                    console.warn("UI refresh warning:", uiErr);
+                }
             } catch (err) {
                 console.error("Voting error:", err);
                 if (statusEl) statusEl.innerText = "";
@@ -2250,10 +2271,14 @@
                 statusEl.innerText = "Mining...";
                 await waitWithTimeout(tx);
                 hideLoader();
-                statusEl.innerText = newState ? "Address Hidden" : "Address Visible";
-                statusEl.className = "text-xs font-bold text-emerald-400";
                 showToast(t("toast_privacy_updated") || "Настройки приватности обновлены!", false);
-                setTimeout(() => statusEl.classList.add("hidden"), 3000);
+                try {
+                    statusEl.innerText = newState ? "Address Hidden" : "Address Visible";
+                    statusEl.className = "text-xs font-bold text-emerald-400";
+                    setTimeout(() => statusEl.classList.add("hidden"), 3000);
+                } catch (uiErr) {
+                    console.warn("UI refresh warning:", uiErr);
+                }
             } catch (err) {
                 console.error(err);
                 toggle.checked = !newState; // revert
@@ -2294,7 +2319,7 @@
             const btn = document.getElementById("btn-register");
             const statusEl = document.getElementById("admin-status");
 
-            const originalBtnText = btn.innerText;
+            const originalBtnHtml = btn.innerHTML;
 
             try {
                 if (!nickname || !group || !ethers.utils.isAddress(address)) {
@@ -2326,7 +2351,11 @@
 
                 showToast(t("toast_student_registered"), "success");
 
-                fetchStudentRegistry(); // Refresh registry table
+                try {
+                    await fetchStudentRegistry(); // Refresh registry table
+                } catch (uiErr) {
+                    console.warn("UI refresh warning:", uiErr);
+                }
 
             } catch (err) {
                 console.error("registerStudent error:", err);
@@ -2339,7 +2368,7 @@
                 document.getElementById("reg-address").value = "";
 
                 btn.disabled = false; btn.classList.remove("opacity-50");
-                btn.innerText = "Enroll & Grant 0.01 OGI";
+                btn.innerHTML = originalBtnHtml;
             }
         }
 
@@ -2424,7 +2453,7 @@
             const group = document.getElementById("qr-group").value.trim();
             const btn = document.getElementById("btn-qr-register");
             const statusEl = document.getElementById("admin-status");
-            const originalBtnText = btn.innerText;
+            const originalBtnHtml = btn.innerHTML;
 
             try {
                 if (!nickname || !group) {
@@ -2453,8 +2482,12 @@
                 hideLoader();
                 setStatus(statusEl, `Hero ${nickname} summoned successfully! 🎉`, "success");
                 showToast(t("toast_student_registered"), "success");
-                resetQrScanner();
-                fetchStudentRegistry();
+                try {
+                    resetQrScanner();
+                    await fetchStudentRegistry();
+                } catch (uiErr) {
+                    console.warn("UI refresh warning:", uiErr);
+                }
             } catch (err) {
                 console.error("registerStudentFromQr error:", err);
                 setStatus(statusEl, "QR Summoning failed.", "error");
@@ -2466,7 +2499,7 @@
                 document.getElementById("qr-scanned-address").innerText = "";
 
                 btn.disabled = false;
-                btn.innerText = "📲 Register On-chain (+ 0.01 OGI gas)";
+                btn.innerHTML = originalBtnHtml;
             }
         }
 
@@ -2534,7 +2567,7 @@
 
                 // Sync the Guild Builder student pool with fresh registry data
                 populateGuildPool();
-                if (typeof applyTranslations === 'function') applyTranslations();
+                if (typeof setLanguage === 'function') setLanguage(localStorage.getItem('lang') || 'en');
             } catch (err) {
                 console.error(err);
                 tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-rose-500 font-bold">Failed to load registry.</td></tr>`;
@@ -2550,8 +2583,12 @@
                 const tx = await signer.sendTransaction(txParams);
                 await waitWithTimeout(tx);
                 hideLoader();
-                btn.innerText = "✅ Sent";
-                setTimeout(() => { btn.innerText = originalText; btn.disabled = false; }, 3000);
+                try {
+                    btn.innerText = "✅ Sent";
+                    setTimeout(() => { btn.innerText = originalText; btn.disabled = false; }, 3000);
+                } catch (uiErr) {
+                    console.warn("UI refresh warning:", uiErr);
+                }
             } catch (err) {
                 console.error(err);
                 btn.innerText = "❌ Fail";
@@ -2625,10 +2662,15 @@
                 setStatus(statusEl, `Loot successfully bestowed! 🎉`, "success");
                 showToast(t("reward_granted_success"), "success");
 
-                // Clear reward inputs only on successful transaction
-                document.getElementById("reward-address").value = '';
-                document.getElementById("reward-custom-amount").value = '';
-                document.getElementById("reward-reason").value = '';
+                try {
+                    // Clear reward inputs only on successful transaction
+                    document.getElementById("reward-address").value = '';
+                    document.getElementById("reward-custom-amount").value = '';
+                    document.getElementById("reward-reason").value = '';
+                    await fetchStudentRegistry();
+                } catch (uiErr) {
+                    console.warn("UI refresh warning:", uiErr);
+                }
             } catch (err) {
                 console.error(err);
                 if (tx && tx.hash) {
@@ -2694,8 +2736,12 @@
                 await waitWithTimeout(tx);
 
                 showToast("toast_leave_guild_success", false);
-                await fetchUserData(); // refresh dashboard
-                await fetchStudentRegistry();
+                try {
+                    await fetchUserData(); // refresh dashboard
+                    await fetchStudentRegistry();
+                } catch (uiErr) {
+                    console.warn("UI refresh warning:", uiErr);
+                }
             } catch (err) {
                 console.error(err);
                 if (typeof handleWeb3Error === 'function') handleWeb3Error(err, "err_leave_guild");
@@ -2715,7 +2761,11 @@
                 const tx = await voterContract.kick_from_guild(studentAddr, await getGasOverrides());
                 await waitWithTimeout(tx);
                 showToast("toast_kick_success", false);
-                await fetchStudentRegistry();
+                try {
+                    await fetchStudentRegistry();
+                } catch (uiErr) {
+                    console.warn("UI refresh warning:", uiErr);
+                }
             } catch (err) {
                 console.error(err);
                 if (typeof handleWeb3Error === 'function') handleWeb3Error(err, "err_kick");
@@ -2765,74 +2815,78 @@
                 document.getElementById("daily-code-display").innerText = code;
                 showToast(t("toast_code_generated") || "Код успешно сгенерирован!", false);
 
-                let timeLeft = 25;
-                clearInterval(countdownInterval);
-                const timerEl = document.getElementById("daily-code-timer");
-                const studentTimerEl = document.getElementById("student-attendance-timer");
-                const attendanceInput = document.getElementById("attendance-code-input");
-                const claimBtn = document.getElementById("btn-claim-attendance");
+                try {
+                    let timeLeft = 25;
+                    clearInterval(countdownInterval);
+                    const timerEl = document.getElementById("daily-code-timer");
+                    const studentTimerEl = document.getElementById("student-attendance-timer");
+                    const attendanceInput = document.getElementById("attendance-code-input");
+                    const claimBtn = document.getElementById("btn-claim-attendance");
 
-                // Initialize timer displays and enable controls
-                if (timerEl) {
-                    timerEl.classList.remove("hidden", "text-rose-500");
-                    timerEl.classList.add("animate-pulse", "text-amber-500");
-                    timerEl.innerText = `Осталось времени: 25 сек`;
-                }
-                if (studentTimerEl) {
-                    studentTimerEl.classList.remove("hidden", "text-rose-500");
-                    studentTimerEl.classList.add("animate-pulse", "text-amber-500");
-                    studentTimerEl.innerText = `Осталось времени: 25 сек`;
-                }
-                if (attendanceInput) {
-                    attendanceInput.disabled = false;
-                    attendanceInput.placeholder = "CODE";
-                }
-                if (claimBtn) {
-                    claimBtn.disabled = false;
-                    claimBtn.classList.remove("opacity-50", "cursor-not-allowed");
-                }
-
-                countdownInterval = setInterval(() => {
-                    timeLeft--;
-                    if (timeLeft < 0) {
-                        clearInterval(countdownInterval);
-
-                        if (timerEl) {
-                            timerEl.classList.remove("animate-pulse", "text-amber-500");
-                            timerEl.classList.add("text-rose-500");
-                            timerEl.innerText = "Время действия истекло! ❌";
-                        }
-                        if (studentTimerEl) {
-                            studentTimerEl.classList.remove("animate-pulse", "text-amber-500");
-                            studentTimerEl.classList.add("text-rose-500");
-                            studentTimerEl.innerText = "Время действия истекло! ❌";
-                        }
-                        document.getElementById("daily-code-display").innerText = "----";
-
-                        if (attendanceInput) {
-                            attendanceInput.disabled = true;
-                            attendanceInput.placeholder = "EXPIRED";
-                            attendanceInput.value = "";
-                        }
-                        if (claimBtn) {
-                            claimBtn.disabled = true;
-                            claimBtn.classList.add("opacity-50", "cursor-not-allowed");
-                        }
-
-                        // Reset the attendance reward input field back to its default value of 10
-                        const rewardInputEl = document.getElementById("attendanceRewardInput");
-                        if (rewardInputEl) {
-                            rewardInputEl.value = "10";
-                        }
-                        attendanceRewardAmount = 10;
-
-                        return;
+                    // Initialize timer displays and enable controls
+                    if (timerEl) {
+                        timerEl.classList.remove("hidden", "text-rose-500");
+                        timerEl.classList.add("animate-pulse", "text-amber-500");
+                        timerEl.innerText = `Осталось времени: 25 сек`;
+                    }
+                    if (studentTimerEl) {
+                        studentTimerEl.classList.remove("hidden", "text-rose-500");
+                        studentTimerEl.classList.add("animate-pulse", "text-amber-500");
+                        studentTimerEl.innerText = `Осталось времени: 25 сек`;
+                    }
+                    if (attendanceInput) {
+                        attendanceInput.disabled = false;
+                        attendanceInput.placeholder = "CODE";
+                    }
+                    if (claimBtn) {
+                        claimBtn.disabled = false;
+                        claimBtn.classList.remove("opacity-50", "cursor-not-allowed");
                     }
 
-                    const text = `Осталось времени: ${timeLeft} сек`;
-                    if (timerEl) timerEl.innerText = text;
-                    if (studentTimerEl) studentTimerEl.innerText = text;
-                }, 1000);
+                    countdownInterval = setInterval(() => {
+                        timeLeft--;
+                        if (timeLeft < 0) {
+                            clearInterval(countdownInterval);
+
+                            if (timerEl) {
+                                timerEl.classList.remove("animate-pulse", "text-amber-500");
+                                timerEl.classList.add("text-rose-500");
+                                timerEl.innerText = "Время действия истекло! ❌";
+                            }
+                            if (studentTimerEl) {
+                                studentTimerEl.classList.remove("animate-pulse", "text-amber-500");
+                                studentTimerEl.classList.add("text-rose-500");
+                                studentTimerEl.innerText = "Время действия истекло! ❌";
+                            }
+                            document.getElementById("daily-code-display").innerText = "----";
+
+                            if (attendanceInput) {
+                                attendanceInput.disabled = true;
+                                attendanceInput.placeholder = "EXPIRED";
+                                attendanceInput.value = "";
+                            }
+                            if (claimBtn) {
+                                claimBtn.disabled = true;
+                                claimBtn.classList.add("opacity-50", "cursor-not-allowed");
+                            }
+
+                            // Reset the attendance reward input field back to its default value of 10
+                            const rewardInputEl = document.getElementById("attendanceRewardInput");
+                            if (rewardInputEl) {
+                                rewardInputEl.value = "10";
+                            }
+                            attendanceRewardAmount = 10;
+
+                            return;
+                        }
+
+                        const text = `Осталось времени: ${timeLeft} сек`;
+                        if (timerEl) timerEl.innerText = text;
+                        if (studentTimerEl) studentTimerEl.innerText = text;
+                    }, 1000);
+                } catch (uiErr) {
+                    console.warn("UI refresh warning:", uiErr);
+                }
             } catch (err) {
                 console.error(err);
                 document.getElementById("daily-code-display").innerText = "----";
@@ -2868,21 +2922,28 @@
                 await waitWithTimeout(tx);
                 hideLoader();
 
-                const rewardAmountStr = await voterContract.current_attendance_reward();
-                const rewardVal = rewardAmountStr.toNumber();
-                document.getElementById("voting-status").innerText = `Attendance Claimed! +${rewardVal} SGC 🎉`;
-                document.getElementById("voting-status").className = "mt-6 text-center text-sm font-bold text-emerald-400";
-                document.getElementById("attendance-code-input").value = "";
-
-                // Hide student timer on successful claim
-                const studentTimerEl = document.getElementById("student-attendance-timer");
-                if (studentTimerEl) {
-                    studentTimerEl.classList.add("hidden");
-                }
-
                 showToast(t("toast_attendance_claimed") || "Посещаемость подтверждена! Награда начислена.", false);
-                await fetchUserData();
-                loadPollTopics();
+                try {
+                    let rewardVal = attendanceRewardAmount;
+                    try {
+                        const rewardAmountStr = await voterContract.current_attendance_reward();
+                        rewardVal = rewardAmountStr.toNumber();
+                    } catch (e) { }
+                    document.getElementById("voting-status").innerText = `Attendance Claimed! +${rewardVal} SGC 🎉`;
+                    document.getElementById("voting-status").className = "mt-6 text-center text-sm font-bold text-emerald-400";
+                    document.getElementById("attendance-code-input").value = "";
+
+                    // Hide student timer on successful claim
+                    const studentTimerEl = document.getElementById("student-attendance-timer");
+                    if (studentTimerEl) {
+                        studentTimerEl.classList.add("hidden");
+                    }
+
+                    await fetchUserData();
+                    await loadPollTopics();
+                } catch (uiErr) {
+                    console.warn("UI refresh warning:", uiErr);
+                }
             } catch (err) {
                 console.error("Attendance claim error:", err);
                 if (tx && tx.hash) {
@@ -2921,10 +2982,14 @@
                 const tx = await voterContract.buyItem(itemId, params);
                 await waitWithTimeout(tx); // Wait for purchase to be mined
                 hideLoader();
-                hideLoader();
                 showToast(t("toast_purchase_success") || "Покупка успешно совершена!", false);
-                await fetchUserData();
-                loadPollTopics();
+                try {
+                    await fetchUserData();
+                    if (isStudent) await loadStudentInventory();
+                    await loadPollTopics();
+                } catch (uiErr) {
+                    console.warn("UI refresh warning:", uiErr);
+                }
             } catch (err) {
                 console.error("FULL ERROR OBJECT:", err);
                 if (typeof handleWeb3Error === 'function') handleWeb3Error(err, "err_buy_failed");
@@ -2953,7 +3018,7 @@
 
         async function savePollTopics() {
             const btn = document.querySelector('button[onclick="savePollTopics()"]');
-            const originalText = btn ? btn.innerText : "Save Topics";
+            const originalHtml = btn ? btn.innerHTML : "Save Topics";
             if (btn) {
                 btn.innerText = "Saving...";
                 btn.disabled = true;
@@ -2972,19 +3037,23 @@
                 await waitWithTimeout(tx);
                 hideLoader();
 
-                if (btn) btn.innerText = "Confirmed! Reloading...";
                 showToast(t("toast_quests_updated") || "Названия квестов обновлены!", false);
-                setTimeout(() => window.location.reload(), 2000);
+                try {
+                    await loadPollTopics();
+                    await fetchProposals();
+                } catch (uiErr) {
+                    console.warn("UI refresh warning:", uiErr);
+                }
             } catch (err) {
                 console.error("FULL ERROR OBJECT:", err);
                 if (typeof handleWeb3Error === 'function') handleWeb3Error(err);
                 else showToast("Error saving quests: " + (err.message || err), true);
-                if (btn) {
-                    btn.innerText = originalText;
-                }
             } finally {
                 hideLoader();
-                if (btn) btn.disabled = false;
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = originalHtml;
+                }
             }
         }
 
@@ -3007,15 +3076,23 @@
                 hideLoader();
 
                 showToast(t("toast_round_started") || "Новый раунд успешно начат!", false);
-                setTimeout(() => window.location.reload(), 2000);
+                try {
+                    await loadQuestNamesFromChain();
+                    await fetchProposals();
+                } catch (uiErr) {
+                    console.warn("UI refresh warning:", uiErr);
+                }
             } catch (err) {
                 console.error("startNewRound error:", err);
                 if (typeof handleWeb3Error === 'function') handleWeb3Error(err);
                 else showToast("Error starting round: " + (err.message || err), true);
-                if (btn) { btn.style.transform = ""; btn.style.transition = ""; }
             } finally {
                 hideLoader();
-                if (btn) btn.disabled = false;
+                if (btn) {
+                    btn.style.transform = "";
+                    btn.style.transition = "";
+                    btn.disabled = false;
+                }
             }
         }
 
@@ -3265,7 +3342,7 @@
             }
 
             const btn = document.querySelector('button[onclick="addMarketItem()"]');
-            const originalText = btn ? btn.innerText : "Add Item";
+            const originalHtml = btn ? btn.innerHTML : "Add Item";
             if (btn) {
                 btn.innerText = "Adding...";
                 btn.disabled = true;
@@ -3282,25 +3359,33 @@
                 await waitWithTimeout(tx);
                 hideLoader();
 
-                if (btn) btn.innerText = "Confirmed! Reloading...";
-                showToast("Товар добавлен в магазин!", false);
-                setTimeout(() => window.location.reload(), 2000);
+                showToast(t("toast_item_added") || "Товар добавлен в магазин!", false);
+                try {
+                    document.getElementById("market-item-name").value = "";
+                    document.getElementById("market-item-price").value = "";
+                    document.getElementById("market-item-type").value = "1";
+                    onItemTypeChange();
+                    await renderMarketItems();
+                    await loadMarketLogs();
+                } catch (uiErr) {
+                    console.warn("UI refresh warning:", uiErr);
+                }
             } catch (err) {
                 console.error("FULL ERROR OBJECT:", err);
                 if (typeof handleWeb3Error === 'function') handleWeb3Error(err);
                 else showToast("Error: " + (err.message || err), true);
-                if (btn) btn.innerText = originalText;
             } finally {
                 hideLoader();
-                if (btn) btn.disabled = false;
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = originalHtml;
+                }
             }
         }
 
         // ── V7: Token Sink JS Functions ──────────────────────────────────────────────
 
         async function activateConsumable(itemId, btn) {
-            const lg = localStorage.getItem('lang') || 'en';
-            const t = translations[lg];
             const originalText = btn ? btn.innerText : '';
             try {
                 if (btn) { btn.disabled = true; btn.innerText = '...'; }
@@ -3309,12 +3394,16 @@
                 const tx = await voterContract.activate_consumable_item(itemId, params);
                 await waitWithTimeout(tx);
                 hideLoader();
-                showToast(t.activate_success || 'Предмет активирован!', false);
-                await fetchUserData();
-                await loadStudentInventory();
+                showToast(t('activate_success') || 'Предмет активирован!', false);
+                try {
+                    await fetchUserData();
+                    await loadStudentInventory();
+                } catch (uiErr) {
+                    console.warn("UI refresh warning:", uiErr);
+                }
             } catch (err) {
                 console.error('activateConsumable error:', err);
-                if (typeof handleWeb3Error === 'function') handleWeb3Error(err, t.err_not_owned || 'err_not_owned_fallback');
+                if (typeof handleWeb3Error === 'function') handleWeb3Error(err, t('err_not_owned') || 'err_not_owned_fallback');
                 else showToast('Error: ' + (err.message || err), true);
             } finally {
                 hideLoader();
@@ -3323,8 +3412,6 @@
         }
 
         async function recycleItem(itemId, refundPercent, btn) {
-            const lg = localStorage.getItem('lang') || 'en';
-            const t = translations[lg];
             const originalText = btn ? btn.innerText : '';
             try {
                 if (btn) { btn.disabled = true; btn.innerText = '...'; }
@@ -3333,12 +3420,16 @@
                 const tx = await voterContract.recycle_item(itemId, params);
                 await waitWithTimeout(tx);
                 hideLoader();
-                showToast(t.recycle_success || 'Предмет сдан! SGC возвращены.', false);
-                await fetchUserData();
-                await loadStudentInventory();
+                showToast(t('recycle_success') || 'Предмет сдан! SGC возвращены.', false);
+                try {
+                    await fetchUserData();
+                    await loadStudentInventory();
+                } catch (uiErr) {
+                    console.warn("UI refresh warning:", uiErr);
+                }
             } catch (err) {
                 console.error('recycleItem error:', err);
-                if (typeof handleWeb3Error === 'function') handleWeb3Error(err, t.err_not_owned || 'err_not_owned_fallback');
+                if (typeof handleWeb3Error === 'function') handleWeb3Error(err, t('err_not_owned') || 'err_not_owned_fallback');
                 else showToast('Error: ' + (err.message || err), true);
             } finally {
                 hideLoader();
@@ -3347,8 +3438,6 @@
         }
 
         async function transformToXP(itemId, xpBonus, btn) {
-            const lg = localStorage.getItem('lang') || 'en';
-            const t = translations[lg];
             const originalText = btn ? btn.innerText : '';
             try {
                 if (btn) { btn.disabled = true; btn.innerText = '...'; }
@@ -3357,13 +3446,17 @@
                 const tx = await voterContract.transform_item_to_xp(itemId, params);
                 await waitWithTimeout(tx);
                 hideLoader();
-                const successMsg = (t.transform_success || '+%s XP получено!').replace('%s', xpBonus);
+                const successMsg = (t('transform_success') || '+%s XP получено!').replace('%s', xpBonus);
                 showToast(successMsg, false);
-                await fetchUserData();
-                await loadStudentInventory();
+                try {
+                    await fetchUserData();
+                    await loadStudentInventory();
+                } catch (uiErr) {
+                    console.warn("UI refresh warning:", uiErr);
+                }
             } catch (err) {
                 console.error('transformToXP error:', err);
-                if (typeof handleWeb3Error === 'function') handleWeb3Error(err, t.err_not_owned || 'err_not_owned_fallback');
+                if (typeof handleWeb3Error === 'function') handleWeb3Error(err, t('err_not_owned') || 'err_not_owned_fallback');
                 else showToast('Error: ' + (err.message || err), true);
             } finally {
                 hideLoader();
@@ -3394,10 +3487,13 @@
                 await waitWithTimeout(tx);
                 hideLoader();
 
-                const b = getBtn();
-                if (b) b.innerText = 'Confirmed! Reloading...';
-                showToast("Статус товара обновлен!", false);
-                setTimeout(() => window.location.reload(), 2000);
+                showToast(t("toast_item_status_updated") || "Статус товара обновлен!", false);
+                try {
+                    await renderMarketItems();
+                    await loadMarketLogs();
+                } catch (uiErr) {
+                    console.warn("UI refresh warning:", uiErr);
+                }
 
             } catch (err) {
                 console.error('FULL ERROR OBJECT:', err);
@@ -3651,9 +3747,6 @@
                 "i18n_9": "Gold Stash (SGC)",
                 "i18n_10": "Updating privacy...",
                 "i18n_11": "Claim Attendance",
-                "i18n_hide_wallet": "Скрыть кошелек из рейтинга",
-                "i18n_gold_stash": "Золотой запас (SGC)",
-                "guild_leader_badge": "👑 Лидер Гильдии",
                 "i18n_hide_wallet": "Hide Wallet from Leaderboard",
                 "i18n_gold_stash": "Gold Stash (SGC)",
                 "guild_leader_badge": "👑 Guild Leader",
@@ -3662,22 +3755,24 @@
                 "toast_no_metamask_short": "MetaMask not found!",
                 "toast_registry_empty": "Registry empty",
                 "reward_granted_success": "Reward successfully granted!",
-                "toast_reward_success": "Награда успешно начислена!",
-                "toast_tx_sent": "Транзакция отправлена, но возможно прервана. Проверьте через пару минут.",
-                "toast_invalid_amount": "Сумма должна быть от 1 до 50 SGC",
-                "toast_code_generated": "Код успешно сгенерирован!",
-                "toast_attendance_claimed": "Посещаемость подтверждена! Награда начислена.",
-                "toast_purchase_success": "Покупка успешно совершена!",
-                "toast_quests_updated": "Названия квестов обновлены!",
-                "toast_round_started": "Новый раунд успешно начат!",
+                "toast_reward_success": "Reward successfully granted!",
+                "toast_tx_sent": "Transaction sent, please check status in a few minutes.",
+                "toast_invalid_amount": "Amount must be between 1 and 50 SGC",
+                "toast_code_generated": "Code generated successfully!",
+                "toast_attendance_claimed": "Attendance claimed! Reward granted.",
+                "toast_purchase_success": "Purchase completed successfully!",
+                "toast_quests_updated": "Quest names updated!",
+                "toast_round_started": "New round started successfully!",
                 "toast_enter_name_price": "Enter item name and price.",
                 "toast_invalid_refund": "Refund % must be 0–100.",
-                "toast_privacy_updated": "Настройки приватности обновлены!",
+                "toast_item_added": "Item added to the store!",
+                "toast_item_status_updated": "Item status updated!",
+                "toast_privacy_updated": "Privacy settings updated!",
                 "toast_enter_amount": "Enter custom amount",
                 "toast_enter_group": "Enter Target Group ID",
-                "toast_enter_amount": "Enter Custom Amount",
-                "toast_group_reward_success": "Групповая награда успешно начислена!",
-                "toast_wrong_network": "Вы в старой сети! Нажмите 'Setup Network', чтобы переключиться на актуальную версию 0G Galileo.",
+                "toast_group_reward_success": "Group reward granted successfully!",
+                "toast_wrong_network": "Wrong network! Click 'Setup Network' to switch to 0G Galileo.",
+                "toast_no_members": "No members found in this guild.",
                 "i18n_minor_quest": "Minor Quest",
                 "i18n_major_quest": "Major Quest",
                 "i18n_epic_raid": "Epic Boss Raid",
@@ -3688,7 +3783,7 @@
                 "guild_id_placeholder": "Guild ID",
                 "load_guild_hint": "Load a guild to see members",
                 "i18n_12": "Enter the Beacon Code provided by the Game Master.",
-                "i18n_13": "Осталось времени: 25 сек",
+                "i18n_13": "Time left: 25 sec",
                 "i18n_14": "Claim",
                 "no_artifacts": "You don't have any purchased artifacts yet.",
                 "i18n_17": "Active Quests (Voting)",
@@ -3722,9 +3817,9 @@
                 "i18n_45": "Custom Amount (XP)",
                 "i18n_46": "Reason for Reward",
                 "i18n_47": "Beacon Timer",
-                "i18n_48": "Вознаграждение за посещаемость (SGC)",
+                "i18n_48": "Attendance Reward (SGC)",
                 "i18n_49": "Generate Daily Code",
-                "i18n_50": "Осталось времени: 25 сек",
+                "i18n_50": "Time left: 25 sec",
                 "i18n_51": "Market Logs",
                 "i18n_52": "Student",
                 "wallet_addr": "Wallet",
@@ -3802,6 +3897,7 @@
             },
             "ru": {
                 "err_OnlyGM": "Доступ запрещен: действие доступно только Преподавателю.",
+                "err_NotMasterOrLeader": "Доступ запрещен: действие доступно только Мастеру или Лидеру Гильдии.",
                 "err_AlreadyVoted": "Ошибка: Вы уже проголосовали в этом раунде.",
                 "err_HasRights": "Ошибка: У студента уже есть права голоса.",
                 "err_NickTaken": "Ошибка: Этот никнейм уже занят.",
@@ -3852,6 +3948,13 @@
                 "leave_pay_xp": "Заплатить репутацией (-50 XP)",
                 "leave_cancel": "Отмена",
                 "kick_btn": "Исключить",
+                "kick_confirm": "Вы уверены, что хотите исключить этого студента из гильдии?",
+                "toast_kick_success": "Студент успешно исключен из гильдии!",
+                "err_kick": "Не удалось исключить студента.",
+                "toast_leave_guild_success": "Вы успешно покинули гильдию!",
+                "err_leave_guild": "Не удалось покинуть гильдию.",
+                "toast_error_prefix": "Произошла ошибка.",
+                "toast_no_members": "В этой гильдии не найдено участников.",
                 "guild_vault": "Сейф Гильдии",
                 "dao_premiums": "DAO Премии",
                 "vault_distribution": "Распределение Казны Гильдии",
@@ -3951,10 +4054,11 @@
                 "toast_round_started": "Новый раунд успешно начат!",
                 "toast_enter_name_price": "Введите название и цену.",
                 "toast_invalid_refund": "Процент возврата должен быть от 0 до 100.",
+                "toast_item_added": "Товар добавлен в магазин!",
+                "toast_item_status_updated": "Статус товара обновлен!",
                 "toast_privacy_updated": "Настройки приватности обновлены!",
                 "toast_enter_amount": "Введите сумму",
                 "toast_enter_group": "Введите ID группы",
-                "toast_enter_amount": "Введите сумму",
                 "toast_group_reward_success": "Групповая награда успешно начислена!",
                 "toast_wrong_network": "Неверная сеть! Переключитесь на 0G Galileo.",
                 "i18n_minor_quest": "МАЛЫЙ КВЕСТ",
@@ -4476,13 +4580,18 @@
                 await waitWithTimeout(tx);
                 showToast(`${t("toast_guild_created")} #${guildId}`, "success");
 
-                const guildInput = document.getElementById("admin-create-guild-id");
-                if (guildInput) {
-                    await loadGuildComposition(guildId);
-                } else {
-                    guildBuilderInit();
+                try {
+                    const guildInput = document.getElementById("admin-create-guild-id");
+                    if (guildInput) {
+                        await loadGuildComposition(guildId);
+                    } else {
+                        guildBuilderInit();
+                    }
+                    await populateGuildPool();
+                    await fetchStudentRegistry();
+                } catch (uiErr) {
+                    console.warn("UI refresh warning:", uiErr);
                 }
-                await populateGuildPool();
             } catch (e) {
                 console.error(e);
                 showToast(parseContractError(e), "error");
@@ -4526,9 +4635,13 @@
                 showToast(`Tx sent: ${tx.hash.substring(0, 10)}...`, "info");
                 await waitWithTimeout(tx);
                 showToast(`${t("toast_reward_distributed")} #${guildId}!`, "success");
-                const guildInput = document.getElementById('admin-dist-guild-id');
-                if (guildInput) {
-                    guildInput.value = '';
+                try {
+                    const guildInput = document.getElementById('admin-dist-guild-id');
+                    if (guildInput) {
+                        guildInput.value = '';
+                    }
+                } catch (uiErr) {
+                    console.warn("UI refresh warning:", uiErr);
                 }
             } catch (e) {
                 console.error(e);
@@ -4681,7 +4794,11 @@
                 showToast(`Tx sent: ${tx.hash.substring(0, 10)}…`, 'info');
                 await waitWithTimeout(tx);
                 showToast(t('toast_reward_distributed') || `✅ Vault distributed for Guild #${_vaultGuildId}!`, 'success');
-                await loadVaultAction();
+                try {
+                    await loadVaultAction();
+                } catch (uiErr) {
+                    console.warn("UI refresh warning:", uiErr);
+                }
             } catch (e) {
                 console.error(e);
                 showToast(parseContractError(e), 'error');
@@ -4837,7 +4954,11 @@
                 showToast(`Tx sent: ${tx.hash.substring(0, 10)}…`, 'info');
                 await waitWithTimeout(tx);
                 showToast(t('toast_reward_distributed') || `✅ Vault distributed for Guild #${guildId}!`, 'success');
-                await loadStudentVaultAction();
+                try {
+                    await loadStudentVaultAction();
+                } catch (uiErr) {
+                    console.warn("UI refresh warning:", uiErr);
+                }
             } catch (e) {
                 console.error(e);
                 showToast(parseContractError(e), 'error');
