@@ -4676,7 +4676,9 @@
                 if (srcSlot) clearSlot(srcSlot, false); // clear without returning to pool
             } else {
                 // From pool → remove card from pool
-                const poolCard = document.querySelector(`#guild-student-pool [data-address="${address}"]`);
+                const normAddr = String(address || "").toLowerCase();
+                const poolCards = document.querySelectorAll("#guild-student-pool .guild-student-card");
+                const poolCard = Array.from(poolCards).find(c => String(c.dataset.address || "").toLowerCase() === normAddr);
                 if (poolCard) poolCard.remove();
                 updatePoolEmptyHint();
             }
@@ -4689,41 +4691,25 @@
             updateGuildSlotCount();
         }
 
-        function clearSlot(slot, returnToPool = true) {
-            // Read student data BEFORE clearing innerHTML
-            const card = slot.querySelector(".guild-student-card");
-            const student = card
-                ? { address: card.dataset.address, nickname: card.dataset.nickname, xp: parseInt(card.dataset.xp) }
-                : null;
+        function getEditingGuildId() {
+            const raw = (document.getElementById("admin-create-guild-id")?.value || "").trim();
+            const parsed = parseInt(raw, 10);
+            return (!isNaN(parsed) && parsed > 0) ? parsed : 0;
+        }
 
-            const idx = parseInt(slot.dataset.slotIndex);
+        function clearSlot(slot, returnToPool = true) {
+            const idx = parseInt(slot.dataset.slotIndex, 10);
 
             // Replace the slot element entirely so no stale event listeners accumulate
             const freshSlot = createEmptySlot(idx);
             slot.parentNode.replaceChild(freshSlot, slot);
 
-            if (returnToPool && student) returnCardToPool(student);
             updateGuildSlotCount();
+            if (returnToPool) populateGuildPool();
         }
 
         async function returnCardToPool(student) {
-            const pool = document.getElementById("guild-student-pool");
-            if (!pool) return;
-            // Avoid duplicates
-            if (pool.querySelector(`[data-address="${student.address}"]`)) return;
-
-            // Strict filtering: ONLY students with guild_id == 0 are allowed in the pool
-            try {
-                if (voterContract) {
-                    const gid = await voterContract.student_to_guild(student.address);
-                    if (gid.toNumber() > 0) return;
-                }
-            } catch (e) {
-                console.error("Failed to check student_to_guild in returnCardToPool", e);
-            }
-
-            pool.appendChild(createStudentCard(student, false));
-            updatePoolEmptyHint();
+            await populateGuildPool();
         }
 
         function guildPoolDragOver(e) { e.preventDefault(); }
@@ -4732,10 +4718,10 @@
             e.preventDefault();
             if (!guildDraggedCardData || guildDraggedCardData.fromSlot === null) return;
             // Dragged from a slot back to pool
-            const { fromSlot, address, nickname, xp } = guildDraggedCardData;
+            const { fromSlot } = guildDraggedCardData;
             const srcSlot = document.querySelector(`.guild-drop-slot[data-slot-index="${fromSlot}"]`);
-            if (srcSlot) clearSlot(srcSlot, false);
-            returnCardToPool({ address, nickname, xp });
+            if (srcSlot) clearSlot(srcSlot, true);
+            else populateGuildPool();
         }
 
         function updatePoolEmptyHint() {
@@ -4752,9 +4738,12 @@
             if (el) el.textContent = `${filled}/5`;
         }
 
+        let guildPoolSeq = 0;
+
         async function populateGuildPool() {
             const pool = document.getElementById("guild-student-pool");
             if (!pool) return;
+            const mySeq = ++guildPoolSeq;
             pool.innerHTML = `<p class="text-slate-600 text-xs text-center py-6 italic animate-pulse">${t('guild_pool_loading')}</p>`;
 
             if (!registryData || registryData.length === 0) {
@@ -4762,23 +4751,37 @@
                 return;
             }
 
-            // Query the contract to find out which students are already in a guild
+            const editingGuildId = getEditingGuildId();
             const alreadyInSlot = new Set(
-                Array.from(document.querySelectorAll("#guild-drop-zone .guild-student-card")).map(c => c.dataset.address)
+                Array.from(document.querySelectorAll("#guild-drop-zone .guild-student-card"))
+                    .map(c => String(c.dataset.address || "").trim().toLowerCase())
+                    .filter(Boolean)
             );
 
             const freeStudents = [];
             for (const student of registryData) {
-                if (alreadyInSlot.has(student.address)) continue;
-                try {
-                    const guildIdBN = await voterContract.student_to_guild(student.address);
-                    if (guildIdBN.toNumber() === 0) {
-                        freeStudents.push(student);
+                const normAddr = String(student?.address || "").trim().toLowerCase();
+                if (!normAddr || alreadyInSlot.has(normAddr)) continue;
+
+                let studentGuildId = 0;
+                if (typeof student.guildId === "number") {
+                    studentGuildId = student.guildId;
+                } else if (voterContract && typeof voterContract.student_to_guild === "function") {
+                    try {
+                        const guildIdBN = await voterContract.student_to_guild(student.address);
+                        if (mySeq !== guildPoolSeq) return;
+                        studentGuildId = guildIdBN.toNumber();
+                    } catch {
+                        studentGuildId = 0;
                     }
-                } catch {
-                    freeStudents.push(student); // if call fails, show the student anyway
+                }
+
+                if (studentGuildId === 0 || (editingGuildId > 0 && studentGuildId === editingGuildId)) {
+                    freeStudents.push(student);
                 }
             }
+
+            if (mySeq !== guildPoolSeq) return;
 
             pool.innerHTML = "";
             const hint = document.createElement("p");
@@ -4795,9 +4798,9 @@
         async function loadGuildComposition(guildId) {
             if (!voterContract || !registryData || registryData.length === 0) return;
 
-            // Clear current slots to prepare for new data (returns any existing cards to pool)
+            // Clear current slots to prepare for new data
             document.querySelectorAll("#guild-drop-zone .guild-drop-slot").forEach(slot => {
-                clearSlot(slot, true);
+                clearSlot(slot, false);
             });
 
             if (!isNaN(guildId) && guildId > 0) {
@@ -4828,10 +4831,6 @@
 
                         activeMembers.forEach((student, i) => {
                             if (i < slots.length) {
-                                // First remove from pool if they are there
-                                const poolCard = document.querySelector(`#guild-student-pool .guild-student-card[data-address="${student.address}"]`);
-                                if (poolCard) poolCard.remove();
-
                                 const slot = slots[i];
                                 slot.innerHTML = "";
                                 slot.classList.remove("slot-empty");
@@ -4839,13 +4838,14 @@
                                 slot.appendChild(createStudentCard(student, true));
                             }
                         });
-                        updateGuildSlotCount();
-                        updatePoolEmptyHint();
                     }
                 } catch (err) {
                     console.error("Failed to load guild members", err);
                 }
             }
+
+            updateGuildSlotCount();
+            await populateGuildPool();
         }
 
         async function createGuildAction() {
@@ -4863,9 +4863,19 @@
                 return;
             }
 
-            // Collect members from filled slots
+            // Collect members from filled slots without gaps before padding ZERO_ADDR at the end
             const slotCards = document.querySelectorAll("#guild-drop-zone .guild-drop-slot.slot-filled .guild-student-card");
-            const members = Array.from(slotCards).map(c => c.dataset.address);
+            const seenMembers = new Set();
+            const members = Array.from(slotCards)
+                .map(c => String(c.dataset.address || "").trim())
+                .filter(addr => {
+                    if (!addr) return false;
+                    const lower = addr.toLowerCase();
+                    if (lower === ZERO_ADDR || seenMembers.has(lower)) return false;
+                    if (!ethers.utils.isAddress(addr)) return false;
+                    seenMembers.add(lower);
+                    return true;
+                });
 
             if (members.length === 0) {
                 showToast(t("toast_guild_min"), "error");
