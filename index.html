@@ -1827,7 +1827,10 @@
                 const savedTab = sessionStorage.getItem('activeTab');
                 if (savedTab && ['voting', 'leaderboard', 'market', 'admin'].includes(savedTab)) {
                     if (savedTab !== 'admin' || isAdmin) {
-                        switchTab(savedTab);
+                        const tabEl = document.getElementById('tab-' + savedTab);
+                        if (!tabEl || !tabEl.classList.contains('active')) {
+                            switchTab(savedTab);
+                        }
                     }
                 }
             } catch (e) { }
@@ -2562,35 +2565,51 @@
 
         // --- Student Registry Logic ---
         let registryData = [];
+        let registryFetchSeq = 0;
 
         async function fetchStudentRegistry() {
             const tbody = document.getElementById("registry-tbody");
             const badge = document.getElementById("registry-count-badge");
             if (!tbody) return;
 
+            const mySeq = ++registryFetchSeq;
             tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-sky-400 animate-pulse font-bold">Loading registry...</td></tr>`;
 
             try {
                 const countRes = await voterContract.get_student_count();
+                if (mySeq !== registryFetchSeq) return;
+
                 const count = countRes.toNumber();
                 if (badge) badge.innerText = count;
 
                 if (count === 0) {
+                    registryData = [];
                     tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-500">No students yet.</td></tr>`;
                     return;
                 }
 
-                registryData = [];
+                const freshRegistry = [];
+                const seenAddresses = new Set();
                 for (let i = 0; i < count; i++) {
                     const addr = await voterContract.student_addresses(i);
+                    if (mySeq !== registryFetchSeq) return;
+
+                    const normAddr = String(addr || '').toLowerCase();
+                    if (!normAddr || seenAddresses.has(normAddr)) continue;
+                    seenAddresses.add(normAddr);
+
                     const s = await voterContract.students(addr);
+                    if (mySeq !== registryFetchSeq) return;
+
                     let guildId = 0;
                     try { guildId = (await voterContract.student_to_guild(addr)).toNumber(); } catch { }
-                    registryData.push({ address: addr, nickname: s[0], group: s[1], xp: s[2].toNumber(), guildId });
+                    if (mySeq !== registryFetchSeq) return;
+
+                    freshRegistry.push({ address: addr, nickname: s[0], group: s[1], xp: s[2].toNumber(), guildId });
                 }
 
                 // Gather unique guild IDs to fetch leaders in batch
-                const uniqueGuildIds = [...new Set(registryData.filter(r => r.guildId > 0).map(r => r.guildId))];
+                const uniqueGuildIds = [...new Set(freshRegistry.filter(r => r.guildId > 0).map(r => r.guildId))];
                 const guildLeaders = {}; // guildId -> leader address (lowercase)
                 await Promise.all(uniqueGuildIds.map(async gid => {
                     try {
@@ -2598,6 +2617,11 @@
                         guildLeaders[gid] = leader.toLowerCase();
                     } catch { guildLeaders[gid] = ''; }
                 }));
+
+                if (mySeq !== registryFetchSeq) return;
+
+                registryData = freshRegistry;
+                if (badge) badge.innerText = registryData.length;
 
                 tbody.innerHTML = registryData.map((r, i) => {
                     const isLeader = r.guildId > 0 && guildLeaders[r.guildId] === r.address.toLowerCase();
@@ -2623,9 +2647,11 @@
                 `}).join("");
 
                 // Sync the Guild Builder student pool with fresh registry data
-                populateGuildPool();
+                await populateGuildPool();
+                if (mySeq !== registryFetchSeq) return;
                 if (typeof setLanguage === 'function') setLanguage(localStorage.getItem('lang') || 'en');
             } catch (err) {
+                if (mySeq !== registryFetchSeq) return;
                 console.error(err);
                 tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-rose-500 font-bold">Failed to load registry.</td></tr>`;
             }
@@ -4678,8 +4704,15 @@
         }
 
         async function createGuildAction() {
-            const guildIdStr = document.getElementById("admin-create-guild-id").value;
-            const guildId = parseInt(guildIdStr);
+            const btn = document.querySelector('button[onclick="createGuildAction()"]');
+            if (isTxPending || (btn && btn.disabled)) return;
+            if (!voterContract) {
+                showToast(t("toast_no_metamask_short") || "Wallet not connected", "error");
+                return;
+            }
+
+            const guildIdStr = (document.getElementById("admin-create-guild-id")?.value || "").trim();
+            const guildId = parseInt(guildIdStr, 10);
             if (isNaN(guildId) || guildId <= 0) {
                 showToast(t("toast_invalid_guild"), "error");
                 return;
@@ -4697,30 +4730,54 @@
             // Pad to 5 with zero address (contract expects DynArray[address, 5])
             while (members.length < 5) members.push(ZERO_ADDR);
 
+            isTxPending = true;
+            if (btn) {
+                btn.disabled = true;
+                btn.classList.add("opacity-50", "cursor-not-allowed");
+            }
+
+            let tx;
             try {
                 showLoader(t("toast_creating_guild"));
-                const tx = await voterContract.create_guild(guildId, members);
+                const overrides = await getGasOverrides("0");
+                tx = await voterContract.create_guild(guildId, members, overrides);
                 showToast(`Tx sent: ${tx.hash.substring(0, 10)}...`, "info");
                 await waitWithTimeout(tx);
                 showToast(`${t("toast_guild_created")} #${guildId}`, "success");
 
                 try {
+                    await fetchStudentRegistry();
                     const guildInput = document.getElementById("admin-create-guild-id");
                     if (guildInput) {
                         await loadGuildComposition(guildId);
                     } else {
                         guildBuilderInit();
                     }
-                    await populateGuildPool();
-                    await fetchStudentRegistry();
                 } catch (uiErr) {
                     console.warn("UI refresh warning:", uiErr);
                 }
             } catch (e) {
-                console.error(e);
-                showToast(parseContractError(e), "error");
+                const txHash = tx?.hash || e?.txHash || e?.transactionHash || null;
+                console.error("[createGuildAction] Transaction failed:", {
+                    code: e?.code ?? e?.error?.code ?? null,
+                    reason: e?.reason || e?.error?.message || e?.data?.message || e?.message || String(e),
+                    txHash,
+                    error: e
+                });
+                const isOnChainRevert = e?.code === 'CALL_EXCEPTION' || (e?.receipt && e.receipt.status === 0);
+                if (txHash && !isOnChainRevert) {
+                    showToast((t("err_tx_timeout") || t("toast_tx_sent")) + ` (${txHash.substring(0, 10)}...)`, "info");
+                } else {
+                    if (txHash && e && typeof e === "object" && !e.txHash) e.txHash = txHash;
+                    showToast(parseContractError(e), "error");
+                }
             } finally {
                 hideLoader();
+                isTxPending = false;
+                if (btn) {
+                    btn.disabled = false;
+                    btn.classList.remove("opacity-50", "cursor-not-allowed");
+                }
             }
         }
 
