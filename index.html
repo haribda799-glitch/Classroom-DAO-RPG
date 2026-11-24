@@ -1441,22 +1441,138 @@
             }
         }
 
-        function waitWithTimeout(tx, timeoutMs = 150000) {
-            if (!tx || typeof tx.wait !== "function") {
-                return Promise.resolve(null);
+        function isTransientRpcError(err) {
+            if (!err) return false;
+            const transientCodes = new Set(["-32603", "-32000", "-32005", "SERVER_ERROR", "NETWORK_ERROR", "TIMEOUT"]);
+            const codes = [err.code, err.error?.code, err.data?.code]
+                .filter(c => c !== undefined && c !== null)
+                .map(c => String(c));
+            if (codes.some(c => transientCodes.has(c))) return true;
+
+            const combinedMsg = [
+                err.message,
+                err.reason,
+                err.error?.message,
+                err.data?.message,
+                typeof err.body === "string" ? err.body : ""
+            ].filter(Boolean).join(" ").toLowerCase();
+
+            return [
+                "no matching receipts",
+                "header not found",
+                "missing trie node",
+                "internal json-rpc",
+                "failed to fetch",
+                "network error",
+                "timeout"
+            ].some(substr => combinedMsg.includes(substr));
+        }
+
+        async function waitWithTimeout(tx, timeoutMs = 150000, pollIntervalMs = 2500) {
+            if (!tx) return null;
+
+            const waitFallback = () => {
+                if (typeof tx.wait !== "function") return Promise.resolve(null);
+                let timer;
+                const timeoutPromise = new Promise((_, reject) => {
+                    timer = setTimeout(() => {
+                        const err = new Error("TX_TIMEOUT");
+                        err.code = "TX_TIMEOUT";
+                        err.txHash = tx.hash || null;
+                        reject(err);
+                    }, timeoutMs);
+                });
+                return Promise.race([tx.wait(), timeoutPromise]).finally(() => clearTimeout(timer));
+            };
+
+            if (!tx.hash) {
+                return waitFallback();
             }
-            let timer;
-            const timeoutPromise = new Promise((_, reject) => {
-                timer = setTimeout(() => {
-                    const err = new Error("TX_TIMEOUT");
-                    err.code = "TX_TIMEOUT";
-                    err.txHash = tx.hash || null;
-                    reject(err);
-                }, timeoutMs);
-            });
-            return Promise.race([tx.wait(), timeoutPromise]).finally(() => {
-                clearTimeout(timer);
-            });
+
+            const txHash = tx.hash;
+            const primary = (typeof provider !== "undefined" && provider && typeof provider.getTransactionReceipt === "function")
+                ? { name: "wallet", instance: provider }
+                : (tx.provider && typeof tx.provider.getTransactionReceipt === "function")
+                    ? { name: "tx.provider", instance: tx.provider }
+                    : null;
+            const secondary = (typeof READ_ONLY_PROVIDER !== "undefined" && READ_ONLY_PROVIDER && typeof READ_ONLY_PROVIDER.getTransactionReceipt === "function" && (!primary || READ_ONLY_PROVIDER !== primary.instance))
+                ? { name: "readOnlyRpc", instance: READ_ONLY_PROVIDER }
+                : null;
+
+            const baseCandidates = [primary, secondary].filter(Boolean);
+            if (baseCandidates.length === 0) {
+                return waitFallback();
+            }
+
+            const deadline = Date.now() + timeoutMs;
+            let attempt = 0;
+
+            while (Date.now() < deadline) {
+                const ordered = (attempt % 2 === 1 && baseCandidates.length > 1)
+                    ? [baseCandidates[1], baseCandidates[0]]
+                    : baseCandidates;
+
+                let receipt = null;
+                for (const candidate of ordered) {
+                    const remaining = deadline - Date.now();
+                    if (remaining <= 0) break;
+
+                    const callTimeout = Math.max(100, Math.min(15000, remaining));
+                    let callTimer;
+                    try {
+                        receipt = await Promise.race([
+                            candidate.instance.getTransactionReceipt(txHash),
+                            new Promise((_, reject) => {
+                                callTimer = setTimeout(() => {
+                                    const e = new Error("RPC receipt query timeout");
+                                    e.code = "TIMEOUT";
+                                    reject(e);
+                                }, callTimeout);
+                            })
+                        ]);
+                        break;
+                    } catch (rpcErr) {
+                        if (isTransientRpcError(rpcErr)) {
+                            console.warn("[waitWithTimeout] transient RPC error, retrying...", {
+                                provider: candidate.name,
+                                code: rpcErr?.code ?? rpcErr?.error?.code ?? null,
+                                reason: rpcErr?.reason || rpcErr?.error?.message || rpcErr?.message || String(rpcErr),
+                                txHash
+                            });
+                            continue;
+                        }
+                        if (rpcErr && typeof rpcErr === "object" && !rpcErr.txHash) {
+                            rpcErr.txHash = txHash;
+                        }
+                        throw rpcErr;
+                    } finally {
+                        clearTimeout(callTimer);
+                    }
+                }
+
+                if (receipt) {
+                    if (receipt.status === 0 || receipt.status === "0x0" || receipt.status === false) {
+                        const revertErr = new Error("Transaction reverted on-chain");
+                        revertErr.code = "CALL_EXCEPTION";
+                        revertErr.reason = "transaction failed";
+                        revertErr.receipt = receipt;
+                        revertErr.transactionHash = txHash;
+                        revertErr.txHash = txHash;
+                        throw revertErr;
+                    }
+                    return receipt;
+                }
+
+                attempt++;
+                const remainingAfter = deadline - Date.now();
+                if (remainingAfter <= 0) break;
+                await new Promise(resolve => setTimeout(resolve, Math.min(pollIntervalMs, remainingAfter)));
+            }
+
+            const timeoutErr = new Error("TX_TIMEOUT");
+            timeoutErr.code = "TX_TIMEOUT";
+            timeoutErr.txHash = txHash;
+            throw timeoutErr;
         }
 
         function hideLoader() {
@@ -2924,10 +3040,22 @@
         let attendanceRewardAmount = 10;
         let countdownInterval;
         async function generateDailyCode(event) {
+            const btn = event?.currentTarget || document.querySelector('button[onclick="generateDailyCode(event)"]');
+            if (isTxPending || (btn && btn.disabled)) return;
+
+            if (!voterContract || !signer) {
+                showToast(t("toast_no_metamask_short") || "Wallet not connected", "error");
+                return;
+            }
+
             const rewardInput = document.getElementById("attendanceRewardInput");
-            let rewardVal = rewardInput ? rewardInput.value.trim() : "";
+            const rewardVal = rewardInput ? rewardInput.value.trim() : "";
             let parsedReward = 10;
             if (rewardVal !== "") {
+                if (!/^\d+$/.test(rewardVal)) {
+                    showToast(t("toast_invalid_amount") || "Сумма должна быть от 1 до 50 SGC", true);
+                    return;
+                }
                 parsedReward = parseInt(rewardVal, 10);
             }
             if (isNaN(parsedReward) || parsedReward < 1 || parsedReward > 50) {
@@ -2936,15 +3064,21 @@
             }
             attendanceRewardAmount = parsedReward;
 
-            const btn = event.currentTarget;
-            const originalText = btn.innerText;
-            try {
+            const originalHtml = btn ? btn.innerHTML : "";
+            isTxPending = true;
+            if (btn) {
                 btn.innerText = "Generating...";
                 btn.disabled = true;
+                btn.classList.add("opacity-50", "cursor-not-allowed");
+            }
+
+            let tx;
+            try {
                 showLoader();
                 const code = Math.floor(1000 + Math.random() * 9000).toString();
                 const codeHash = ethers.utils.id(code);
-                const tx = await voterContract.generateDailyCode(codeHash, parsedReward, await getGasOverrides("0"));
+                const overrides = await getGasOverrides("0");
+                tx = await voterContract.generateDailyCode(codeHash, parsedReward, overrides);
                 document.getElementById("daily-code-display").innerText = "Mining...";
                 await waitWithTimeout(tx);
                 hideLoader();
@@ -3025,14 +3159,25 @@
                     console.warn("UI refresh warning:", uiErr);
                 }
             } catch (err) {
-                console.error(err);
+                const txHash = tx?.hash || err?.txHash || err?.transactionHash || null;
+                console.error("[generateDailyCode] Transaction failed:", {
+                    code: err?.code ?? err?.error?.code ?? null,
+                    reason: err?.reason || err?.error?.message || err?.data?.message || err?.message || String(err),
+                    txHash,
+                    error: err
+                });
                 document.getElementById("daily-code-display").innerText = "----";
+                if (txHash && err && typeof err === "object" && !err.txHash) err.txHash = txHash;
                 if (typeof handleWeb3Error === 'function') handleWeb3Error(err);
                 else showToast("Error: " + (err.message || err), true);
             } finally {
                 hideLoader();
-                btn.disabled = false;
-                btn.innerText = originalText;
+                isTxPending = false;
+                if (btn) {
+                    btn.disabled = false;
+                    btn.classList.remove("opacity-50", "cursor-not-allowed");
+                    btn.innerHTML = originalHtml;
+                }
             }
         }
 
