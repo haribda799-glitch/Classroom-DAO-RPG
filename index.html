@@ -1677,10 +1677,19 @@
                 return;
             }
 
+            const gasErrText = [
+                error?.message,
+                error?.reason,
+                error?.error?.message,
+                error?.data?.message,
+                errStr
+            ].filter(Boolean).join(" ").toLowerCase();
+
             const isGasError =
                 (error && error.code === 'INSUFFICIENT_FUNDS') ||
-                (error && error.message && typeof error.message === 'string' && error.message.toLowerCase().includes('insufficient funds')) ||
-                errStr.includes('insufficient funds');
+                gasErrText.includes('insufficient funds') ||
+                gasErrText.includes('gas required exceeds') ||
+                gasErrText.includes('out of gas');
 
             if (isGasError) {
                 showToast(t["err_insufficient_gas"] || "Error: Insufficient gas (A0GI) to send transaction. Please ask the instructor to top up your balance.", true);
@@ -2441,14 +2450,31 @@
 
             let timer;
             try {
-                const currentGasPrice = await Promise.race([
-                    provider.getGasPrice(),
+                const [currentGasPrice, latestBlock] = await Promise.race([
+                    Promise.all([
+                        provider.getGasPrice(),
+                        typeof provider.getBlock === "function"
+                            ? provider.getBlock("latest").catch(() => null)
+                            : Promise.resolve(null)
+                    ]),
                     new Promise((_, reject) => {
                         timer = setTimeout(() => reject(new Error("GAS_PRICE_TIMEOUT")), 12000);
                     })
                 ]);
                 if (currentGasPrice && currentGasPrice.gt(0)) {
-                    txOverrides.gasPrice = currentGasPrice.mul(125).div(100);
+                    const boostedGasPrice = currentGasPrice.mul(125).div(100);
+                    if (latestBlock && latestBlock.baseFeePerGas != null) {
+                        const baseFee = ethers.BigNumber.from(latestBlock.baseFeePerGas);
+                        const lowBaseFeeThreshold = ethers.utils.parseUnits("10", "gwei");
+                        if (baseFee.lt(lowBaseFeeThreshold)) {
+                            const cappedGasPrice = baseFee.mul(2).add(ethers.utils.parseUnits("150", "gwei"));
+                            txOverrides.gasPrice = boostedGasPrice.lt(cappedGasPrice) ? boostedGasPrice : cappedGasPrice;
+                        } else {
+                            txOverrides.gasPrice = boostedGasPrice;
+                        }
+                    } else {
+                        txOverrides.gasPrice = boostedGasPrice;
+                    }
                 }
             } catch (err) {
                 console.warn("[getGasOverrides] RPC gasPrice fetch failed, falling back to wallet estimation:", {
@@ -4550,7 +4576,18 @@
             if (errObj.message === "TX_TIMEOUT" || errCode === "TX_TIMEOUT") {
                 return t("err_tx_timeout");
             }
-            if (errCode === "INSUFFICIENT_FUNDS" || raw.toLowerCase().includes("insufficient funds")) {
+            const gasErrText = [
+                raw,
+                errObj.message,
+                errObj.error?.message,
+                errObj.data?.message
+            ].filter(Boolean).join(" ").toLowerCase();
+            if (
+                errCode === "INSUFFICIENT_FUNDS" ||
+                gasErrText.includes("insufficient funds") ||
+                gasErrText.includes("gas required exceeds") ||
+                gasErrText.includes("out of gas")
+            ) {
                 return t("err_insufficient_gas");
             }
 
