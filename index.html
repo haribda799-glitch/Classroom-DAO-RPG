@@ -2467,7 +2467,7 @@
                         const baseFee = ethers.BigNumber.from(latestBlock.baseFeePerGas);
                         const lowBaseFeeThreshold = ethers.utils.parseUnits("10", "gwei");
                         if (baseFee.lt(lowBaseFeeThreshold)) {
-                            const cappedGasPrice = baseFee.mul(2).add(ethers.utils.parseUnits("150", "gwei"));
+                            const cappedGasPrice = baseFee.mul(2).add(ethers.utils.parseUnits("1100", "gwei"));
                             txOverrides.gasPrice = boostedGasPrice.lt(cappedGasPrice) ? boostedGasPrice : cappedGasPrice;
                         } else {
                             txOverrides.gasPrice = boostedGasPrice;
